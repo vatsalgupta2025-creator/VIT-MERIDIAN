@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PlayCircle, CheckCircle, GraduationCap, X, Search, Loader2,
@@ -9,7 +9,8 @@ import {
 import confetti from 'canvas-confetti';
 import { currentUser } from '@/data/mockData';
 
-const API_KEY = 'AIzaSyC7pquxHgB_LOADYI1K7xhkvqjPnSiOnqM';
+const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA';
+
 
 interface VideoItem {
     id: string;
@@ -58,7 +59,15 @@ export default function LearningComponent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [completedVideos, setCompletedVideos] = useState<string[]>([]);
-    const [showQuiz, setShowQuiz] = useState(false);
+
+    // Quiz state
+    const [quizQuestions, setQuizQuestions] = useState<{ question: string; options: string[]; correctAnswer: number; explanation: string }[]>([]);
+    const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+    const [quizIndex, setQuizIndex] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [showExplanation, setShowExplanation] = useState(false);
+    const [quizScore, setQuizScore] = useState(0);
+    const [quizDone, setQuizDone] = useState(false);
 
     const heatmapData = useMemo(() => generateHeatmapData(), []);
 
@@ -76,7 +85,7 @@ export default function LearningComponent() {
 
         setIsSearching(true);
         try {
-            const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}&maxResults=20`);
+            const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}&maxResults=5`);
             const searchData = await searchRes.json();
 
             if (searchData.items && searchData.items.length > 0) {
@@ -127,8 +136,65 @@ export default function LearningComponent() {
     const playVideo = (video: VideoItem) => {
         setActiveVideo(video);
         setViewMode('watch');
-        setShowQuiz(false);
+        // Reset quiz state
+        setQuizQuestions([]);
+        setQuizIndex(0);
+        setSelectedAnswer(null);
+        setShowExplanation(false);
+        setQuizScore(0);
+        setQuizDone(false);
+        setIsGeneratingQuiz(false);
     };
+
+    // Auto-generate quiz whenever a new video is opened
+    useEffect(() => {
+        if (!activeVideo || viewMode !== 'watch') return;
+        if (completedVideos.includes(activeVideo.id)) return;
+        const generate = async () => {
+            setIsGeneratingQuiz(true);
+            try {
+                const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You are an educational quiz generator. Based on this YouTube video titled "${activeVideo.title}" by ${activeVideo.channelTitle}, generate exactly 5 multiple-choice quiz questions that test understanding of the video topic.
+
+Respond ONLY with a valid JSON array like this:
+[
+  {
+    "question": "Question text?",
+    "options": ["A", "B", "C", "D"],
+    "correctAnswer": 0,
+    "explanation": "Why this is correct."
+  }
+]
+
+Do not include any other text, just the JSON array.` }]
+                            }],
+                            generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+                        })
+                    }
+                );
+                const data = await res.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const jsonMatch = text.match(/\[.*\]/s);
+                if (jsonMatch) {
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    setQuizQuestions(parsed);
+                }
+            } catch (e) {
+                console.error('Quiz generation failed', e);
+            } finally {
+                setIsGeneratingQuiz(false);
+            }
+        };
+        generate();
+    }, [activeVideo?.id, viewMode]);
 
     const handleQuizPass = () => {
         if (!activeVideo) return;
@@ -137,7 +203,6 @@ export default function LearningComponent() {
             setCompletedVideos(prev => [...prev, activeVideo.id]);
             currentUser.totalPoints += activeVideo.xp;
         }
-        setShowQuiz(false);
     };
 
     const getHeatmapColor = (level: number) => {
@@ -402,47 +467,91 @@ export default function LearningComponent() {
                         </div>
                     </div>
 
-                    {/* Quiz */}
-                    <div className="w-full lg:w-[360px] flex-shrink-0">
-                        <div className="bg-[#0c0f17] rounded-xl p-5 border border-white/[0.05] sticky top-0">
+                    {/* Quiz Panel */}
+                    <div className="w-full lg:w-[380px] flex-shrink-0">
+                        <div className="bg-[#0c0f17] rounded-xl p-5 border border-white/[0.05] sticky top-0 h-full overflow-y-auto">
                             <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2">
-                                <GraduationCap className="text-cyan-400" size={20} /> Knowledge Check
+                                <GraduationCap className="text-cyan-400" size={20} /> AI Knowledge Quiz
                             </h3>
-                            <p className="text-[11px] text-white/40 mb-5">Earn {activeVideo.xp} XP by passing the quiz.</p>
+                            <p className="text-[11px] text-white/40 mb-4">Earn {activeVideo.xp} XP by completing the quiz.</p>
 
                             {isCompleted ? (
                                 <div className="text-center py-8 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                                    <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3 text-emerald-400">
-                                        <CheckCircle size={28} />
-                                    </div>
-                                    <h4 className="font-bold text-emerald-400 text-sm">Module Mastered!</h4>
+                                    <CheckCircle size={28} className="text-emerald-400 mx-auto mb-2" />
+                                    <h4 className="font-bold text-emerald-400 text-sm">Module Mastered! 🎉</h4>
                                     <p className="text-[11px] text-emerald-400/60 mt-1">XP already claimed.</p>
                                 </div>
-                            ) : !showQuiz ? (
-                                <button
-                                    onClick={() => setShowQuiz(true)}
-                                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 transition-all"
-                                >
-                                    Start Quiz Challenge
-                                </button>
+                            ) : isGeneratingQuiz ? (
+                                <div className="text-center py-10">
+                                    <Loader2 size={28} className="text-cyan-400 animate-spin mx-auto mb-3" />
+                                    <p className="text-white/50 text-xs">Generating AI quiz from video...</p>
+                                </div>
+                            ) : quizQuestions.length === 0 ? (
+                                <div className="text-center py-8 text-white/30 text-xs">Quiz unavailable. Check your API key.</div>
+                            ) : quizDone ? (
+                                <div className="text-center py-6">
+                                    <div className="text-4xl mb-3">{quizScore >= 3 ? '🎉' : '📚'}</div>
+                                    <h4 className="font-bold text-white text-lg mb-1">{quizScore}/{quizQuestions.length} Correct</h4>
+                                    <p className="text-white/40 text-xs mb-4">{quizScore >= 3 ? 'Great job! XP earned!' : 'Keep practising!'}</p>
+                                    {quizScore >= 3 && !isCompleted && (
+                                        <button onClick={handleQuizPass} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold text-sm mb-2">
+                                            Claim {activeVideo.xp} XP
+                                        </button>
+                                    )}
+                                    <button onClick={() => { setQuizIndex(0); setSelectedAnswer(null); setShowExplanation(false); setQuizScore(0); setQuizDone(false); }}
+                                        className="w-full py-2 rounded-xl border border-white/10 text-white/50 text-xs hover:text-white transition">
+                                        Retry Quiz
+                                    </button>
+                                </div>
                             ) : (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-                                    <p className="text-sm text-white/80 leading-relaxed">
-                                        Based on this video, what is the most critical factor to consider?
+                                    <div className="flex justify-between text-[10px] text-white/30 mb-1">
+                                        <span>Q{quizIndex + 1} of {quizQuestions.length}</span>
+                                        <span>{quizScore} correct</span>
+                                    </div>
+                                    <p className="text-sm text-white/90 font-medium leading-relaxed">
+                                        {quizQuestions[quizIndex].question}
                                     </p>
                                     <div className="space-y-2">
-                                        {["Memory complexity", "Algorithm selection based on data size", "Choosing the right UI color", "Skipping error handling"].map((opt, i) => (
-                                            <button
-                                                key={i}
+                                        {quizQuestions[quizIndex].options.map((opt, i) => {
+                                            let cls = 'border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:border-cyan-500/30';
+                                            if (showExplanation) {
+                                                if (i === quizQuestions[quizIndex].correctAnswer) cls = 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400';
+                                                else if (i === selectedAnswer) cls = 'border-red-500/50 bg-red-500/10 text-red-400';
+                                                else cls = 'border-white/5 bg-white/[0.01] text-white/30';
+                                            }
+                                            return (
+                                                <button key={i} disabled={showExplanation}
+                                                    onClick={() => setSelectedAnswer(i)}
+                                                    className={`w-full text-left p-3 rounded-lg border transition-all text-sm ${cls} ${selectedAnswer === i && !showExplanation ? 'ring-1 ring-cyan-500/50' : ''}`}>
+                                                    {opt}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    {showExplanation && (
+                                        <p className="text-[11px] text-white/50 bg-white/[0.03] rounded-lg p-2.5 border border-white/5">
+                                            💡 {quizQuestions[quizIndex].explanation}
+                                        </p>
+                                    )}
+                                    <div className="flex gap-2 pt-1">
+                                        {!showExplanation ? (
+                                            <button disabled={selectedAnswer === null}
                                                 onClick={() => {
-                                                    if (i === 1) handleQuizPass();
-                                                    else alert("Incorrect! Try again.");
+                                                    if (selectedAnswer === quizQuestions[quizIndex].correctAnswer) setQuizScore(s => s + 1);
+                                                    setShowExplanation(true);
                                                 }}
-                                                className="w-full text-left p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-cyan-500/30 transition-all text-sm text-white/70 hover:text-white"
-                                            >
-                                                {opt}
+                                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold text-sm disabled:opacity-40">
+                                                Submit
                                             </button>
-                                        ))}
+                                        ) : (
+                                            <button onClick={() => {
+                                                if (quizIndex + 1 >= quizQuestions.length) setQuizDone(true);
+                                                else { setQuizIndex(i => i + 1); setSelectedAnswer(null); setShowExplanation(false); }
+                                            }} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm hover:bg-white/15">
+                                                {quizIndex + 1 >= quizQuestions.length ? 'See Results' : 'Next Question'}
+                                            </button>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}

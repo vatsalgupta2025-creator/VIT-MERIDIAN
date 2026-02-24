@@ -53,17 +53,19 @@ export default function AiRoadmap() {
 
         if (!topic.trim()) return;
         if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-            setError("API Key is missing. Check your environment configuration.");
+            setError("Gemini API Key is missing.");
             return;
         }
+
+        const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
 
         setIsGenerating(true);
         setError(null);
 
         try {
-            const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+            const genAI = new GoogleGenerativeAI(GEMINI_KEY);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-1.5-flash',
                 generationConfig: {
                     responseMimeType: "application/json",
                 }

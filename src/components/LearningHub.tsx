@@ -72,35 +72,41 @@ function VideoPlayerModal({
     const [quizStarted, setQuizStarted] = useState(false);
     const [pointsEarned, setPointsEarned] = useState(0);
 
-    const handleGenerateQuiz = async () => {
-        setIsGeneratingQuiz(true);
-        try {
-            const generated = await generateQuizFromVideo(video.id, video.title, video.description, 5);
-            if (generated) {
-                const newQuiz: Quiz = {
-                    id: generateQuizId(video.id),
-                    videoId: video.id,
-                    courseId: 'dynamic',
-                    title: generated.title,
-                    questions: generated.questions,
-                    timeLimit: Math.max(5, generated.questions.length * 2),
-                    passingScore: 60,
-                    rewardPoints: 100,
-                };
-                setQuiz(newQuiz);
-                setTimeLeft(newQuiz.timeLimit * 60);
+    // Auto-generate quiz as soon as the modal opens
+    useEffect(() => {
+        const autoGenerate = async () => {
+            if (completedQuizId) return; // already done
+            setIsGeneratingQuiz(true);
+            try {
+                const generated = await generateQuizFromVideo(video.id, video.title, video.description, 5);
+                if (generated) {
+                    const newQuiz: Quiz = {
+                        id: generateQuizId(video.id),
+                        videoId: video.id,
+                        courseId: 'dynamic',
+                        title: generated.title,
+                        questions: generated.questions,
+                        timeLimit: Math.max(5, generated.questions.length * 2),
+                        passingScore: 60,
+                        rewardPoints: 100,
+                    };
+                    setQuiz(newQuiz);
+                    setTimeLeft(newQuiz.timeLimit * 60);
+                }
+            } catch (error) {
+                console.error('Error generating quiz:', error);
+            } finally {
+                setIsGeneratingQuiz(false);
             }
-        } catch (error) {
-            console.error('Error generating quiz:', error);
-        } finally {
-            setIsGeneratingQuiz(false);
-        }
-    };
+        };
+        autoGenerate();
+    }, [video.id]);
 
     const handleComplete = () => {
         setIsCompleted(true);
         onVideoComplete(video.id);
     };
+
 
     useEffect(() => {
         if (quizStarted && !isQuizCompleted && timeLeft > 0) {
@@ -188,37 +194,28 @@ function VideoPlayerModal({
                             <h4 className="text-base font-bold text-white">Quiz</h4>
                         </div>
 
-                        {!isCompleted ? (
-                            <div className="text-center py-8">
-                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-3">
-                                    <Lock size={24} className="text-white/20" />
-                                </div>
-                                <p className="text-white/40 text-xs">Complete video to unlock</p>
-                            </div>
-                        ) : completedQuizId ? (
+                        {completedQuizId ? (
                             <div className="text-center py-8">
                                 <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
                                     <CheckCircle size={24} className="text-emerald-400" />
                                 </div>
-                                <h5 className="text-base font-bold text-white mb-1">Done!</h5>
+                                <h5 className="text-base font-bold text-white mb-1">Quiz Done! 🎉</h5>
+                                <p className="text-white/40 text-xs">You already aced this quiz</p>
                             </div>
                         ) : !quiz ? (
                             <div className="text-center py-6">
                                 {isGeneratingQuiz ? (
                                     <>
                                         <Loader2 size={28} className="text-cyan-400 animate-spin mx-auto mb-3" />
-                                        <p className="text-white/60 text-xs">Generating quiz...</p>
+                                        <p className="text-white/60 text-xs">Generating AI quiz from video...</p>
                                     </>
                                 ) : (
                                     <>
                                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-3">
                                             <Target size={24} className="text-violet-400" />
                                         </div>
-                                        <h5 className="text-sm font-bold text-white mb-1">Ready?</h5>
-                                        <p className="text-white/40 text-xs mb-3">5 questions â€¢ Earn XP</p>
-                                        <button onClick={handleGenerateQuiz} className="px-4 py-2 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg font-medium text-sm">
-                                            Start Quiz
-                                        </button>
+                                        <h5 className="text-sm font-bold text-white mb-1">Quiz failed to load</h5>
+                                        <p className="text-white/40 text-xs mb-3">Check your API key</p>
                                     </>
                                 )}
                             </div>

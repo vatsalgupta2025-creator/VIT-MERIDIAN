@@ -35,6 +35,7 @@ import MrVighelp from '@/components/MrVighelp';
 import AiRoadmap from '@/components/AiRoadmap';
 import CampusExplorer from '@/components/CampusExplorer';
 import VisualAlgorithms from '@/components/VisualAlgorithms';
+import TravelPool from '@/components/TravelPool';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
 
 const BootScreen = dynamic(() => import('@/components/BootScreen'), { ssr: false });
@@ -140,6 +141,8 @@ export default function Home() {
         return <AnimatedAIChat />;
       case 'visual-algos':
         return <VisualAlgorithms />;
+      case 'travel-pool':
+        return <TravelPool />;
       default:
         return <DashboardOverview />;
     }

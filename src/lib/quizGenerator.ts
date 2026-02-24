@@ -5,7 +5,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Quiz, QuizQuestion } from '@/types/learning';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+
 
 interface GeneratedQuiz {
     title: string;
@@ -30,7 +31,7 @@ async function generateVideoSummary(
 
     try {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompt = `You are an educational content analyzer. Analyze the following video metadata and generate a comprehensive summary of what this educational video would cover.
 
@@ -83,7 +84,7 @@ export async function generateQuizFromVideo(
         const videoSummary = await generateVideoSummary(videoTitle, videoDescription);
 
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         // Build a comprehensive prompt with video context
         let contextPrompt = '';
