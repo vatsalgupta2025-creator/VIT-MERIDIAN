@@ -18,7 +18,7 @@ const CLUBS = [
 ];
 
 const EVENTS = [
-    { title: 'Rivera 2026', date: 'March 14 - 17, 2026', time: '10:00 AM', location: 'Main Grounds', type: 'Cultural', image: '🎉' },
+    { title: 'Vibrance 2026', date: 'March 14 - 17, 2026', time: '10:00 AM', location: 'Main Grounds', type: 'Cultural', image: '🎉' },
     { title: 'DevFest VIT', date: 'April 2, 2026', time: '09:00 AM', location: 'Anna Auditorium', type: 'Technical', image: '💻' },
     { title: 'GraVitas', date: 'September 20, 2026', time: '08:00 AM', location: 'SJT', type: 'Technical', image: '🚀' },
     { title: 'Finance Summit', date: 'May 10, 2026', time: '11:00 AM', location: 'Channa Reddy', type: 'Management', image: '📊' }
@@ -55,7 +55,7 @@ export default function ClubsEvents() {
                                 <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs font-bold tracking-wider uppercase border border-orange-500/20">Featured</span>
                                 <span className="flex items-center gap-1.5 text-white/60 text-sm"><Flame size={14} className="text-orange-400" /> Hot Right Now</span>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">RIVERA 2026</h1>
+                            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">VIBRANCE 2026</h1>
                             <p className="text-white/60 max-w-xl text-lg mb-6">The biggest cultural and sports fest of VIT. Get ready for 4 days of non-stop excitement, pro-shows, and unforgettable memories.</p>
                             <button className="px-6 py-3 rounded-xl bg-white text-black font-bold hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                                 Register Now
