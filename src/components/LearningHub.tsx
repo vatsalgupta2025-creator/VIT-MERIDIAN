@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -24,10 +24,18 @@ import {
     Medal,
     ChevronRight,
     Hexagon,
+    Key,
+    Link,
+    Plus,
+    Trash2,
+    ListVideo,
+    ChevronDown,
+    ChevronUp,
+    AlertCircle,
 } from 'lucide-react';
 import { YouTubeVideo, Quiz } from '@/types/learning';
 import { mockLeaderboard, parseDuration, formatViewCount, mockSkills } from '@/data/learningData';
-import { searchYouTubeVideos } from '@/lib/youtubeApi';
+import { searchYouTubeVideos, getVideoByUrl, getPlaylistVideos, extractPlaylistId } from '@/lib/youtubeApi';
 import { generateQuizFromVideo, calculateQuizPoints, generateQuizId } from '@/lib/quizGenerator';
 import { fireConfetti, firePerfectScoreCelebration } from '@/lib/confetti';
 import Squares from '@/components/Squares';
@@ -207,7 +215,7 @@ function VideoPlayerModal({
                                             <Target size={24} className="text-violet-400" />
                                         </div>
                                         <h5 className="text-sm font-bold text-white mb-1">Ready?</h5>
-                                        <p className="text-white/40 text-xs mb-3">5 questions • Earn XP</p>
+                                        <p className="text-white/40 text-xs mb-3">5 questions â€¢ Earn XP</p>
                                         <button onClick={handleGenerateQuiz} className="px-4 py-2 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg font-medium text-sm">
                                             Start Quiz
                                         </button>
@@ -218,7 +226,7 @@ function VideoPlayerModal({
                             <div className="space-y-3">
                                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                                     <h5 className="font-bold text-white mb-1 text-xs">{quiz.title}</h5>
-                                    <p className="text-[10px] text-white/60">📝 {quiz.questions.length} questions • ⏱️ {quiz.timeLimit} min</p>
+                                    <p className="text-[10px] text-white/60">ðŸ“ {quiz.questions.length} questions â€¢ â±ï¸ {quiz.timeLimit} min</p>
                                 </div>
                                 <button onClick={() => setQuizStarted(true)} className="w-full py-2 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg font-medium text-sm">
                                     Begin
@@ -442,6 +450,219 @@ function StatsPanel({
 }
 
 // ============================================================
+// YouTube API Key Setup Panel
+// ============================================================
+function YouTubeKeyPanel({
+    apiKey,
+    onSave,
+}: {
+    apiKey: string;
+    onSave: (key: string) => void;
+}) {
+    const [draft, setDraft] = useState(apiKey);
+    const [visible, setVisible] = useState(false);
+
+    return (
+        <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/5 border border-rose-500/20 rounded-2xl p-5 mb-4">
+            <div className="flex items-start gap-3 mb-3">
+                <Key size={18} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                <div>
+                    <h3 className="text-sm font-bold text-white">YouTube Data API Key</h3>
+                    <p className="text-white/40 text-xs mt-0.5">
+                        Enter your key to fetch real video metadata. Get one free at{' '}
+                        <a href="https://console.cloud.google.com/apis/api/youtube.googleapis.com" target="_blank" rel="noreferrer"
+                            className="text-cyan-400 hover:underline">Google Cloud Console</a>.
+                    </p>
+                </div>
+            </div>
+            <div className="flex gap-2">
+                <input
+                    type={visible ? 'text' : 'password'}
+                    value={draft}
+                    onChange={e => setDraft(e.target.value)}
+                    placeholder="AIzaâ€¦"
+                    className="flex-1 bg-black/30 border border-white/[0.08] rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-rose-500/40 placeholder-white/20 font-mono"
+                />
+                <button onClick={() => setVisible(v => !v)}
+                    className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white/40 hover:text-white/70 text-xs transition-all">
+                    {visible ? 'Hide' : 'Show'}
+                </button>
+                <button onClick={() => onSave(draft.trim())}
+                    className="px-4 py-2 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-all">
+                    Save
+                </button>
+            </div>
+            {apiKey && (
+                <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">
+                    <CheckCircle size={12} /> API key saved â€” ready to fetch videos
+                </p>
+            )}
+        </div>
+    );
+}
+
+// ============================================================
+// My Watched Videos Tab
+// ============================================================
+function MyVideosTab({
+    apiKey,
+    onVideoSelect,
+    watchedVideos,
+    completedQuizzes,
+}: {
+    apiKey: string;
+    onVideoSelect: (video: YouTubeVideo) => void;
+    watchedVideos: Set<string>;
+    completedQuizzes: Map<string, { score: number; points: number }>;
+}) {
+    const [urlInput, setUrlInput] = useState('');
+    const [myVideos, setMyVideos] = useState<YouTubeVideo[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [playlistMode, setPlaylistMode] = useState(false);
+
+    // Load saved videos
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('vitgroww_my_videos');
+            if (saved) setMyVideos(JSON.parse(saved));
+        } catch { }
+    }, []);
+
+    // Persist
+    useEffect(() => {
+        localStorage.setItem('vitgroww_my_videos', JSON.stringify(myVideos));
+    }, [myVideos]);
+
+    const addVideo = async () => {
+        if (!urlInput.trim()) return;
+        if (!apiKey) { setError('Please save your YouTube API key first.'); return; }
+        setError('');
+        setLoading(true);
+
+        try {
+            if (playlistMode) {
+                const pid = extractPlaylistId(urlInput) || urlInput.trim();
+                const videos = await getPlaylistVideos(pid, 20, apiKey);
+                if (!videos.length) { setError('Playlist not found or no videos returned.'); return; }
+                setMyVideos(prev => {
+                    const ids = new Set(prev.map(v => v.id));
+                    return [...prev, ...videos.filter(v => !ids.has(v.id))];
+                });
+            } else {
+                const video = await getVideoByUrl(urlInput.trim(), apiKey);
+                if (!video) { setError('Video not found. Check the URL or your API key.'); return; }
+                setMyVideos(prev => prev.find(v => v.id === video.id) ? prev : [video, ...prev]);
+            }
+            setUrlInput('');
+        } catch (e: any) {
+            setError(e.message || 'Failed to fetch video.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const removeVideo = (id: string) => setMyVideos(prev => prev.filter(v => v.id !== id));
+
+    return (
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Input row */}
+            <div className="flex gap-2 mb-3 flex-shrink-0">
+                <div className="flex-1 relative">
+                    <Link size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+                    <input
+                        value={urlInput}
+                        onChange={e => setUrlInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && addVideo()}
+                        placeholder={playlistMode ? 'Paste YouTube playlist URLâ€¦' : 'Paste YouTube video URLâ€¦'}
+                        className="w-full pl-9 pr-3 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition-all"
+                    />
+                </div>
+                <button onClick={() => setPlaylistMode(p => !p)}
+                    title={playlistMode ? 'Switch to video mode' : 'Switch to playlist mode'}
+                    className={`px-3 py-2.5 rounded-xl border text-xs font-medium transition-all ${playlistMode ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-white/[0.03] border-white/[0.08] text-white/40 hover:text-white/70'}`}>
+                    {playlistMode ? <ListVideo size={16} /> : <Play size={16} />}
+                </button>
+                <button onClick={addVideo} disabled={loading || !urlInput.trim()}
+                    className="px-4 py-2.5 bg-cyan-500 text-black rounded-xl font-bold text-sm hover:bg-cyan-400 disabled:opacity-50 flex items-center gap-1.5 transition-all">
+                    {loading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    Add
+                </button>
+            </div>
+
+            {error && (
+                <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs flex-shrink-0">
+                    <AlertCircle size={13} /> {error}
+                </div>
+            )}
+
+            {myVideos.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-white/[0.03] flex items-center justify-center mx-auto mb-4">
+                            <Play size={32} className="text-white/20" />
+                        </div>
+                        <h3 className="text-white/50 font-medium mb-2">No videos added yet</h3>
+                        <p className="text-white/25 text-sm max-w-xs mx-auto">
+                            Paste a YouTube video URL above to fetch it and take an AI-generated quiz on it.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 pb-4 content-start">
+                    {myVideos.map(video => {
+                        const quizId = `quiz-${video.id}`;
+                        const quizDone = completedQuizzes.has(quizId);
+                        const videoWatched = watchedVideos.has(video.id);
+                        return (
+                            <div key={video.id} className="group relative bg-white/[0.03] border border-white/[0.06] hover:border-cyan-500/30 rounded-xl overflow-hidden transition-all cursor-pointer"
+                                onClick={() => onVideoSelect(video)}>
+                                <div className="relative aspect-video">
+                                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-10 h-10 rounded-full bg-cyan-500/90 flex items-center justify-center">
+                                            <Play size={16} className="text-white ml-0.5" fill="white" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] text-white">
+                                        {parseDuration(video.duration)}
+                                    </div>
+                                    {videoWatched && (
+                                        <div className="absolute top-1 left-1 w-5 h-5 rounded bg-emerald-500/90 flex items-center justify-center">
+                                            <CheckCircle size={11} className="text-white" />
+                                        </div>
+                                    )}
+                                    {quizDone && (
+                                        <div className="absolute top-1 right-1 w-5 h-5 rounded bg-violet-500/90 flex items-center justify-center">
+                                            <Award size={11} className="text-white" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-3 flex flex-col gap-1">
+                                    <h4 className="text-xs font-medium text-white/80 line-clamp-2 group-hover:text-cyan-400 transition-colors">{video.title}</h4>
+                                    <p className="text-[10px] text-white/40">{video.channelTitle}</p>
+                                    <div className="flex items-center justify-between mt-1">
+                                        <span className="text-[9px] text-white/25">{formatViewCount(video.viewCount)} views</span>
+                                        {quizDone
+                                            ? <span className="text-[9px] text-violet-400 flex items-center gap-0.5"><Award size={9} /> Quiz done</span>
+                                            : <span className="text-[9px] text-cyan-400 flex items-center gap-0.5"><Brain size={9} /> Take quiz</span>
+                                        }
+                                    </div>
+                                </div>
+                                <button onClick={e => { e.stopPropagation(); removeVideo(video.id); }}
+                                    className="absolute top-1 left-1 w-6 h-6 rounded bg-black/60 flex items-center justify-center text-white/0 group-hover:text-white/50 hover:!text-red-400 transition-all">
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ============================================================
 // Main Learning Hub Component
 // ============================================================
 export default function LearningHub() {
@@ -457,6 +678,30 @@ export default function LearningHub() {
     const [streak, setStreak] = useState(7);
     const [searchHistory, setSearchHistory] = useState<string[]>(['React tutorial', 'Python basics', 'Machine learning']);
     const [leaderboard, setLeaderboard] = useState(mockLeaderboard);
+    // New state for YouTube key + tabs
+    const [youtubeApiKey, setYoutubeApiKey] = useState('AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA');
+    const [activeTab, setActiveTab] = useState<'discover' | 'my-videos'>('discover');
+    const [showKeyPanel, setShowKeyPanel] = useState(false);
+
+    // Load API key from localStorage
+    useEffect(() => {
+        try {
+            const savedKey = localStorage.getItem('vitgroww_yt_api_key');
+            if (savedKey) setYoutubeApiKey(savedKey);
+            else {
+                // Pre-save the built-in key so users see green immediately
+                const defaultKey = 'AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA';
+                localStorage.setItem('vitgroww_yt_api_key', defaultKey);
+            }
+        } catch { }
+    }, []);
+
+    const saveApiKey = (key: string) => {
+        setYoutubeApiKey(key);
+        localStorage.setItem('vitgroww_yt_api_key', key);
+        setShowKeyPanel(false);
+    };
+
 
     // Load recommended videos on mount
     useEffect(() => {
@@ -523,18 +768,15 @@ export default function LearningHub() {
             <div className="relative z-10 h-full flex p-3 md:p-4 gap-3">
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col min-w-0">
-                    {/* Header - Compact */}
+                    {/* Header */}
                     <div className="flex items-center justify-between mb-3 flex-shrink-0">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
                                 <BookOpen size={16} className="text-white" />
                             </div>
-                            <div>
-                                <h1 className="text-base font-bold text-white flex items-center gap-1.5">
-                                    Learning Hub
-                                    <Sparkles size={12} className="text-cyan-400 animate-pulse" />
-                                </h1>
-                            </div>
+                            <h1 className="text-base font-bold text-white flex items-center gap-1.5">
+                                Learning Hub <Sparkles size={12} className="text-cyan-400 animate-pulse" />
+                            </h1>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="px-2 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center gap-1">
@@ -545,192 +787,149 @@ export default function LearningHub() {
                                 <Flame size={12} className="text-orange-400" />
                                 <span className="text-xs font-bold text-orange-400">{streak}</span>
                             </div>
+                            {/* API Key Button */}
+                            <button onClick={() => setShowKeyPanel(p => !p)}
+                                className={`px-2 py-1 rounded-lg border flex items-center gap-1 text-xs font-medium transition-all ${youtubeApiKey
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                    : 'bg-rose-500/10 border-rose-500/30 text-rose-400 animate-pulse'
+                                    }`}>
+                                <Key size={11} />
+                                {youtubeApiKey ? 'API âœ“' : 'Set API Key'}
+                            </button>
                         </div>
                     </div>
 
-                    {/* Search Bar - Compact */}
-                    <form onSubmit={handleSearch} className="flex gap-2 mb-3 flex-shrink-0">
-                        <div className="flex-1 relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search video lectures..."
-                                className="w-full pl-9 pr-3 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition-all"
-                            />
-                        </div>
-                        <button type="submit" disabled={isSearching} className="px-4 py-2.5 bg-cyan-500 text-black rounded-xl font-bold text-sm hover:bg-cyan-400 disabled:opacity-50 flex items-center gap-1.5">
-                            {isSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                        </button>
-                    </form>
-
-                    {/* Search History - Compact */}
-                    {searchHistory.length > 0 && (
-                        <div className="flex items-center gap-2 mb-3 flex-shrink-0 overflow-x-auto pb-1">
-                            <History size={12} className="text-white/30 flex-shrink-0" />
-                            {searchHistory.map((query, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => { setSearchQuery(query); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10px] text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 transition-all whitespace-nowrap"
-                                >
-                                    {query}
-                                </button>
-                            ))}
-                        </div>
+                    {/* API Key Panel */}
+                    {showKeyPanel && (
+                        <YouTubeKeyPanel apiKey={youtubeApiKey} onSave={saveApiKey} />
                     )}
 
-                    {/* Main Content - Fill remaining space */}
+                    {/* Tab Switcher */}
+                    <div className="flex items-center gap-1 mb-3 flex-shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-xl p-1 w-fit">
+                        <button onClick={() => setActiveTab('discover')}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === 'discover'
+                                ? 'bg-cyan-500/20 text-cyan-400'
+                                : 'text-white/30 hover:text-white/60'
+                                }`}>
+                            <TrendingUp size={12} /> Discover
+                        </button>
+                        <button onClick={() => setActiveTab('my-videos')}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === 'my-videos'
+                                ? 'bg-violet-500/20 text-violet-400'
+                                : 'text-white/30 hover:text-white/60'
+                                }`}>
+                            <ListVideo size={12} /> My Videos Quiz
+                        </button>
+                    </div>
+
+                    {/* Main Content */}
                     <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-                        {isLoading && !searchResults.length ? (
-                            <div className="flex-1 flex items-center justify-center">
-                                <Loader2 size={32} className="text-cyan-400 animate-spin" />
-                            </div>
-                        ) : (
-                            <div className="flex-1 flex flex-col min-h-0 gap-3">
-                                {/* Featured Section - Fixed height */}
-                                {videos.length > 0 && (
-                                    <div className="flex-shrink-0 grid grid-cols-1 lg:grid-cols-4 gap-3" style={{ maxHeight: '220px' }}>
-                                        {/* Main Featured Video */}
-                                        <div
-                                            className="lg:col-span-3 relative group cursor-pointer h-full"
-                                            onClick={() => setSelectedVideo(videos[0])}
-                                        >
-                                            <div className="relative h-full min-h-[150px] rounded-xl overflow-hidden bg-white/[0.02] border border-white/[0.08]">
-                                                <img
-                                                    src={videos[0].thumbnail}
-                                                    alt={videos[0].title}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <div className="w-14 h-14 rounded-full bg-cyan-500/90 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                                                        <Play size={24} className="text-white ml-1" fill="white" />
+                        {/* Discover Tab */}
+                        {activeTab === 'discover' ? (
+                            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                                {isLoading && !searchResults.length ? (
+                                    <div className="flex-1 flex items-center justify-center">
+                                        <Loader2 size={32} className="text-cyan-400 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col min-h-0 gap-3">
+                                        {/* Featured Section */}
+                                        {videos.length > 0 && (
+                                            <div className="flex-shrink-0 grid grid-cols-1 lg:grid-cols-4 gap-3" style={{ maxHeight: '220px' }}>
+                                                <div className="lg:col-span-3 relative group cursor-pointer h-full" onClick={() => setSelectedVideo(videos[0])}>
+                                                    <div className="relative h-full min-h-[150px] rounded-xl overflow-hidden bg-white/[0.02] border border-white/[0.08]">
+                                                        <img src={videos[0].thumbnail} alt={videos[0].title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="w-14 h-14 rounded-full bg-cyan-500/90 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                                                                <Play size={24} className="text-white ml-1" fill="white" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] text-white font-medium">{parseDuration(videos[0].duration)}</div>
+                                                        {watchedVideos.has(videos[0].id) && (
+                                                            <div className="absolute top-2 left-2 w-5 h-5 rounded bg-emerald-500/90 flex items-center justify-center"><CheckCircle size={12} className="text-white" /></div>
+                                                        )}
+                                                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                                                            <h3 className="text-sm font-bold text-white mb-0.5 line-clamp-1">{videos[0].title}</h3>
+                                                            <div className="flex items-center gap-2 text-[10px] text-white/60">
+                                                                <span>{videos[0].channelTitle}</span><span>â€¢</span>
+                                                                <span className="flex items-center gap-0.5"><Eye size={10} /> {formatViewCount(videos[0].viewCount)}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-
-                                                <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] text-white font-medium">
-                                                    {parseDuration(videos[0].duration)}
-                                                </div>
-
-                                                {watchedVideos.has(videos[0].id) && (
-                                                    <div className="absolute top-2 left-2 w-5 h-5 rounded bg-emerald-500/90 flex items-center justify-center">
-                                                        <CheckCircle size={12} className="text-white" />
-                                                    </div>
-                                                )}
-
-                                                <div className="absolute bottom-0 left-0 right-0 p-3">
-                                                    <h3 className="text-sm font-bold text-white mb-0.5 line-clamp-1">{videos[0].title}</h3>
-                                                    <div className="flex items-center gap-2 text-[10px] text-white/60">
-                                                        <span>{videos[0].channelTitle}</span>
-                                                        <span>•</span>
-                                                        <span className="flex items-center gap-0.5"><Eye size={10} /> {formatViewCount(videos[0].viewCount)}</span>
-                                                    </div>
+                                                <div className="hidden lg:flex flex-col gap-2 h-full">
+                                                    {videos.slice(1, 3).map((video) => (
+                                                        <div key={video.id} className="relative group cursor-pointer flex-1" onClick={() => setSelectedVideo(video)}>
+                                                            <div className="h-full flex gap-2 p-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-cyan-500/20 transition-all">
+                                                                <div className="relative w-24 h-full min-h-[60px] rounded overflow-hidden flex-shrink-0">
+                                                                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><Play size={14} className="text-white" fill="white" /></div>
+                                                                    <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-black/80 text-[8px] text-white">{parseDuration(video.duration)}</div>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
+                                                                    <h4 className="text-[10px] font-medium text-white line-clamp-2 group-hover:text-cyan-400 transition-colors">{video.title}</h4>
+                                                                    <p className="text-[8px] text-white/40 mt-0.5">{video.channelTitle}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
 
-                                        {/* Side Videos */}
-                                        <div className="hidden lg:flex flex-col gap-2 h-full">
-                                            {videos.slice(1, 3).map((video) => (
-                                                <div
-                                                    key={video.id}
-                                                    className="relative group cursor-pointer flex-1"
-                                                    onClick={() => setSelectedVideo(video)}
-                                                >
-                                                    <div className="h-full flex gap-2 p-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-cyan-500/20 transition-all">
-                                                        <div className="relative w-24 h-full min-h-[60px] rounded overflow-hidden flex-shrink-0">
-                                                            <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                                        {/* Video Grid */}
+                                        <div className="flex-1 min-h-0 overflow-y-auto">
+                                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-[#02040a]/80 backdrop-blur-sm py-1 z-10">
+                                                <TrendingUp size={14} className="text-cyan-400" />
+                                                <h3 className="text-xs font-semibold text-white/60">
+                                                    {searchResults.length > 0 ? `Results for "${searchQuery}"` : 'Recommended for you'}
+                                                </h3>
+                                                <span className="text-[10px] text-white/30">({videos.length} videos)</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
+                                                {videos.slice(searchResults.length > 0 ? 1 : 0).map((video) => (
+                                                    <div key={video.id} className="group cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                                                        <div className="relative aspect-video rounded-lg overflow-hidden bg-white/[0.02] border border-white/[0.06] group-hover:border-cyan-500/30 transition-all">
+                                                            <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                                                             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                <Play size={14} className="text-white" fill="white" />
+                                                                <div className="w-8 h-8 rounded-full bg-cyan-500/90 flex items-center justify-center"><Play size={14} className="text-white ml-0.5" fill="white" /></div>
                                                             </div>
-                                                            <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-black/80 text-[8px] text-white">
-                                                                {parseDuration(video.duration)}
-                                                            </div>
+                                                            <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-black/80 text-[8px] text-white">{parseDuration(video.duration)}</div>
+                                                            {watchedVideos.has(video.id) && (
+                                                                <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded bg-emerald-500/90 flex items-center justify-center"><CheckCircle size={8} className="text-white" /></div>
+                                                            )}
+                                                            {completedQuizzes.has(`quiz-${video.id}`) && (
+                                                                <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded bg-violet-500/90 flex items-center justify-center"><Award size={8} className="text-white" /></div>
+                                                            )}
                                                         </div>
-                                                        <div className="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
-                                                            <h4 className="text-[10px] font-medium text-white line-clamp-2 group-hover:text-cyan-400 transition-colors">{video.title}</h4>
-                                                            <p className="text-[8px] text-white/40 mt-0.5">{video.channelTitle}</p>
-                                                        </div>
+                                                        <h4 className="text-[10px] font-medium text-white/80 line-clamp-2 mt-1 group-hover:text-cyan-400 transition-colors">{video.title}</h4>
+                                                        <p className="text-[8px] text-white/40 mt-0.5">{video.channelTitle}</p>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Video Grid - Scrollable */}
-                                <div className="flex-1 min-h-0 overflow-y-auto">
-                                    <div className="flex items-center gap-2 mb-2 sticky top-0 bg-[#02040a]/80 backdrop-blur-sm py-1 z-10">
-                                        <TrendingUp size={14} className="text-cyan-400" />
-                                        <h3 className="text-xs font-semibold text-white/60">
-                                            {searchResults.length > 0 ? `Results for "${searchQuery}"` : 'Recommended for you'}
-                                        </h3>
-                                        <span className="text-[10px] text-white/30">({videos.length} videos)</span>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
-                                        {videos.slice(searchResults.length > 0 ? 1 : 0).map((video) => (
-                                            <div
-                                                key={video.id}
-                                                className="group cursor-pointer"
-                                                onClick={() => setSelectedVideo(video)}
-                                            >
-                                                <div className="relative aspect-video rounded-lg overflow-hidden bg-white/[0.02] border border-white/[0.06] group-hover:border-cyan-500/30 transition-all">
-                                                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <div className="w-8 h-8 rounded-full bg-cyan-500/90 flex items-center justify-center">
-                                                            <Play size={14} className="text-white ml-0.5" fill="white" />
-                                                        </div>
-                                                    </div>
-                                                    <div className="absolute bottom-0.5 right-0.5 px-1 py-0.5 rounded bg-black/80 text-[8px] text-white">
-                                                        {parseDuration(video.duration)}
-                                                    </div>
-                                                    {watchedVideos.has(video.id) && (
-                                                        <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded bg-emerald-500/90 flex items-center justify-center">
-                                                            <CheckCircle size={8} className="text-white" />
-                                                        </div>
-                                                    )}
-                                                    {completedQuizzes.has(`quiz-${video.id}`) && (
-                                                        <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded bg-violet-500/90 flex items-center justify-center">
-                                                            <Award size={8} className="text-white" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <h4 className="text-[10px] font-medium text-white/80 line-clamp-2 mt-1 group-hover:text-cyan-400 transition-colors">{video.title}</h4>
-                                                <p className="text-[8px] text-white/40 mt-0.5">{video.channelTitle}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
+                        ) : (
+                            /* My Videos Tab */
+                            <MyVideosTab
+                                apiKey={youtubeApiKey}
+                                onVideoSelect={setSelectedVideo}
+                                watchedVideos={watchedVideos}
+                                completedQuizzes={completedQuizzes}
+                            />
                         )}
                     </div>
                 </div>
 
-                {/* Right Sidebar - Leaderboard & Skills */}
+                {/* Right Sidebar */}
                 <div className="hidden xl:flex flex-col w-64 flex-shrink-0 gap-3 overflow-y-auto">
-                    {/* Stats Panel */}
-                    <StatsPanel
-                        totalPoints={totalPoints}
-                        streak={streak}
-                        videosWatched={watchedVideos.size}
-                        quizzesCompleted={completedQuizzes.size}
-                    />
-
-                    {/* Leaderboard */}
-                    <LeaderboardPanel
-                        leaderboard={leaderboard}
-                        userPoints={totalPoints}
-                    />
-
-                    {/* Skills Honeycomb */}
-                    <SkillsHoneycombPanel
-                        completedQuizzes={completedQuizzes}
-                        watchedVideos={watchedVideos}
-                    />
+                    <StatsPanel totalPoints={totalPoints} streak={streak} videosWatched={watchedVideos.size} quizzesCompleted={completedQuizzes.size} />
+                    <LeaderboardPanel leaderboard={leaderboard} userPoints={totalPoints} />
+                    <SkillsHoneycombPanel completedQuizzes={completedQuizzes} watchedVideos={watchedVideos} />
                 </div>
             </div>
 

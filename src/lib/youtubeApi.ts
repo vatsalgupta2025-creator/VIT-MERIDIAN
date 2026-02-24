@@ -1,27 +1,25 @@
 // ============================================================
-// SYNAPSE Learning Hub — YouTube API Service
+// VITGROWW Learning Hub — YouTube API Service
+// Supports both env-var API key and runtime user-supplied key
 // ============================================================
 
-import { YouTubeVideo, YouTubeVideoDetails } from '@/types/learning';
+import { YouTubeVideo } from '@/types/learning';
 import { YOUTUBE_API_CONFIG, parseDuration, formatViewCount } from '@/data/learningData';
 
-const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+const ENV_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA';
+
+
+// ── Internal helpers ─────────────────────────────────────────
 
 interface YouTubeSearchItem {
-    id: {
-        videoId: string;
-    };
+    id: { videoId: string };
     snippet: {
         title: string;
         description: string;
         channelTitle: string;
         channelId: string;
         publishedAt: string;
-        thumbnails: {
-            default: { url: string };
-            medium: { url: string };
-            high: { url: string };
-        };
+        thumbnails: { default: { url: string }; medium: { url: string }; high: { url: string } };
     };
 }
 
@@ -33,404 +31,146 @@ interface YouTubeVideoItem {
         channelTitle: string;
         channelId: string;
         publishedAt: string;
-        thumbnails: {
-            default: { url: string };
-            medium: { url: string };
-            high: { url: string };
-        };
+        thumbnails: { default: { url: string }; medium: { url: string }; high: { url: string } };
     };
-    contentDetails: {
-        duration: string;
-    };
-    statistics: {
-        viewCount: string;
-        likeCount: string;
+    contentDetails: { duration: string };
+    statistics: { viewCount: string; likeCount: string };
+}
+
+function mapVideoItem(item: YouTubeVideoItem): YouTubeVideo {
+    return {
+        id: item.id,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
+        channelTitle: item.snippet.channelTitle,
+        channelId: item.snippet.channelId,
+        publishedAt: item.snippet.publishedAt,
+        duration: item.contentDetails.duration,
+        viewCount: parseInt(item.statistics.viewCount) || 0,
+        likeCount: parseInt(item.statistics.likeCount) || 0,
     };
 }
 
-interface YouTubeSearchResponse {
-    kind: string;
-    etag: string;
-    nextPageToken?: string;
-    prevPageToken?: string;
-    pageInfo: {
-        totalResults: number;
-        resultsPerPage: number;
-    };
-    items: YouTubeSearchItem[];
+// ── Extract video ID from any YouTube URL format ─────────────
+
+export function extractVideoId(url: string): string | null {
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+        /^([a-zA-Z0-9_-]{11})$/, // bare ID
+    ];
+    for (const re of patterns) {
+        const m = url.match(re);
+        if (m) return m[1];
+    }
+    return null;
 }
 
-// Search YouTube videos with pagination support for maximum results
-export async function searchYouTubeVideos(query: string, maxResults: number = 50): Promise<YouTubeVideo[]> {
-    if (!API_KEY) {
-        console.warn('YouTube API key not configured. Using mock data.');
+// ── Extract playlist ID from URL ─────────────────────────────
+
+export function extractPlaylistId(url: string): string | null {
+    const m = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+}
+
+// ── Fetch details for a single video by URL or ID ────────────
+
+export async function getVideoByUrl(urlOrId: string, apiKey?: string): Promise<YouTubeVideo | null> {
+    const key = apiKey || ENV_API_KEY;
+    if (!key) return null;
+    const videoId = extractVideoId(urlOrId);
+    if (!videoId) return null;
+
+    try {
+        const url = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=snippet,contentDetails,statistics&id=${videoId}&key=${key}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('YouTube API error');
+        const data = await res.json();
+        if (!data.items?.length) return null;
+        return mapVideoItem(data.items[0]);
+    } catch (e) {
+        console.error('getVideoByUrl error:', e);
+        return null;
+    }
+}
+
+// ── Search videos ─────────────────────────────────────────────
+
+export async function searchYouTubeVideos(query: string, maxResults = 20, apiKey?: string): Promise<YouTubeVideo[]> {
+    const key = apiKey || ENV_API_KEY;
+    if (!key) {
+        console.warn('YouTube API key not set — using mock data.');
         return getMockVideos(query);
     }
 
     try {
-        const allVideos: YouTubeVideo[] = [];
-        let nextPageToken: string | undefined = undefined;
-        const maxPages = Math.ceil(maxResults / 50); // YouTube API max per page is 50
-        let totalFetched = 0;
+        const eduQuery = `${query} tutorial lecture`;
+        const searchUrl = `${YOUTUBE_API_CONFIG.baseUrl}/search?part=snippet&q=${encodeURIComponent(eduQuery)}&type=video&maxResults=${Math.min(50, maxResults)}&order=relevance&videoDuration=medium&key=${key}`;
+        const searchRes = await fetch(searchUrl);
+        if (!searchRes.ok) throw new Error('Search failed');
+        const searchData = await searchRes.json();
+        if (!searchData.items?.length) return [];
 
-        for (let page = 0; page < maxPages && totalFetched < maxResults; page++) {
-            // Search for educational content with lecture/tutorial keywords
-            const educationalQuery = `${query} tutorial lecture course`;
-            let searchUrl = `${YOUTUBE_API_CONFIG.baseUrl}/search?part=snippet&q=${encodeURIComponent(educationalQuery)}&type=video&maxResults=50&order=relevance&videoDuration=medium&key=${API_KEY}`;
-
-            if (nextPageToken) {
-                searchUrl += `&pageToken=${nextPageToken}`;
-            }
-
-            const searchResponse = await fetch(searchUrl);
-            if (!searchResponse.ok) {
-                throw new Error('Failed to fetch videos');
-            }
-
-            const searchData: YouTubeSearchResponse = await searchResponse.json();
-            nextPageToken = searchData.nextPageToken;
-
-            if (!searchData.items || searchData.items.length === 0) {
-                break;
-            }
-
-            const videoIds = searchData.items.map((item: YouTubeSearchItem) => item.id.videoId).join(',');
-
-            // Get video details including duration and statistics
-            const detailsUrl = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=contentDetails,statistics,snippet&id=${videoIds}&key=${API_KEY}`;
-            const detailsResponse = await fetch(detailsUrl);
-
-            if (!detailsResponse.ok) {
-                throw new Error('Failed to fetch video details');
-            }
-
-            const detailsData = await detailsResponse.json();
-
-            const videos = detailsData.items.map((item: YouTubeVideoItem) => ({
-                id: item.id,
-                title: item.snippet.title,
-                description: item.snippet.description,
-                thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-                channelTitle: item.snippet.channelTitle,
-                channelId: item.snippet.channelId,
-                publishedAt: item.snippet.publishedAt,
-                duration: item.contentDetails.duration,
-                viewCount: parseInt(item.statistics.viewCount) || 0,
-                likeCount: parseInt(item.statistics.likeCount) || 0,
-            }));
-
-            allVideos.push(...videos);
-            totalFetched += videos.length;
-
-            // If no next page token, we've reached the end
-            if (!nextPageToken) {
-                break;
-            }
-        }
-
-        // Also search for the original query without educational keywords to get more variety
-        const additionalSearchUrl = `${YOUTUBE_API_CONFIG.baseUrl}/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=50&order=viewCount&key=${API_KEY}`;
-        const additionalSearchResponse = await fetch(additionalSearchUrl);
-
-        if (additionalSearchResponse.ok) {
-            const additionalSearchData: YouTubeSearchResponse = await additionalSearchResponse.json();
-
-            if (additionalSearchData.items && additionalSearchData.items.length > 0) {
-                const additionalVideoIds = additionalSearchData.items.map((item: YouTubeSearchItem) => item.id.videoId).join(',');
-                const additionalDetailsUrl = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=contentDetails,statistics,snippet&id=${additionalVideoIds}&key=${API_KEY}`;
-                const additionalDetailsResponse = await fetch(additionalDetailsUrl);
-
-                if (additionalDetailsResponse.ok) {
-                    const additionalDetailsData = await additionalDetailsResponse.json();
-
-                    const additionalVideos = additionalDetailsData.items.map((item: YouTubeVideoItem) => ({
-                        id: item.id,
-                        title: item.snippet.title,
-                        description: item.snippet.description,
-                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-                        channelTitle: item.snippet.channelTitle,
-                        channelId: item.snippet.channelId,
-                        publishedAt: item.snippet.publishedAt,
-                        duration: item.contentDetails.duration,
-                        viewCount: parseInt(item.statistics.viewCount) || 0,
-                        likeCount: parseInt(item.statistics.likeCount) || 0,
-                    }));
-
-                    // Add unique videos only
-                    const existingIds = new Set(allVideos.map(v => v.id));
-                    for (const video of additionalVideos) {
-                        if (!existingIds.has(video.id)) {
-                            allVideos.push(video);
-                            existingIds.add(video.id);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Sort by view count (most popular first)
-        allVideos.sort((a, b) => b.viewCount - a.viewCount);
-
-        // Return up to maxResults
-        return allVideos.slice(0, maxResults);
-    } catch (error) {
-        console.error('Error fetching YouTube videos:', error);
+        const ids = searchData.items.map((i: YouTubeSearchItem) => i.id.videoId).join(',');
+        const detRes = await fetch(`${YOUTUBE_API_CONFIG.baseUrl}/videos?part=contentDetails,statistics,snippet&id=${ids}&key=${key}`);
+        if (!detRes.ok) throw new Error('Details failed');
+        const detData = await detRes.json();
+        return (detData.items as YouTubeVideoItem[]).map(mapVideoItem).sort((a, b) => b.viewCount - a.viewCount);
+    } catch (e) {
+        console.error('searchYouTubeVideos error:', e);
         return getMockVideos(query);
     }
 }
 
-// Get video details by ID
-export async function getVideoDetails(videoId: string): Promise<YouTubeVideo | null> {
-    if (!API_KEY) {
-        return getMockVideoById(videoId);
-    }
+// ── Get playlist videos ───────────────────────────────────────
+
+export async function getPlaylistVideos(playlistId: string, maxResults = 30, apiKey?: string): Promise<YouTubeVideo[]> {
+    const key = apiKey || ENV_API_KEY;
+    if (!key) return getMockVideos('playlist');
 
     try {
-        const url = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=snippet,contentDetails,statistics&id=${videoId}&key=${API_KEY}`;
-        const response = await fetch(url);
+        const listUrl = `${YOUTUBE_API_CONFIG.baseUrl}/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=${Math.min(50, maxResults)}&key=${key}`;
+        const listRes = await fetch(listUrl);
+        if (!listRes.ok) throw new Error('Playlist fetch failed');
+        const listData = await listRes.json();
+        if (!listData.items?.length) return [];
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch video details');
-        }
-
-        const data = await response.json();
-
-        if (!data.items || data.items.length === 0) {
-            return null;
-        }
-
-        const item = data.items[0] as YouTubeVideoItem;
-        return {
-            id: item.id,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-            channelTitle: item.snippet.channelTitle,
-            channelId: item.snippet.channelId,
-            publishedAt: item.snippet.publishedAt,
-            duration: item.contentDetails.duration,
-            viewCount: parseInt(item.statistics.viewCount) || 0,
-            likeCount: parseInt(item.statistics.likeCount) || 0,
-        };
-    } catch (error) {
-        console.error('Error fetching video details:', error);
-        return getMockVideoById(videoId);
-    }
-}
-
-// Get videos from a playlist
-export async function getPlaylistVideos(playlistId: string, maxResults: number = 50): Promise<YouTubeVideo[]> {
-    if (!API_KEY) {
-        return getMockVideos('playlist');
-    }
-
-    try {
-        const allVideos: YouTubeVideo[] = [];
-        let nextPageToken: string | undefined = undefined;
-        const maxPages = Math.ceil(maxResults / 50);
-
-        for (let page = 0; page < maxPages && allVideos.length < maxResults; page++) {
-            let playlistUrl = `${YOUTUBE_API_CONFIG.baseUrl}/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}`;
-
-            if (nextPageToken) {
-                playlistUrl += `&pageToken=${nextPageToken}`;
-            }
-
-            const playlistResponse = await fetch(playlistUrl);
-
-            if (!playlistResponse.ok) {
-                throw new Error('Failed to fetch playlist');
-            }
-
-            const playlistData = await playlistResponse.json();
-            nextPageToken = playlistData.nextPageToken;
-
-            if (!playlistData.items || playlistData.items.length === 0) {
-                break;
-            }
-
-            const videoIds = playlistData.items
-                .map((item: { snippet: { resourceId: { videoId: string } } }) => item.snippet.resourceId.videoId)
-                .join(',');
-
-            const detailsUrl = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=contentDetails,statistics,snippet&id=${videoIds}&key=${API_KEY}`;
-            const detailsResponse = await fetch(detailsUrl);
-
-            if (!detailsResponse.ok) {
-                throw new Error('Failed to fetch video details');
-            }
-
-            const detailsData = await detailsResponse.json();
-
-            const videos = detailsData.items.map((item: YouTubeVideoItem) => ({
-                id: item.id,
-                title: item.snippet.title,
-                description: item.snippet.description,
-                thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-                channelTitle: item.snippet.channelTitle,
-                channelId: item.snippet.channelId,
-                publishedAt: item.snippet.publishedAt,
-                duration: item.contentDetails.duration,
-                viewCount: parseInt(item.statistics.viewCount) || 0,
-                likeCount: parseInt(item.statistics.likeCount) || 0,
-            }));
-
-            allVideos.push(...videos);
-
-            if (!nextPageToken) {
-                break;
-            }
-        }
-
-        return allVideos.slice(0, maxResults);
-    } catch (error) {
-        console.error('Error fetching playlist videos:', error);
+        const ids = listData.items
+            .map((i: { snippet: { resourceId: { videoId: string } } }) => i.snippet.resourceId.videoId)
+            .join(',');
+        const detRes = await fetch(`${YOUTUBE_API_CONFIG.baseUrl}/videos?part=contentDetails,statistics,snippet&id=${ids}&key=${key}`);
+        if (!detRes.ok) throw new Error('Details failed');
+        const detData = await detRes.json();
+        return (detData.items as YouTubeVideoItem[]).map(mapVideoItem);
+    } catch (e) {
+        console.error('getPlaylistVideos error:', e);
         return getMockVideos('playlist');
     }
 }
 
-// Get related/recommended videos for a specific video
-export async function getRelatedVideos(videoId: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
-    if (!API_KEY) {
-        return getMockVideos('related');
-    }
+// ── Get video details by ID ───────────────────────────────────
 
-    try {
-        // First get the video details to extract keywords
-        const videoDetails = await getVideoDetails(videoId);
-        if (!videoDetails) {
-            return [];
-        }
-
-        // Extract keywords from title and search for related content
-        const titleWords = videoDetails.title.split(' ').filter(word => word.length > 3).slice(0, 3).join(' ');
-        const searchQuery = `${titleWords} ${videoDetails.channelTitle}`;
-
-        const relatedVideos = await searchYouTubeVideos(searchQuery, maxResults);
-
-        // Filter out the original video
-        return relatedVideos.filter(v => v.id !== videoId);
-    } catch (error) {
-        console.error('Error fetching related videos:', error);
-        return getMockVideos('related');
-    }
+export async function getVideoDetails(videoId: string, apiKey?: string): Promise<YouTubeVideo | null> {
+    return getVideoByUrl(videoId, apiKey);
 }
 
-// Get popular videos in a category
-export async function getPopularVideos(categoryId: string = '27', maxResults: number = 20): Promise<YouTubeVideo[]> {
-    if (!API_KEY) {
-        return getMockVideos('popular');
-    }
+// ── Mock data fallback ────────────────────────────────────────
 
-    try {
-        const url = `${YOUTUBE_API_CONFIG.baseUrl}/videos?part=snippet,contentDetails,statistics&chart=mostPopular&videoCategoryId=${categoryId}&maxResults=${maxResults}&key=${API_KEY}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch popular videos');
-        }
-
-        const data = await response.json();
-
-        return data.items.map((item: YouTubeVideoItem) => ({
-            id: item.id,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-            channelTitle: item.snippet.channelTitle,
-            channelId: item.snippet.channelId,
-            publishedAt: item.snippet.publishedAt,
-            duration: item.contentDetails.duration,
-            viewCount: parseInt(item.statistics.viewCount) || 0,
-            likeCount: parseInt(item.statistics.likeCount) || 0,
-        }));
-    } catch (error) {
-        console.error('Error fetching popular videos:', error);
-        return getMockVideos('popular');
-    }
-}
-
-// Mock data fallback when API key is not available
 function getMockVideos(query: string): YouTubeVideo[] {
     const mockVideos: YouTubeVideo[] = [
-        {
-            id: 'RBSGKlAvoiM',
-            title: 'Introduction to Data Structures and Algorithms',
-            description: 'Learn the fundamentals of data structures and algorithms in this comprehensive tutorial.',
-            thumbnail: 'https://i.ytimg.com/vi/RBSGKlAvoiM/maxresdefault.jpg',
-            channelTitle: 'Abdul Bari',
-            channelId: 'UCZCFT11CWBi3MHNlGf019nw',
-            publishedAt: '2023-01-15T10:00:00Z',
-            duration: 'PT45M30S',
-            viewCount: 1250000,
-            likeCount: 45000,
-        },
-        {
-            id: 'bMknfKXIFA8',
-            title: 'React Tutorial for Beginners',
-            description: 'Complete React tutorial covering components, hooks, state management and more.',
-            thumbnail: 'https://i.ytimg.com/vi/bMknfKXIFA8/maxresdefault.jpg',
-            channelTitle: 'Academind',
-            channelId: 'UCSJbGtTlrDami-tDGPUV9-w',
-            publishedAt: '2023-06-01T08:00:00Z',
-            duration: 'PT2H10M',
-            viewCount: 2100000,
-            likeCount: 72000,
-        },
-        {
-            id: 'rfscVS0vtbw',
-            title: 'Python Tutorial - Full Course for Beginners',
-            description: 'A complete Python tutorial for absolute beginners. Learn Python from scratch.',
-            thumbnail: 'https://i.ytimg.com/vi/rfscVS0vtbw/maxresdefault.jpg',
-            channelTitle: 'freeCodeCamp',
-            channelId: 'UC8butISFssTIElRVOmh-0Og',
-            publishedAt: '2023-03-10T14:00:00Z',
-            duration: 'PT4H26M',
-            viewCount: 15000000,
-            likeCount: 320000,
-        },
-        {
-            id: 'ukzFI9rgwfU',
-            title: 'Machine Learning Basics',
-            description: 'Introduction to machine learning concepts, algorithms, and applications.',
-            thumbnail: 'https://i.ytimg.com/vi/ukzFI9rgwfU/maxresdefault.jpg',
-            channelTitle: 'Stanford',
-            channelId: 'UC-EnprmTZC_hBkQKtMk6XZg',
-            publishedAt: '2022-09-15T12:00:00Z',
-            duration: 'PT55M',
-            viewCount: 3200000,
-            likeCount: 95000,
-        },
-        {
-            id: 'i7twT3U2_XQ',
-            title: 'System Design Interview - Step by Step',
-            description: 'Learn how to approach system design interviews with real examples.',
-            thumbnail: 'https://i.ytimg.com/vi/i7twT3U2_XQ/maxresdefault.jpg',
-            channelTitle: 'Gaurav Sen',
-            channelId: 'UCRPMAqdtSgd0Ipeef7iFsKw',
-            publishedAt: '2023-02-20T09:00:00Z',
-            duration: 'PT38M',
-            viewCount: 890000,
-            likeCount: 28000,
-        },
+        { id: 'RBSGKlAvoiM', title: 'Introduction to Data Structures and Algorithms', description: 'Learn the fundamentals of data structures and algorithms.', thumbnail: 'https://i.ytimg.com/vi/RBSGKlAvoiM/maxresdefault.jpg', channelTitle: 'Abdul Bari', channelId: 'UCZCFT11CWBi3MHNlGf019nw', publishedAt: '2023-01-15T10:00:00Z', duration: 'PT45M30S', viewCount: 1250000, likeCount: 45000 },
+        { id: 'bMknfKXIFA8', title: 'React Tutorial for Beginners', description: 'Complete React tutorial covering components, hooks, and state management.', thumbnail: 'https://i.ytimg.com/vi/bMknfKXIFA8/maxresdefault.jpg', channelTitle: 'Academind', channelId: 'UCSJbGtTlrDami-tDGPUV9-w', publishedAt: '2023-06-01T08:00:00Z', duration: 'PT2H10M', viewCount: 2100000, likeCount: 72000 },
+        { id: 'rfscVS0vtbw', title: 'Python Tutorial - Full Course for Beginners', description: 'A complete Python tutorial for absolute beginners.', thumbnail: 'https://i.ytimg.com/vi/rfscVS0vtbw/maxresdefault.jpg', channelTitle: 'freeCodeCamp', channelId: 'UC8butISFssTIElRVOmh-0Og', publishedAt: '2023-03-10T14:00:00Z', duration: 'PT4H26M', viewCount: 15000000, likeCount: 320000 },
+        { id: 'ukzFI9rgwfU', title: 'Machine Learning Basics', description: 'Introduction to machine learning concepts and algorithms.', thumbnail: 'https://i.ytimg.com/vi/ukzFI9rgwfU/maxresdefault.jpg', channelTitle: 'Stanford', channelId: 'UC-EnprmTZC_hBkQKtMk6XZg', publishedAt: '2022-09-15T12:00:00Z', duration: 'PT55M', viewCount: 3200000, likeCount: 95000 },
+        { id: 'i7twT3U2_XQ', title: 'System Design Interview - Step by Step', description: 'Learn how to approach system design interviews.', thumbnail: 'https://i.ytimg.com/vi/i7twT3U2_XQ/maxresdefault.jpg', channelTitle: 'Gaurav Sen', channelId: 'UCRPMAqdtSgd0Ipeef7iFsKw', publishedAt: '2023-02-20T09:00:00Z', duration: 'PT38M', viewCount: 890000, likeCount: 28000 },
     ];
-
-    // Filter based on query (simple matching)
     if (query) {
-        const lowerQuery = query.toLowerCase();
-        return mockVideos.filter(v =>
-            v.title.toLowerCase().includes(lowerQuery) ||
-            v.description.toLowerCase().includes(lowerQuery)
-        );
+        const lq = query.toLowerCase();
+        const filtered = mockVideos.filter(v => v.title.toLowerCase().includes(lq) || v.description.toLowerCase().includes(lq));
+        return filtered.length ? filtered : mockVideos;
     }
-
     return mockVideos;
 }
 
-function getMockVideoById(videoId: string): YouTubeVideo | null {
-    const videos = getMockVideos('');
-    return videos.find(v => v.id === videoId) || null;
-}
-
-// Export utility functions
+// Re-export utility fns used by other files
 export { parseDuration, formatViewCount };
