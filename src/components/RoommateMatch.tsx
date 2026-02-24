@@ -9,6 +9,7 @@ import {
     Leaf, Flame, Coffee, Wind, Fan, UserCheck, UserX, Settings
 } from 'lucide-react';
 import { currentUser } from '@/data/mockData';
+import AnoAI from './ui/animated-shader-background';
 
 // Types
 interface RoommateProfile {
@@ -533,7 +534,11 @@ export default function RoommateMatch() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+            {/* AnoAI Aurora Background */}
+            <div className="fixed inset-0 z-0 pointer-events-none" style={{ opacity: 0.35 }}>
+                <AnoAI />
+            </div>
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

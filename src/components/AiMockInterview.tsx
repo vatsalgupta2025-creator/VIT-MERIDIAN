@@ -2,8 +2,10 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
-import { Camera, Mic, Square, Play, RefreshCw, AlertCircle } from 'lucide-react';
+import { Camera, Mic, Square, Play, RefreshCw, AlertCircle, CameraOff } from 'lucide-react';
 import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision';
+
+const GEMINI_API_KEY = 'AIzaSyDB7cUKL1VVvlv-R3410iB_GMhOQdndrQo';
 
 interface InterviewMessage {
     id: string;
@@ -30,16 +32,10 @@ export default function AiMockInterview() {
 
     // Initialize Gemini Chat Session (Using REST Streaming)
     const initInterview = useCallback(async () => {
-        if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-            setError('Gemini API key is missing. Please configure your environment.');
-            return;
-        }
-
         try {
-            const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-            // Reverting to gemini-2.0-flash-exp as it is robust for generateContentStream
+            const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-2.0-flash',
                 systemInstruction: `You are a highly experienced strict, professional technical interviewer from a top-tier tech company. 
                 You are currently conducting a mock software engineering interview with a student candidate via video call.
                 
@@ -57,7 +53,6 @@ export default function AiMockInterview() {
             const session = model.startChat({ history: [] });
             chatSessionRef.current = session;
 
-            // Trigger the initial greeting
             const initialResult = await session.sendMessage("START_INTERVIEW");
             const aiText = initialResult.response.text();
 
@@ -229,17 +224,33 @@ export default function AiMockInterview() {
 
     const startCamera = async (): Promise<boolean> => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 1280, height: 720, facingMode: 'user' },
-                audio: true
-            });
+            // First try video + audio
+            let stream: MediaStream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+                    audio: true
+                });
+            } catch {
+                // If audio permission fails, try video only
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+                });
+            }
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
+                await videoRef.current.play().catch(() => { });
             }
             return true;
         } catch (err: any) {
             console.error("Error accessing camera:", err);
-            setError(`Could not access webcam: ${err.message}. Camera permissions are required for the AI to analyze your body language.`);
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError('Camera permission denied. Please click the camera icon in your browser\'s address bar and allow access, then try again.');
+            } else if (err.name === 'NotFoundError') {
+                setError('No camera found. Please connect a webcam and try again.');
+            } else {
+                setError(`Could not access webcam: ${err.message}`);
+            }
             return false;
         }
     };

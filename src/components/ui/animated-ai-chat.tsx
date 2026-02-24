@@ -22,6 +22,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react"
 import ShaderBackground from "./shader-background";
 
+const GEMINI_API_KEY = 'AIzaSyAgdAFmlC9RuTUK_diHRMA--kwK5pAMU_I';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+interface Message {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
 interface UseAutoResizeTextareaProps {
     minHeight: number;
     maxHeight?: number;
@@ -137,6 +145,7 @@ Textarea.displayName = "Textarea"
 
 export function AnimatedAIChat() {
     const [value, setValue] = useState("");
+    const [messages, setMessages] = useState<Message[]>([]);
     const [attachments, setAttachments] = useState<string[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -150,6 +159,7 @@ export function AnimatedAIChat() {
     });
     const [inputFocused, setInputFocused] = useState(false);
     const commandPaletteRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const commandSuggestions: CommandSuggestion[] = [
         {
@@ -259,16 +269,34 @@ export function AnimatedAIChat() {
         }
     };
 
-    const handleSendMessage = () => {
-        if (value.trim()) {
-            startTransition(() => {
-                setIsTyping(true);
-                setTimeout(() => {
-                    setIsTyping(false);
-                    setValue("");
-                    adjustHeight(true);
-                }, 3000);
+    const handleSendMessage = async () => {
+        if (!value.trim() || isTyping) return;
+        const userMessage = value.trim();
+        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        setValue("");
+        adjustHeight(true);
+        setIsTyping(true);
+        try {
+            const history = messages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }]
+            }));
+            history.push({ role: 'user', parts: [{ text: userMessage }] });
+            const res = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: history,
+                    systemInstruction: { parts: [{ text: 'You are a helpful AI assistant for VIT (Vellore Institute of Technology) students. Help with academics, campus life, hostel queries, clubs, events, and general student questions. Be friendly, concise, and accurate.' }] }
+                })
             });
+            const data = await res.json();
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+            setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+        } catch {
+            setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Please try again.' }]);
+        } finally {
+            setIsTyping(false);
         }
     };
 
@@ -303,31 +331,70 @@ export function AnimatedAIChat() {
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
                     <div className="text-center space-y-3">
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                            className="inline-block"
-                        >
-                            <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/40 pb-1">
-                                How can I help today?
-                            </h1>
+                        {messages.length === 0 ? (
                             <motion.div
-                                className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                                initial={{ width: 0, opacity: 0 }}
-                                animate={{ width: "100%", opacity: 1 }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                            />
-                        </motion.div>
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.5 }}
+                                className="inline-block"
+                            >
+                                <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/40 pb-1">
+                                    How can I help today?
+                                </h1>
+                                <motion.div
+                                    className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: "100%", opacity: 1 }}
+                                    transition={{ delay: 0.5, duration: 0.8 }}
+                                />
+                            </motion.div>
+                        ) : null}
                         <motion.p
                             className="text-sm text-white/40"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
                         >
-                            Type a command or ask a question
+                            {messages.length === 0 ? 'Type a command or ask a question' : ''}
                         </motion.p>
                     </div>
+
+                    {/* Chat Messages */}
+                    {messages.length > 0 && (
+                        <div className="space-y-4 max-h-[50vh] overflow-y-auto px-1 custom-scrollbar">
+                            {messages.map((msg, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    {msg.role === 'assistant' && (
+                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-1">
+                                            <Sparkles className="w-3.5 h-3.5 text-white" />
+                                        </div>
+                                    )}
+                                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
+                                            ? 'bg-white/10 text-white/90 rounded-tr-sm'
+                                            : 'bg-white/[0.04] border border-white/[0.06] text-white/80 rounded-tl-sm'
+                                        }`}>
+                                        {msg.content}
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {isTyping && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
+                                        <Sparkles className="w-3.5 h-3.5 text-white" />
+                                    </div>
+                                    <div className="px-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-2xl rounded-tl-sm">
+                                        <TypingDots />
+                                    </div>
+                                </motion.div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+                    )}
 
                     <motion.div
                         className="relative backdrop-blur-2xl bg-white/[0.02] rounded-2xl border border-white/[0.05] shadow-2xl"
