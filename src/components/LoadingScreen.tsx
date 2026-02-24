@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Zap, GraduationCap, BookOpen, Users, Award } from 'lucide-react';
+import { ShaderAnimation } from './ui/shader-animation';
 
 // TODO: Add your friend's enhanced Loading Screen implementation here
 // This component should include:
@@ -58,10 +59,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             transition={{ duration: 0.5 }}
             className="fixed inset-0 bg-[#040812] z-50 flex flex-col items-center justify-center"
         >
-            {/* Background Effects */}
+            {/* Shader Animation Background */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-[100px]" />
+                <ShaderAnimation />
             </div>
 
             {/* Logo Animation */}

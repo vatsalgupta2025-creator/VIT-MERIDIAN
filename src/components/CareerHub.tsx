@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import Galaxy from './ui/Galaxy';
 
 const GEMINI_API_KEY = 'AIzaSyAAzmTY0Eb0_Ytm7SIkCbysBJPf0bWIMWo';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -662,8 +663,22 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
 
     return (
         <motion.div variants={containerV} initial="hidden" animate="show" className="space-y-6 h-[calc(100vh-140px)] flex flex-col overflow-hidden relative">
+            <Galaxy
+                mouseRepulsion={true}
+                mouseInteraction={true}
+                density={1}
+                glowIntensity={0.3}
+                saturation={0}
+                hueShift={140}
+                twinkleIntensity={0.3}
+                rotationSpeed={0.1}
+                repulsionStrength={2}
+                autoCenterRepulsion={0}
+                starSpeed={0.5}
+                speed={1}
+            />
             {/* Ambient Backlight */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none z-0" />
 
             {/* Header */}
             <motion.div variants={itemV} className="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0 relative z-10">

@@ -11,6 +11,7 @@ import {
     Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, Filler
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { ShaderAnimation } from './ui/shader-lines';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, Filler);
 
@@ -158,9 +159,14 @@ export default function BudgetTracker() {
     }), [weeklyData]);
 
     return (
-        <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col overflow-hidden">
+        <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col overflow-hidden relative">
+            {/* Shader Background */}
+            <div className="absolute inset-0 z-0 opacity-35 pointer-events-none overflow-hidden rounded-2xl">
+                <ShaderAnimation />
+            </div>
+
             {/* Header */}
-            <div className="flex items-center justify-between flex-shrink-0">
+            <div className="relative z-10 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-4">
                     <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}
                         className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 border border-white/10">

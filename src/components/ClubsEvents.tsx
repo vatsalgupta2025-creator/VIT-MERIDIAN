@@ -6,6 +6,7 @@ import {
     Users, Calendar, Flame, ChevronRight,
     MapPin, Clock, Search, ExternalLink
 } from 'lucide-react';
+import { ShaderAnimation } from './ui/shader-lines';
 
 const CLUBS = [
     { name: 'Apple Developers Group', category: 'Technical', members: 420, icon: '🍎', color: 'slate' },
@@ -38,8 +39,13 @@ export default function ClubsEvents() {
     );
 
     return (
-        <div className="h-[calc(100vh-120px)] w-full overflow-y-auto custom-scrollbar" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <div className="space-y-8 pb-10">
+        <div className="h-[calc(100vh-120px)] w-full overflow-y-auto custom-scrollbar relative" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {/* Shader Background */}
+            <div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden rounded-2xl">
+                <ShaderAnimation />
+            </div>
+
+            <div className="relative z-10 space-y-8 pb-10">
                 {/* Hero Section */}
                 <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600/20 via-fuchsia-500/10 to-orange-500/20 p-10 border border-white/10">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[100px] pointer-events-none" />

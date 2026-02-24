@@ -131,7 +131,7 @@ function VideoPlayerModal({
         setPointsEarned(calculatedPoints);
         onQuizComplete(quiz.id, score, calculatedPoints);
         if (percentage === 100) firePerfectScoreCelebration();
-        else if (percentage >= 60) fireConfetti({ intensity: 'high' });
+        else if (percentage >= 60) fireConfetti({ particleCount: 100, spread: 70 });
     };
 
     const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import WeatherWidget from './WeatherWidget';
+import FaultyTerminal from './FaultyTerminal';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -571,97 +572,124 @@ export default function DashboardOverview() {
     ];
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6 pb-8"
-        >
-            {/* Welcome Section */}
-            <WelcomeSection />
-
-            {/* Search Bar */}
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-            >
-                <SearchBar />
-            </motion.div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {quickStats.map((stat, i) => (
-                    <StatCard key={i} stat={stat} index={i} />
-                ))}
+        <>
+            {/* Faulty Terminal Background */}
+            <div className="fixed inset-0 z-0 opacity-35 pointer-events-none">
+                <FaultyTerminal
+                    scale={1.5}
+                    gridMul={[2, 1]}
+                    digitSize={1.2}
+                    timeScale={0.5}
+                    pause={false}
+                    scanlineIntensity={0.5}
+                    glitchAmount={1}
+                    flickerAmount={1}
+                    noiseAmp={1}
+                    chromaticAberration={0}
+                    dither={0}
+                    curvature={0.1}
+                    tint="#A7EF9E"
+                    mouseReact={false}
+                    mouseStrength={0.5}
+                    pageLoadAnimation
+                    brightness={0.6}
+                />
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Activity Chart */}
-                    <ActivityChart />
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="relative z-10 space-y-6 pb-8"
+            >
+                {/* Welcome Section */}
+                <WelcomeSection />
 
-                    {/* 2x2 Analytics Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <SubjectPerformanceChart />
-                        <GradeDistributionChart />
-                    </div>
+                {/* Search Bar */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <SearchBar />
+                </motion.div>
 
-                    {/* Attendance Chart */}
-                    <AttendanceChart />
 
-                    {/* Quick Actions */}
-                    <div>
-                        <motion.h3
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-sm font-semibold text-white/70 mb-4 flex items-center gap-2"
-                        >
-                            <Layers size={14} className="text-cyan-400" />
-                            Quick Actions
-                        </motion.h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            {quickActions.map((action, i) => (
-                                <QuickAction key={i} action={action} index={i} />
-                            ))}
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {quickStats.map((stat, i) => (
+                        <StatCard key={i} stat={stat} index={i} />
+                    ))}
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Activity Chart */}
+                        <ActivityChart />
+
+                        {/* 2x2 Analytics Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <SubjectPerformanceChart />
+                            <GradeDistributionChart />
+                        </div>
+
+                        {/* Attendance Chart */}
+                        <AttendanceChart />
+
+                        {/* Quick Actions */}
+                        <div>
+                            <motion.h3
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-sm font-semibold text-white/70 mb-4 flex items-center gap-2"
+                            >
+                                <Layers size={14} className="text-cyan-400" />
+                                Quick Actions
+                            </motion.h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                {quickActions.map((action, i) => (
+                                    <QuickAction key={i} action={action} index={i} />
+                                ))}
+                            </div>
                         </div>
                     </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                        {/* Ongoing Class */}
+                        <OngoingClassWidget />
+
+                        {/* Weather */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <WeatherWidget />
+                        </motion.div>
+
+                        {/* Mini Calendar */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            <CalendarWidget />
+                        </motion.div>
+
+                        {/* Todo */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.6 }}
+                        >
+                            <TodoList />
+                        </motion.div>
+                    </div>
                 </div>
-
-                {/* Right Column */}
-                <div className="space-y-6">
-                    {/* Ongoing Class */}
-                    <OngoingClassWidget />
-
-                    {/* Weather */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <WeatherWidget />
-                    </motion.div>
-
-                    {/* Mini Calendar */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 }}
-                    >
-                        <CalendarWidget />
-                    </motion.div>
-
-                    {/* Todo */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 }}
-                    >
-                        <TodoList />
-                    </motion.div>
-                </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </>
     );
 }
