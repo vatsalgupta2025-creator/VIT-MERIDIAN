@@ -7,7 +7,7 @@ import {
     Rocket, AlertCircle, Calendar, Users, Tent, BookOpenCheck,
     Wallet, BarChart3, Vote, HandHeart, MapPin, Binary, Bot,
     Bus, Car, Edit3, UserCheck, ChevronDown, Bell, Zap,
-    Building2, ShieldAlert
+    GitBranch, Activity, LogOut, Gamepad2, Building2, HeartHandshake, ShieldAlert
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
@@ -37,6 +37,7 @@ const categories = [
         id: 'campus',
         label: 'Campus Life',
         items: [
+            { id: 'safe', label: '🛡 VITGROWW SAFE', icon: ShieldAlert },
             { id: 'campus', label: 'Campus Explorer', icon: MapPin },
             { id: 'hostel-hub', label: 'Hostel Hub', icon: Building2 },
             { id: 'parent-portal', label: 'Parent Portal', icon: ShieldAlert },
@@ -75,7 +76,7 @@ const categories = [
             { id: 'briefing', label: 'Smart Briefing', icon: Bell },
             { id: 'admin-automation', label: 'Admin Auto', icon: Zap },
         ],
-    },
+    }
 ];
 
 const bottomItems = [

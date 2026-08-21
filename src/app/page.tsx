@@ -42,6 +42,7 @@ import HostelHub from '@/components/HostelHub';
 import ParentPortal from '@/components/ParentPortal';
 import { UserProvider } from '@/context/UserContext';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
+const VitgrowwSafe = dynamic(() => import('@/components/VitgrowwSafe'), { ssr: false });
 
 const BootScreen = dynamic(() => import('@/components/BootScreen'), { ssr: false });
 
@@ -125,6 +126,8 @@ export default function Home() {
         return <HostelHub />;
       case 'parent-portal':
         return <ParentPortal />;
+      case 'safe':
+        return <VitgrowwSafe />;
       default:
         return <DashboardOverview />;
     }

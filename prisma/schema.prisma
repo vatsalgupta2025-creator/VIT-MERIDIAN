@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// enum UserRole {
+//   STUDENT
+//   ADMIN
+// }
+
+// enum ReportStatus {
+//   SUBMITTED
+//   UNDER_REVIEW
+//   IN_PROGRESS
+//   RESOLVED
+//   REJECTED
+// }
+
+// enum ReportCategory {
+//   HARASSMENT
+//   SUSPICIOUS_ACTIVITY
+//   ACCIDENT
+//   MEDICAL
+//   THEFT
+//   INFRASTRUCTURE_HAZARD
+//   OTHER
+// }
+
+// enum EmergencyStatus {
+//   CREATED
+//   ACTIVE
+//   ACKNOWLEDGED
+//   RESOLVED
+//   CANCELLED
+// }
+
+// enum SafeWalkStatus {
+//   ACTIVE
+//   COMPLETED
+//   OVERDUE
+//   ESCALATED
+// }
+
+// enum AlertSeverity {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   CRITICAL
+// }
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  studentId    String?  @unique
+  role         String   @default("STUDENT")
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  emergencyContacts  EmergencyContact[]
+  safetyReports      SafetyReport[]
+  emergencyEvents    EmergencyEvent[]
+  safeWalkSessions   SafeWalkSession[]
+  notifications      SafetyNotification[]
+}
+
+model EmergencyContact {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  phone        String
+  relationship String
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SafetyReport {
+  id          String         @id @default(cuid())
+  reportId    String         @unique // VS-XXXX format
+  userId      String
+  category    String
+  description String
+  location    String
+  incidentAt  DateTime
+  status      String         @default("SUBMITTED")
+  adminNotes  String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SafetyAlert {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  severity    String        @default("MEDIUM")
+  location    String?
+  active      Boolean       @default(true)
+  expiresAt   DateTime?
+  createdBy   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model EmergencyEvent {
+  id           String          @id @default(cuid())
+  userId       String
+  type         String          // MEDICAL, FIRE, ASSAULT, OTHER
+  latitude     Float?
+  longitude    Float?
+  accuracy     Float?
+  status       String          @default("CREATED")
+  demoNote     String?
+  resolvedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SafeWalkSession {
+  id              String         @id @default(cuid())
+  userId          String
+  startLocation   String
+  destination     String
+  expectedArrival DateTime
+  status          String         @default("ACTIVE")
+  lastLatitude    Float?
+  lastLongitude   Float?
+  startedAt       DateTime       @default(now())
+  endedAt         DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SafetyLocation {
+  id          String  @id @default(cuid())
+  name        String
+  type        String  // SECURITY_POST, MEDICAL, HOSTEL, ACADEMIC, EMERGENCY_PHONE, MAIN_GATE
+  latitude    Float
+  longitude   Float
+  description String?
+  phone       String?
+  active      Boolean @default(true)
+}
+
+model SafetyNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
