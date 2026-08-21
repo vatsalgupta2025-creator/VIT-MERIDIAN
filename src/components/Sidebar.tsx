@@ -317,7 +317,7 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                                     className="text-[10px] font-mono truncate"
                                     style={{ color: 'var(--text-muted)' }}
                                 >
-                                    {user.registrationNumber || 'Set reg. number'}
+                                    {user.regNo || 'Set reg. number'}
                                 </p>
                             </div>
                             <Edit3

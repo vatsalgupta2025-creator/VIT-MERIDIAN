@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -182,7 +182,7 @@ Do not include any other text, just the JSON array.` }]
                 );
                 const data = await res.json();
                 const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                const jsonMatch = text.match(/\[.*\]/s);
+                const jsonMatch = text.match(/\[[\s\S]*\]/);
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     setQuizQuestions(parsed);
