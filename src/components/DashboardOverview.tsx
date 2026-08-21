@@ -113,6 +113,8 @@ export default function DashboardOverview() {
     const registerModules = [
         { id: 'timetable', label: 'Timetable', category: 'academic', status: 'Live', time: '2m ago', icon: CalendarIcon },
         { id: 'attendance', label: 'Attendance Ledger', category: 'academic', status: '87%', time: '1h ago', icon: BarChart3 },
+        { id: 'hostel-hub', label: 'Hostel Hub', category: 'hostel', status: 'Open', time: '6h ago', icon: Users },
+        { id: 'parent-portal', label: 'Parent Portal', category: 'hostel', status: 'Active', time: '1h ago', icon: Brain },
         { id: 'search', label: 'Oracle Search', category: 'ai', status: 'Ready', time: 'Just now', icon: Search },
         { id: 'study-materials', label: 'Study Materials', category: 'academic', status: '12 new', time: '3h ago', icon: BookOpen },
         { id: 'campus', label: 'Campus Map', category: 'campus', status: 'Active', time: '5h ago', icon: MapPin },
@@ -159,7 +161,7 @@ export default function DashboardOverview() {
                             
                             {/* Category Tabs */}
                             <div className="flex gap-2 text-xs font-mono">
-                                {['all', 'academic', 'campus', 'ai'].map(tab => (
+                                {['all', 'academic', 'hostel', 'campus', 'ai'].map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}

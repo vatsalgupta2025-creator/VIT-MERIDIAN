@@ -6,7 +6,8 @@ import {
     Settings, Brain, GraduationCap, FileText, Share2, Library,
     Rocket, AlertCircle, Calendar, Users, Tent, BookOpenCheck,
     Wallet, BarChart3, Vote, HandHeart, MapPin, Binary, Bot,
-    Bus, Car, Edit3, UserCheck, ChevronDown, Bell, Zap
+    Bus, Car, Edit3, UserCheck, ChevronDown, Bell, Zap,
+    Building2, ShieldAlert
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
@@ -37,6 +38,8 @@ const categories = [
         label: 'Campus Life',
         items: [
             { id: 'campus', label: 'Campus Explorer', icon: MapPin },
+            { id: 'hostel-hub', label: 'Hostel Hub', icon: Building2 },
+            { id: 'parent-portal', label: 'Parent Portal', icon: ShieldAlert },
             { id: 'clubs-events', label: 'Clubs & Events', icon: Tent },
             { id: 'roommate', label: 'Roommate Match', icon: Users },
             { id: 'lost-found', label: 'Lost & Found', icon: AlertCircle },

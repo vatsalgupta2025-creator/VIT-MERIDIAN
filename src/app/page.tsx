@@ -37,6 +37,8 @@ import BusTransportation from '@/components/BusTransportation';
 import ProfileView from '@/components/ProfileView';
 import FacultyManagement from '@/components/FacultyManagement';
 import StudentDetailsModal from '@/components/StudentDetailsModal';
+import HostelHub from '@/components/HostelHub';
+import ParentPortal from '@/components/ParentPortal';
 import { UserProvider } from '@/context/UserContext';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
 
@@ -118,6 +120,10 @@ export default function Home() {
         return <BusTransportation />;
       case 'faculty':
         return <FacultyManagement />;
+      case 'hostel-hub':
+        return <HostelHub />;
+      case 'parent-portal':
+        return <ParentPortal />;
       default:
         return <DashboardOverview />;
     }
