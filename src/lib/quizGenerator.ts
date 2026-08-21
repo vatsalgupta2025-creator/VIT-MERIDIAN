@@ -5,7 +5,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Quiz, QuizQuestion } from '@/types/learning';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 
 
 interface GeneratedQuiz {

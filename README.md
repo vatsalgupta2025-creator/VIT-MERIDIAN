@@ -65,12 +65,15 @@ It doesn't just aggregate information. It **understands context, predicts needs,
 
 ---
 
-### 🏛️ Campus Life
+### 🏛️ Campus Life & Infrastructure
 
 | Feature | Description |
 |---|---|
 | **🗺️ Campus Explorer** | Interactive 3D-style VIT campus map. Find buildings, labs, and facilities in seconds. |
-| **🏠 Roommate Match** | Preference-based roommate matching: block, mess, AC preference, sleep schedule, social style. AI-calculated compatibility scores. |
+| **🏠 Hostel Hub & Complaints** | Explore all hostel blocks, mess catering info, and warden contacts. Raise and track maintenance/discipline complaints with category-based routing, anonymous submissions, and SLA escalation. |
+| **🚌 Day Scholar Transport** | Track college buses with live mocked location, route schedules, and access your digital bus pass QR code. |
+| **👨‍👩‍👧 Parent Portal** | A dedicated view for parents to monitor attendance, track hostel leave approvals, and communicate directly with wardens/mentors via secure chat. |
+| **👥 Roommate Match** | Preference-based roommate matching: block, mess, AC preference, sleep schedule, social style. AI-calculated compatibility scores. |
 | **📋 Lost & Found** | Campus-wide digital lost & found board with photo uploads and real-time claim tracking. |
 | **🤝 Group Study** | Create or join study groups by subject. Integrated whiteboard and resource sharing. |
 | **🎭 Clubs & Events** | Discover every active club, upcoming event, and open registration — all in one feed. |
@@ -134,13 +137,21 @@ vitgroww/
 │   │   ├── BudgetTracker.tsx   # AI budget advisor
 │   │   ├── AttendanceTracker.tsx
 │   │   ├── AdminAutomation.tsx
+│   │   ├── HostelHub.tsx       # Hostel blocks, mess info, admin
+│   │   ├── HostelComplaints.tsx# Complaints routing & tracking
+│   │   ├── ParentPortal.tsx    # Parent dashboard and secure chat
+│   │   ├── BusTransport.tsx    # Routes, live tracking, and digital pass
 │   │   └── ... (35+ more)
 │   ├── components/ui/          # Design system
 │   │   ├── animated-shader-background.tsx  # Three.js aurora
 │   │   ├── shader-lines.tsx    # WebGL line shaders
 │   │   └── animated-ai-chat.tsx
 │   └── data/
-│       └── mockData.ts         # Campus data layer
+│       ├── mockData.ts         # Campus data layer
+│       ├── complaintsData.ts   # SLA routing rules & mock complaints
+│       ├── hostelsData.ts      # Warden & hostel block details
+│       ├── parentData.ts       # Parent portal notifications & chats
+│       └── transportData.ts    # Bus routes & stops
 ```
 
 ### Tech Stack

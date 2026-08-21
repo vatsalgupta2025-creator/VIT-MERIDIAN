@@ -36,6 +36,8 @@ import CampusExplorer from '@/components/CampusExplorer';
 import VisualAlgorithms from '@/components/VisualAlgorithms';
 import TravelPool from '@/components/TravelPool';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
+import HostelHub from '@/components/HostelHub';
+import ParentPortal from '@/components/ParentPortal';
 
 const BootScreen = dynamic(() => import('@/components/BootScreen'), { ssr: false });
 
@@ -107,6 +109,10 @@ export default function Home() {
         return <CareerHub />;
       case 'lost-found':
         return <LostAndFound />;
+      case 'hostel':
+        return <HostelHub />;
+      case 'parent-portal':
+        return <ParentPortal />;
 
       case 'clubs-events':
         return <ClubsEvents />;

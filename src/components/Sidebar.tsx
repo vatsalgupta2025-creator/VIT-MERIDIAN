@@ -32,7 +32,9 @@ import {
     MapPin,
     Binary,
     Bot,
-    Car
+    Car,
+    Building2,
+    HeartHandshake
 } from 'lucide-react';
 import { currentUser } from '@/data/mockData';
 
@@ -53,6 +55,8 @@ const navItems = [
     { id: 'fileshare', label: 'File Share', icon: Share2 },
     { id: 'career', label: 'Career Hub', icon: Rocket },
     { id: 'lost-found', label: 'Lost & Found', icon: AlertCircle },
+    { id: 'hostel', label: 'Hostels', icon: Building2 },
+    { id: 'parent-portal', label: 'Parent Portal', icon: HeartHandshake },
 
     { id: 'clubs-events', label: 'Clubs & Events', icon: Tent },
     { id: 'roommate', label: 'Roommate Match', icon: Users },

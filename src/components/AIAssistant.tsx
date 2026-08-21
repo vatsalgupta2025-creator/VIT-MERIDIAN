@@ -2,15 +2,22 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send, User, Sparkles, Loader2, X, Minimize2, Maximize2 } from 'lucide-react';
+import { Bot, Send, User, Sparkles, Loader2, X } from 'lucide-react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// TODO: Add your friend's AI Assistant implementation here
-// This component should include:
-// - Chat interface with AI
-// - Context-aware responses about VIT
-// - Integration with campus data
-// - Voice input support (optional)
-// - Quick action buttons
+const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+
+const SYSTEM_PROMPT = `You are VIT Assistant, an intelligent campus helper for VIT (Vellore Institute of Technology) students.
+You help students with:
+- Academic queries (courses, grades, CGPA, attendance)
+- Campus life (clubs, events, hostels, food)
+- Career guidance (internships, placements, skills)
+- Study tips and resources
+- Schedules and timetables
+- General VIT information
+
+Be concise, friendly, and helpful. Keep responses under 150 words unless more detail is truly needed.`;
 
 interface Message {
     id: string;
@@ -25,13 +32,31 @@ export default function AIAssistant() {
         {
             id: '1',
             role: 'assistant',
-            content: 'Hello! I\'m your VIT campus assistant. How can I help you today?',
+            content: "Hello! I'm your VIT campus assistant powered by Gemini AI. How can I help you today? 🎓",
             timestamp: new Date(),
         },
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const chatRef = useRef<ReturnType<typeof genAI.getGenerativeModel> | null>(null);
+    const chatSessionRef = useRef<ReturnType<Awaited<ReturnType<typeof genAI.getGenerativeModel>>['startChat']> | null>(null);
+
+    useEffect(() => {
+        // Initialize chat model with history
+        const model = genAI.getGenerativeModel({
+            model: 'gemini-1.5-flash',
+            systemInstruction: SYSTEM_PROMPT,
+        });
+        chatRef.current = model;
+        chatSessionRef.current = model.startChat({
+            history: [],
+            generationConfig: {
+                maxOutputTokens: 512,
+                temperature: 0.7,
+            },
+        });
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -42,7 +67,7 @@ export default function AIAssistant() {
     }, [messages]);
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() || isLoading) return;
 
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -52,21 +77,44 @@ export default function AIAssistant() {
         };
 
         setMessages(prev => [...prev, userMessage]);
+        const userInput = input;
         setInput('');
         setIsLoading(true);
 
-        // TODO: Implement actual AI response
-        setTimeout(() => {
+        try {
+            if (!chatSessionRef.current) {
+                throw new Error('Chat not initialized');
+            }
+            const result = await chatSessionRef.current.sendMessage(userInput);
+            const text = result.response.text();
+
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'This is a placeholder response. Please implement the actual AI integration from your friend\'s code.',
+                content: text,
                 timestamp: new Date(),
             };
             setMessages(prev => [...prev, assistantMessage]);
+        } catch (err) {
+            console.error('Gemini error:', err);
+            const errMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: '⚠️ Sorry, I encountered an error. Please try again.',
+                timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, errMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
+
+    const quickActions = [
+        'What clubs can I join?',
+        'How to improve CGPA?',
+        'Upcoming campus events?',
+        'Tips for placements?',
+    ];
 
     return (
         <>
@@ -89,27 +137,28 @@ export default function AIAssistant() {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-24 right-6 w-96 h-[500px] bg-[#0c0f17] rounded-2xl border border-white/[0.08] shadow-2xl z-50 flex flex-col overflow-hidden"
+                        className="fixed bottom-24 right-6 w-96 h-[520px] bg-[#0c0f17] rounded-2xl border border-white/[0.08] shadow-2xl z-50 flex flex-col overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
+                        <div className="flex items-center justify-between p-4 border-b border-white/[0.06] bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                                     <Sparkles size={18} className="text-white" />
                                 </div>
                                 <div>
                                     <h3 className="text-white font-semibold">VIT Assistant</h3>
-                                    <p className="text-white/40 text-xs">AI-powered campus helper</p>
+                                    <p className="text-emerald-400 text-xs flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                                        Gemini AI • Online
+                                    </p>
                                 </div>
                             </div>
-                            <div className="flex gap-1">
-                                <button
-                                    onClick={() => setIsOpen(false)}
-                                    className="p-2 text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.05]"
-                                >
-                                    <X size={18} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.05]"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
 
                         {/* Messages */}
@@ -126,7 +175,7 @@ export default function AIAssistant() {
                                     }`}>
                                         {message.role === 'user' ? <User size={14} /> : <Bot size={14} />}
                                     </div>
-                                    <div className={`max-w-[75%] p-3 rounded-2xl text-sm ${
+                                    <div className={`max-w-[78%] p-3 rounded-2xl text-sm whitespace-pre-wrap ${
                                         message.role === 'user'
                                             ? 'bg-violet-500/20 text-white/90 rounded-br-md'
                                             : 'bg-white/[0.05] text-white/80 rounded-bl-md'
@@ -140,11 +189,28 @@ export default function AIAssistant() {
                                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                                         <Bot size={14} className="text-white" />
                                     </div>
-                                    <div className="bg-white/[0.05] p-3 rounded-2xl rounded-bl-md">
-                                        <Loader2 size={16} className="text-white/40 animate-spin" />
+                                    <div className="bg-white/[0.05] p-3 rounded-2xl rounded-bl-md flex items-center gap-2">
+                                        <Loader2 size={14} className="text-violet-400 animate-spin" />
+                                        <span className="text-white/40 text-xs">Thinking...</span>
                                     </div>
                                 </div>
                             )}
+
+                            {/* Quick actions shown only at start */}
+                            {messages.length === 1 && !isLoading && (
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    {quickActions.map((action) => (
+                                        <button
+                                            key={action}
+                                            onClick={() => { setInput(action); }}
+                                            className="text-left text-xs p-2 rounded-xl border border-white/[0.06] text-white/50 hover:text-white/80 hover:border-violet-500/30 hover:bg-violet-500/5 transition-all"
+                                        >
+                                            {action}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             <div ref={messagesEndRef} />
                         </div>
 
@@ -155,9 +221,9 @@ export default function AIAssistant() {
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                                     placeholder="Ask about VIT..."
-                                    className="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-violet-500/40"
+                                    className="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-violet-500/40 transition-colors"
                                 />
                                 <button
                                     onClick={handleSend}
