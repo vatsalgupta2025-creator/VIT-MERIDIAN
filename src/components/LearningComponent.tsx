@@ -153,7 +153,7 @@ export default function LearningComponent() {
         const generate = async () => {
             setIsGeneratingQuiz(true);
             try {
-                const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+                const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
                 const res = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
                     {
@@ -182,7 +182,7 @@ Do not include any other text, just the JSON array.` }]
                 );
                 const data = await res.json();
                 const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                const jsonMatch = text.match(/\[.*\]/s);
+                const jsonMatch = text.match(/\[[\s\S]*\]/);
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     setQuizQuestions(parsed);
@@ -213,10 +213,10 @@ Do not include any other text, just the JSON array.` }]
         return 'bg-violet-400';
     };
 
-    // ── DISCOVER VIEW ──
+    // â”€â”€ DISCOVER VIEW â”€â”€
     const renderDiscover = () => (
         <div className="flex h-full gap-0">
-            {/* ── LEFT SIDEBAR ── */}
+            {/* â”€â”€ LEFT SIDEBAR â”€â”€ */}
             <div className="w-[200px] flex-shrink-0 flex flex-col gap-5 overflow-y-auto custom-scrollbar border-r border-white/[0.05] pr-4 mr-4 hidden lg:flex">
                 {/* Streak Stats */}
                 <div className="text-center">
@@ -310,7 +310,7 @@ Do not include any other text, just the JSON array.` }]
                 </div>
             </div>
 
-            {/* ── MAIN CONTENT ── */}
+            {/* â”€â”€ MAIN CONTENT â”€â”€ */}
             <div className="flex-1 flex flex-col h-full overflow-hidden">
                 {/* Search Bar */}
                 <form onSubmit={handleSearch} className="mb-6 relative flex items-center">
@@ -427,7 +427,7 @@ Do not include any other text, just the JSON array.` }]
         </div>
     );
 
-    // ── WATCH VIEW ──
+    // â”€â”€ WATCH VIEW â”€â”€
     const renderWatchMode = () => {
         if (!activeVideo) return null;
         const isCompleted = completedVideos.includes(activeVideo.id);
@@ -454,9 +454,9 @@ Do not include any other text, just the JSON array.` }]
                             <h1 className="text-xl font-bold text-white mb-2">{activeVideo.title}</h1>
                             <div className="flex flex-wrap items-center gap-3 text-xs text-white/50 mb-4">
                                 <span>{activeVideo.channelTitle}</span>
-                                <span>•</span>
+                                <span>â€¢</span>
                                 <span>{activeVideo.views} views</span>
-                                <span>•</span>
+                                <span>â€¢</span>
                                 <span>{activeVideo.duration}</span>
                             </div>
                             <div className="bg-[#0c0f17] rounded-xl p-4 text-sm text-white/60 leading-relaxed border border-white/[0.05]">
@@ -478,7 +478,7 @@ Do not include any other text, just the JSON array.` }]
                             {isCompleted ? (
                                 <div className="text-center py-8 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                                     <CheckCircle size={28} className="text-emerald-400 mx-auto mb-2" />
-                                    <h4 className="font-bold text-emerald-400 text-sm">Module Mastered! 🎉</h4>
+                                    <h4 className="font-bold text-emerald-400 text-sm">Module Mastered! ðŸŽ‰</h4>
                                     <p className="text-[11px] text-emerald-400/60 mt-1">XP already claimed.</p>
                                 </div>
                             ) : isGeneratingQuiz ? (
@@ -490,7 +490,7 @@ Do not include any other text, just the JSON array.` }]
                                 <div className="text-center py-8 text-white/30 text-xs">Quiz unavailable. Check your API key.</div>
                             ) : quizDone ? (
                                 <div className="text-center py-6">
-                                    <div className="text-4xl mb-3">{quizScore >= 3 ? '🎉' : '📚'}</div>
+                                    <div className="text-4xl mb-3">{quizScore >= 3 ? 'ðŸŽ‰' : 'ðŸ“š'}</div>
                                     <h4 className="font-bold text-white text-lg mb-1">{quizScore}/{quizQuestions.length} Correct</h4>
                                     <p className="text-white/40 text-xs mb-4">{quizScore >= 3 ? 'Great job! XP earned!' : 'Keep practising!'}</p>
                                     {quizScore >= 3 && !isCompleted && (
@@ -531,7 +531,7 @@ Do not include any other text, just the JSON array.` }]
                                     </div>
                                     {showExplanation && (
                                         <p className="text-[11px] text-white/50 bg-white/[0.03] rounded-lg p-2.5 border border-white/5">
-                                            💡 {quizQuestions[quizIndex].explanation}
+                                            ðŸ’¡ {quizQuestions[quizIndex].explanation}
                                         </p>
                                     )}
                                     <div className="flex gap-2 pt-1">
@@ -562,7 +562,7 @@ Do not include any other text, just the JSON array.` }]
         );
     };
 
-    // ── MAIN RETURN ──
+    // â”€â”€ MAIN RETURN â”€â”€
     return (
         <div className="h-[calc(100vh-120px)] w-full flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
             {/* Top Header Bar */}
@@ -612,3 +612,5 @@ Do not include any other text, just the JSON array.` }]
         </div>
     );
 }
+
+

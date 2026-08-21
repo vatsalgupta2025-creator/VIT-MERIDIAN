@@ -15,6 +15,7 @@ import {
     Search,
     Filter
 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 // Define the shape of a traveler
 interface Traveler {
@@ -55,13 +56,14 @@ const initialPools: TravelPoolItem[] = [
 ];
 
 export default function TravelPool() {
+    const { user } = useUser();
     const [pools, setPools] = useState<TravelPoolItem[]>(initialPools);
 
     // Form State
     const [destination, setDestination] = useState('');
     const [date, setDate] = useState('');
     const [mode, setMode] = useState<'Taxi' | 'Train' | 'Plane'>('Taxi');
-    const [name, setName] = useState('');
+    const [name, setName] = useState(user.name || '');
     const [phone, setPhone] = useState('');
 
     // Search and Filter State

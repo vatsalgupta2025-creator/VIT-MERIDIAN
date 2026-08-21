@@ -555,8 +555,6 @@ export const currentUser: UserProfile = {
 export const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
   { id: 'search', label: 'Oracle Search', icon: 'Search' },
-  { id: 'process', label: 'Process Hub', icon: 'GitBranch' },
-  { id: 'pulse', label: 'Pulse Analytics', icon: 'Activity' },
   { id: 'briefing', label: 'Smart Briefing', icon: 'Bell' },
   { id: 'profile', label: 'Profile', icon: 'User' },
 ];

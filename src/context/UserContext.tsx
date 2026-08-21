@@ -1,0 +1,109 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { currentUser as defaultUser, UserProfile } from '@/data/mockData';
+
+export interface UserData {
+    name: string;
+    regNo: string;
+    email: string;
+    avatar: string;
+    major: string;
+    year: string;
+    gpa: number;
+    ruviScore: number;
+    totalPoints: number;
+    streak: number;
+    rank: number;
+}
+
+interface UserContextType {
+    user: UserData;
+    updateUser: (data: Partial<UserData>) => void;
+    isEditModalOpen: boolean;
+    setIsEditModalOpen: (open: boolean) => void;
+}
+
+const STORAGE_KEY = 'vitgroww_user_profile';
+
+function getInitials(name: string): string {
+    if (!name || !name.trim()) return 'ST';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const initialDefaultUser: UserData = {
+    name: 'Ayush Upadhyay',
+    regNo: '23BCE10482',
+    email: 'student@vitgroww.edu',
+    avatar: 'AU',
+    major: 'BTech CSE AIML',
+    year: '3rd Year',
+    gpa: 3.72,
+    ruviScore: 74,
+    totalPoints: 1250,
+    streak: 12,
+    rank: 47,
+};
+
+const UserContext = createContext<UserContextType>({
+    user: initialDefaultUser,
+    updateUser: () => { },
+    isEditModalOpen: false,
+    setIsEditModalOpen: () => { },
+});
+
+export function UserProvider({ children }: { children: React.ReactNode }) {
+    const [user, setUser] = useState<UserData>(initialDefaultUser);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                setUser((prev) => ({
+                    ...prev,
+                    ...parsed,
+                    avatar: getInitials(parsed.name || prev.name),
+                }));
+            } else {
+                // Check if user has prompt on first visit
+                setIsEditModalOpen(true);
+            }
+        } catch (e) {
+            console.error('Failed to load user profile from storage', e);
+        }
+        setIsLoaded(true);
+    }, []);
+
+    const updateUser = (data: Partial<UserData>) => {
+        setUser((prev) => {
+            const updated = {
+                ...prev,
+                ...data,
+                avatar: data.name ? getInitials(data.name) : prev.avatar,
+            };
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            } catch (e) {
+                console.error('Failed to save user profile to storage', e);
+            }
+            return updated;
+        });
+    };
+
+    return (
+        <UserContext.Provider value={{ user, updateUser, isEditModalOpen, setIsEditModalOpen }}>
+            {children}
+        </UserContext.Provider>
+    );
+}
+
+export function useUser() {
+    return useContext(UserContext);
+}

@@ -2,17 +2,18 @@
 
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Crown } from 'lucide-react';
-import { currentUser } from '@/data/mockData';
-
-const leaderboardData = [
-    { rank: 1, name: 'Priya Sharma', gpa: 3.98, xp: 4500, avatar: 'PS' },
-    { rank: 2, name: 'Arjun Patel', gpa: 3.92, xp: 4200, avatar: 'AP' },
-    { rank: 3, name: 'Ayush Upadhyay', gpa: 3.72, xp: currentUser.totalPoints, avatar: 'AU', isMe: true }, // Dynamic current user
-    { rank: 4, name: 'Nina Singh', gpa: 3.70, xp: 3950, avatar: 'NS' },
-    { rank: 5, name: 'Vikram Gupta', gpa: 3.65, xp: 3800, avatar: 'VG' },
-];
+import { useUser } from '@/context/UserContext';
 
 export default function Leaderboard() {
+    const { user } = useUser();
+
+    const leaderboardData = [
+        { rank: 1, name: 'Priya Sharma', gpa: 3.98, xp: 4500, avatar: 'PS' },
+        { rank: 2, name: 'Arjun Patel', gpa: 3.92, xp: 4200, avatar: 'AP' },
+        { rank: 3, name: user.name || 'You', gpa: 3.72, xp: user.totalPoints, avatar: user.avatar, isMe: true },
+        { rank: 4, name: 'Nina Singh', gpa: 3.70, xp: 3950, avatar: 'NS' },
+        { rank: 5, name: 'Vikram Gupta', gpa: 3.65, xp: 3800, avatar: 'VG' },
+    ];
     return (
         <div className="glass-card p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-8">

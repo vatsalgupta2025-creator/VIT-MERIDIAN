@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,13 +13,12 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import Galaxy from './ui/Galaxy';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-// ── Types ──
+// â”€â”€ Types â”€â”€
 type TemplateType = 'modern' | 'classic' | 'minimal' | 'creative';
 
 interface ResumeData {
@@ -88,7 +87,7 @@ const tabs = [
     { id: 'hackathons' as const, label: 'Hackathons', icon: Trophy, color: 'amber' }
 ];
 
-// ── Templates Configuration ──
+// â”€â”€ Templates Configuration â”€â”€
 const templates: { id: TemplateType; name: string; description: string; icon: React.ElementType; color: string }[] = [
     { id: 'modern', name: 'Modern', description: 'Clean with accent colors', icon: Monitor, color: 'cyan' },
     { id: 'classic', name: 'Classic', description: 'Traditional professional', icon: BriefcaseIcon, color: 'slate' },
@@ -96,39 +95,39 @@ const templates: { id: TemplateType; name: string; description: string; icon: Re
     { id: 'creative', name: 'Creative', description: 'Bold & eye-catching', icon: Palette, color: 'violet' },
 ];
 
-// ── Data ──
+// â”€â”€ Data â”€â”€
 const internships: Internship[] = [
-    { id: '1', company: 'Google', role: 'SWE Intern', type: 'Remote', stipend: '₹80K/mo', duration: '3 months', link: 'https://careers.google.com/students/', tags: ['SDE', 'DSA', 'System Design'], color: 'cyan', platform: 'Google Careers', deadline: 'Rolling' },
-    { id: '2', company: 'Microsoft', role: 'SDE Intern', type: 'Hybrid', stipend: '₹60K/mo', duration: '2 months', link: 'https://careers.microsoft.com/students/', tags: ['Azure', 'C#', '.NET'], color: 'blue', platform: 'Microsoft Careers', deadline: 'March 2026' },
-    { id: '3', company: 'Amazon', role: 'SDE Intern', type: 'On-site', stipend: '₹1L/mo', duration: '6 months', link: 'https://www.amazon.jobs/en/teams/internships-for-students', tags: ['AWS', 'Java', 'Distributed Systems'], color: 'amber', platform: 'Amazon Jobs', deadline: 'Rolling' },
-    { id: '4', company: 'Flipkart', role: 'GRiD Intern', type: 'Hybrid', stipend: '₹50K/mo', duration: '2 months', link: 'https://www.flipkartcareers.com/', tags: ['Backend', 'React', 'Microservices'], color: 'blue', platform: 'Flipkart Careers', deadline: 'Sept 2026' },
-    { id: '5', company: 'Goldman Sachs', role: 'Summer Analyst', type: 'On-site', stipend: '₹1.2L/mo', duration: '8 weeks', link: 'https://www.goldmansachs.com/careers/students/', tags: ['Finance', 'Java', 'Analytics'], color: 'amber', platform: 'GS Careers', deadline: 'Nov 2026' },
+    { id: '1', company: 'Google', role: 'SWE Intern', type: 'Remote', stipend: 'â‚¹80K/mo', duration: '3 months', link: 'https://careers.google.com/students/', tags: ['SDE', 'DSA', 'System Design'], color: 'cyan', platform: 'Google Careers', deadline: 'Rolling' },
+    { id: '2', company: 'Microsoft', role: 'SDE Intern', type: 'Hybrid', stipend: 'â‚¹60K/mo', duration: '2 months', link: 'https://careers.microsoft.com/students/', tags: ['Azure', 'C#', '.NET'], color: 'blue', platform: 'Microsoft Careers', deadline: 'March 2026' },
+    { id: '3', company: 'Amazon', role: 'SDE Intern', type: 'On-site', stipend: 'â‚¹1L/mo', duration: '6 months', link: 'https://www.amazon.jobs/en/teams/internships-for-students', tags: ['AWS', 'Java', 'Distributed Systems'], color: 'amber', platform: 'Amazon Jobs', deadline: 'Rolling' },
+    { id: '4', company: 'Flipkart', role: 'GRiD Intern', type: 'Hybrid', stipend: 'â‚¹50K/mo', duration: '2 months', link: 'https://www.flipkartcareers.com/', tags: ['Backend', 'React', 'Microservices'], color: 'blue', platform: 'Flipkart Careers', deadline: 'Sept 2026' },
+    { id: '5', company: 'Goldman Sachs', role: 'Summer Analyst', type: 'On-site', stipend: 'â‚¹1.2L/mo', duration: '8 weeks', link: 'https://www.goldmansachs.com/careers/students/', tags: ['Finance', 'Java', 'Analytics'], color: 'amber', platform: 'GS Careers', deadline: 'Nov 2026' },
     { id: '6', company: 'Wellfound', role: 'Startup Jobs', type: 'Remote/Hybrid', stipend: 'Varies', duration: 'Varies', link: 'https://wellfound.com/', tags: ['Startups', 'SWE', 'Product'], color: 'violet', platform: 'Wellfound', deadline: 'Always Open' },
     { id: '7', company: 'Simplify.jobs', role: 'One-Click Apply', type: 'Remote', stipend: 'Varies', duration: 'Varies', link: 'https://simplify.jobs/', tags: ['Auto Apply', 'SWE', 'Aggregator'], color: 'cyan', platform: 'Simplify', deadline: 'Always Open' },
     { id: '8', company: 'TheHub.io', role: 'Tech & Startup', type: 'Remote/On-site', stipend: 'Varies', duration: 'Varies', link: 'https://thehub.io/', tags: ['European', 'Startup', 'Tech'], color: 'emerald', platform: 'TheHub', deadline: 'Always Open' },
     { id: '9', company: 'Riipen', role: 'Project-Based', type: 'Virtual', stipend: 'Academic Credit', duration: '4-8 weeks', link: 'https://www.riipen.com/', tags: ['Projects', 'Academic', 'Experiential'], color: 'blue', platform: 'Riipen', deadline: 'Always Open' },
     { id: '10', company: 'Outreachy', role: 'Open Source Intern', type: 'Remote', stipend: '$7,000 stipend', duration: '3 months', link: 'https://www.outreachy.org/', tags: ['Open Source', 'Diversity', 'Paid'], color: 'rose', platform: 'Outreachy', deadline: 'Cohort Based' },
-    { id: '11', company: 'Internshala', role: 'Various Roles', type: 'Virtual', stipend: '₹5-25K/mo', duration: '1-6 months', link: 'https://internshala.com/', tags: ['Web Dev', 'ML', 'Marketing'], color: 'violet', platform: 'Internshala', deadline: 'Always Open' },
+    { id: '11', company: 'Internshala', role: 'Various Roles', type: 'Virtual', stipend: 'â‚¹5-25K/mo', duration: '1-6 months', link: 'https://internshala.com/', tags: ['Web Dev', 'ML', 'Marketing'], color: 'violet', platform: 'Internshala', deadline: 'Always Open' },
     { id: '12', company: 'AICTE', role: 'Virtual Intern (Govt)', type: 'Virtual', stipend: 'Free + Certificate', duration: '2-3 months', link: 'https://internship.aicte-india.org/', tags: ['AI', 'IoT', 'Cybersecurity'], color: 'rose', platform: 'AICTE Portal', deadline: 'Semester Based' },
     { id: '13', company: 'LetsGrowMore', role: 'Virtual Intern', type: 'Virtual', stipend: 'Free + Certificate', duration: '1 month', link: 'https://letsgrowmore.in/', tags: ['Web Dev', 'Data Science', 'Open Source'], color: 'emerald', platform: 'LetsGrowMore', deadline: 'Cohort Based' },
     { id: '14', company: 'WeMakeDevs', role: 'Community Intern', type: 'Virtual', stipend: 'Free + Network', duration: 'Flexible', link: 'http://wemakedevs.org/', tags: ['Community', 'Open Source', 'Learning'], color: 'cyan', platform: 'WeMakeDevs', deadline: 'Always Open' },
     { id: '15', company: 'IIT Madras', role: 'Summer Fellowship', type: 'On-site', stipend: 'Stipend + Cert', duration: '2 months', link: 'https://www.moneycontrol.com/education/iit-madras-summer-fellowship-programme-2026-check-eligibility-stipend-and-direct-link-to-apply-here-article-13807630.html', tags: ['Research', 'IIT', 'Summer'], color: 'amber', platform: 'IIT Madras', deadline: 'Feb-Mar 2026' },
     { id: '16', company: '2026 SWE Jobs', role: 'Curated GitHub List', type: 'Remote/On-site', stipend: 'Varies', duration: 'Varies', link: 'https://github.com/speedyapply/2026-SWE-College-Jobs', tags: ['GitHub List', 'SWE', '2026 Batch'], color: 'violet', platform: 'GitHub', deadline: 'Rolling' },
     { id: '17', company: 'Remote Internships', role: 'Paid Remote List', type: 'Remote', stipend: 'Paid', duration: 'Varies', link: 'https://www.notion.so/Remote-Paid-Internship-List-2f0a81523043801bae9cdd6369ef99a3', tags: ['Notion List', 'Remote', 'Paid'], color: 'emerald', platform: 'Notion', deadline: 'Rolling' },
-    { id: '18', company: 'Job Guide Doc', role: 'Application Guide', type: 'Guide', stipend: 'Free', duration: 'Resource', link: 'https://docs.google.com/document/d/1G51cE4rz2e3t5HBjdZzlNSoduKq5aLhsSwRRxj603kg/edit', tags: ['Guide', 'How-To', 'Apply'], color: 'blue', platform: 'Google Doc', deadline: '—' },
-    { id: '19', company: 'Free AI Tools', role: 'AI Resources', type: 'Guide', stipend: 'Free', duration: 'Resource', link: 'https://reflective-index-19c.notion.site/Free-AI-Tools-2deba954f16780c987e6e275977252c8', tags: ['AI Tools', 'Free', 'Notion'], color: 'cyan', platform: 'Notion', deadline: '—' },
+    { id: '18', company: 'Job Guide Doc', role: 'Application Guide', type: 'Guide', stipend: 'Free', duration: 'Resource', link: 'https://docs.google.com/document/d/1G51cE4rz2e3t5HBjdZzlNSoduKq5aLhsSwRRxj603kg/edit', tags: ['Guide', 'How-To', 'Apply'], color: 'blue', platform: 'Google Doc', deadline: 'â€”' },
+    { id: '19', company: 'Free AI Tools', role: 'AI Resources', type: 'Guide', stipend: 'Free', duration: 'Resource', link: 'https://reflective-index-19c.notion.site/Free-AI-Tools-2deba954f16780c987e6e275977252c8', tags: ['AI Tools', 'Free', 'Notion'], color: 'cyan', platform: 'Notion', deadline: 'â€”' },
 ];
 
 const hackathons: Hackathon[] = [
     { id: '1', name: 'MLH Global Hack Week', organizer: 'Major League Hacking', date: 'Every Month', mode: 'Online', prizes: 'Swag + Certificates', link: 'https://mlh.io/', tags: ['Global', 'Beginner Friendly', 'Weekly'], color: 'emerald', status: 'live' },
     { id: '2', name: 'Devfolio Hackathons', organizer: 'Devfolio Platform', date: 'Ongoing', mode: 'Online', prizes: 'Varies', link: 'https://devfolio.co/hackathons', tags: ['Web3', 'Open Source', 'All Levels'], color: 'blue', status: 'live' },
     { id: '3', name: 'Unstop Hackathons', organizer: 'Unstop Platform', date: 'Ongoing', mode: 'Online', prizes: 'Varies', link: 'https://unstop.com/hackathons', tags: ['Corporate', 'Innovation', 'All Domains'], color: 'violet', status: 'live' },
-    { id: '4', name: 'DevsHouse \'26 (D³)', organizer: 'GDG On Campus · VIT Chennai', date: '27-29 March 2026', mode: 'Offline (VIT Chennai)', prizes: 'Cash + Swag', link: 'https://www.devshouse.in/', tags: ['VIT Chennai', '48hrs', 'GDG'], color: 'cyan', status: 'upcoming' },
+    { id: '4', name: 'DevsHouse \'26 (DÂ³)', organizer: 'GDG On Campus Â· VIT Chennai', date: '27-29 March 2026', mode: 'Offline (VIT Chennai)', prizes: 'Cash + Swag', link: 'https://www.devshouse.in/', tags: ['VIT Chennai', '48hrs', 'GDG'], color: 'cyan', status: 'upcoming' },
     { id: '5', name: 'BlackRock HackIndia 2026', organizer: 'BlackRock x HackerRank', date: 'March 2026', mode: 'Online', prizes: 'Cash + PPO', link: 'https://www.hackerrank.com/event/blackrock-hackingindia2026', tags: ['Finance', 'HackerRank', 'PPO'], color: 'amber', status: 'upcoming' },
-    { id: '6', name: 'Smart India Hackathon (SIH)', organizer: 'Govt. of India', date: 'Aug - Dec 2026', mode: 'Hybrid', prizes: '₹1L per problem', link: 'https://www.sih.gov.in/', tags: ['Government', 'Innovation', 'National'], color: 'cyan', status: 'upcoming' },
-    { id: '7', name: 'HackVIT', organizer: 'VIT Vellore', date: 'March 2026', mode: 'Offline', prizes: '₹3L+ prizes', link: 'https://hackvit.in/', tags: ['VIT', 'Web3', 'AI/ML'], color: 'violet', status: 'upcoming' },
+    { id: '6', name: 'Smart India Hackathon (SIH)', organizer: 'Govt. of India', date: 'Aug - Dec 2026', mode: 'Hybrid', prizes: 'â‚¹1L per problem', link: 'https://www.sih.gov.in/', tags: ['Government', 'Innovation', 'National'], color: 'cyan', status: 'upcoming' },
+    { id: '7', name: 'HackVIT', organizer: 'VIT Vellore', date: 'March 2026', mode: 'Offline', prizes: 'â‚¹3L+ prizes', link: 'https://hackvit.in/', tags: ['VIT', 'Web3', 'AI/ML'], color: 'violet', status: 'upcoming' },
     { id: '8', name: 'Google Solution Challenge', organizer: 'Google', date: 'Jan - Mar 2026', mode: 'Online', prizes: '$3000 per team', link: 'https://developers.google.com/community/gdsc-solution-challenge', tags: ['UN SDGs', 'Google Tech', 'Global'], color: 'amber', status: 'upcoming' },
-    { id: '9', name: 'HackWithInfy', organizer: 'Infosys', date: 'May - Aug 2026', mode: 'Online + Offline', prizes: 'PPO + ₹2L', link: 'https://www.infosys.com/careers/hackwithinfy.html', tags: ['PPO', 'DSA', 'Innovation'], color: 'rose', status: 'upcoming' },
+    { id: '9', name: 'HackWithInfy', organizer: 'Infosys', date: 'May - Aug 2026', mode: 'Online + Offline', prizes: 'PPO + â‚¹2L', link: 'https://www.infosys.com/careers/hackwithinfy.html', tags: ['PPO', 'DSA', 'Innovation'], color: 'rose', status: 'upcoming' },
     { id: '10', name: 'ETHIndia', organizer: 'Devfolio', date: 'Dec 2026', mode: 'Offline (Bangalore)', prizes: '$50K+ in bounties', link: 'https://ethindia.co/', tags: ['Web3', 'Ethereum', 'Blockchain'], color: 'cyan', status: 'upcoming' },
 ];
 
@@ -145,16 +144,16 @@ const defaultResume: ResumeData = {
 const containerV = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const itemV = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
-// ── Resume Preview Components ──
+// â”€â”€ Resume Preview Components â”€â”€
 const ModernTemplate = ({ resume }: { resume: ResumeData }) => (
     <div className="bg-white text-slate-800 p-8 min-h-[800px] font-sans">
         <div className="border-l-4 border-cyan-500 pl-6 mb-6">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">{resume.fullName || 'Your Name'}</h1>
             <div className="flex flex-wrap gap-3 text-sm text-slate-600">
                 {resume.email && <span>{resume.email}</span>}
-                {resume.phone && <span>• {resume.phone}</span>}
-                {resume.linkedin && <span>• LinkedIn</span>}
-                {resume.github && <span>• GitHub</span>}
+                {resume.phone && <span>â€¢ {resume.phone}</span>}
+                {resume.linkedin && <span>â€¢ LinkedIn</span>}
+                {resume.github && <span>â€¢ GitHub</span>}
             </div>
         </div>
         {resume.summary && (
@@ -172,7 +171,7 @@ const ModernTemplate = ({ resume }: { resume: ResumeData }) => (
                             <h3 className="font-semibold text-slate-900">{edu.institution}</h3>
                             <span className="text-sm text-slate-500">{edu.year}</span>
                         </div>
-                        <p className="text-sm text-slate-700">{edu.degree}{edu.gpa && <span className="text-slate-500"> • GPA: {edu.gpa}</span>}</p>
+                        <p className="text-sm text-slate-700">{edu.degree}{edu.gpa && <span className="text-slate-500"> â€¢ GPA: {edu.gpa}</span>}</p>
                     </div>
                 ))}
             </div>
@@ -183,7 +182,7 @@ const ModernTemplate = ({ resume }: { resume: ResumeData }) => (
                 {resume.experience.filter(e => e.company).map((exp, i) => (
                     <div key={i} className="mb-4">
                         <div className="flex justify-between items-baseline">
-                            <h3 className="font-semibold text-slate-900">{exp.role} — {exp.company}</h3>
+                            <h3 className="font-semibold text-slate-900">{exp.role} â€” {exp.company}</h3>
                             <span className="text-sm text-slate-500">{exp.duration}</span>
                         </div>
                         <p className="text-sm text-slate-700 mt-1">{exp.description}</p>
@@ -244,7 +243,7 @@ const ClassicTemplate = ({ resume }: { resume: ResumeData }) => (
                             <span className="font-semibold">{edu.institution}</span>
                             <span className="text-sm">{edu.year}</span>
                         </div>
-                        <div className="text-sm text-slate-700">{edu.degree}{edu.gpa && ` — GPA: ${edu.gpa}`}</div>
+                        <div className="text-sm text-slate-700">{edu.degree}{edu.gpa && ` â€” GPA: ${edu.gpa}`}</div>
                     </div>
                 ))}
             </div>
@@ -664,23 +663,6 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
 
     return (
         <motion.div variants={containerV} initial="hidden" animate="show" className="space-y-6 h-[calc(100vh-140px)] flex flex-col overflow-hidden relative">
-            <Galaxy
-                mouseRepulsion={true}
-                mouseInteraction={true}
-                density={1}
-                glowIntensity={0.3}
-                saturation={0}
-                hueShift={140}
-                twinkleIntensity={0.3}
-                rotationSpeed={0.1}
-                repulsionStrength={2}
-                autoCenterRepulsion={0}
-                starSpeed={0.5}
-                speed={1}
-            />
-            {/* Ambient Backlight */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none z-0" />
-
             {/* Header */}
             <motion.div variants={itemV} className="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0 relative z-10">
                 <div className="flex items-center gap-4">
@@ -708,7 +690,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
 
             <div className="flex-1 overflow-y-auto custom-scrollbar pb-6">
                 <AnimatePresence mode="wait">
-                    {/* ═══ LINKEDIN POST GENERATOR ═══ */}
+                    {/* â•â•â• LINKEDIN POST GENERATOR â•â•â• */}
                     {activeTab === 'linkedin' && (
                         <motion.div key="linkedin" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
                             {/* Form */}
@@ -732,22 +714,22 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                 <label className="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2 block ml-1">Tone</label>
                                                 <select value={postTone} onChange={(e) => setPostTone(e.target.value)}
                                                     className="w-full bg-black/40 border border-white/[0.05] hover:border-blue-500/20 rounded-xl px-4 py-3 text-xs text-white/90 focus:outline-none focus:border-blue-500/40 transition-all appearance-none cursor-pointer">
-                                                    <option value="professional">🎯 Professional</option>
-                                                    <option value="casual">👋 Casual & Friendly</option>
-                                                    <option value="inspirational">⭐ Inspirational</option>
-                                                    <option value="storytelling">📖 Storytelling</option>
-                                                    <option value="humble">🙏 Humble & Grateful</option>
+                                                    <option value="professional">ðŸŽ¯ Professional</option>
+                                                    <option value="casual">ðŸ‘‹ Casual & Friendly</option>
+                                                    <option value="inspirational">â­ Inspirational</option>
+                                                    <option value="storytelling">ðŸ“– Storytelling</option>
+                                                    <option value="humble">ðŸ™ Humble & Grateful</option>
                                                 </select>
                                             </div>
                                             <div>
                                                 <label className="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2 block ml-1">Post Type</label>
                                                 <select value={postType} onChange={(e) => setPostType(e.target.value)}
                                                     className="w-full bg-black/40 border border-white/[0.05] hover:border-blue-500/20 rounded-xl px-4 py-3 text-xs text-white/90 focus:outline-none focus:border-blue-500/40 transition-all appearance-none cursor-pointer">
-                                                    <option value="achievement">🏆 Achievement</option>
-                                                    <option value="learning">🎓 Learning / Tip</option>
-                                                    <option value="project">💻 Project Showcase</option>
-                                                    <option value="experience">💼 Experience</option>
-                                                    <option value="announcement">📢 Announcement</option>
+                                                    <option value="achievement">ðŸ† Achievement</option>
+                                                    <option value="learning">ðŸŽ“ Learning / Tip</option>
+                                                    <option value="project">ðŸ’» Project Showcase</option>
+                                                    <option value="experience">ðŸ’¼ Experience</option>
+                                                    <option value="announcement">ðŸ“¢ Announcement</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -761,7 +743,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                 <div className="bg-white/[0.01] backdrop-blur-md rounded-2xl p-5 border border-white/[0.02]">
                                     <p className="text-white/40 text-[10px] font-bold uppercase tracking-wider mb-3 ml-1 flex items-center gap-1.5"><Lightbulb size={12} className="text-amber-400" /> Tips for viral posts</p>
                                     <div className="space-y-2">
-                                        {['Start with a hook — first line is everything', 'Be authentic and share real experiences', 'Use line breaks for readability', 'End with a question to drive engagement'].map(tip => (
+                                        {['Start with a hook â€” first line is everything', 'Be authentic and share real experiences', 'Use line breaks for readability', 'End with a question to drive engagement'].map(tip => (
                                             <p key={tip} className="text-white/40 text-xs flex items-center gap-2 bg-white/[0.02] p-2 rounded-lg">
                                                 <CheckCircle2 size={12} className="text-blue-400/50 flex-shrink-0" /> {tip}
                                             </p>
@@ -810,7 +792,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                         </motion.div>
                     )}
 
-                    {/* ═══ ENHANCED RESUME BUILDER ═══ */}
+                    {/* â•â•â• ENHANCED RESUME BUILDER â•â•â• */}
                     {activeTab === 'resume' && (
                         <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="space-y-6">
                             {/* Template Selection */}
@@ -962,7 +944,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                     <ul className="space-y-1">
                                                         {resumeScore.feedback.map((f, i) => (
                                                             <li key={i} className="text-white/50 text-[10px] flex items-start gap-1.5">
-                                                                <span className="text-emerald-400 mt-0.5">✓</span> {f}
+                                                                <span className="text-emerald-400 mt-0.5">âœ“</span> {f}
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -974,7 +956,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                     <ul className="space-y-1">
                                                         {resumeScore.suggestions.map((s, i) => (
                                                             <li key={i} className="text-white/50 text-[10px] flex items-start gap-1.5">
-                                                                <span className="text-amber-400 mt-0.5">•</span> {s}
+                                                                <span className="text-amber-400 mt-0.5">â€¢</span> {s}
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -1153,7 +1135,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                         </motion.div>
                     )}
 
-                    {/* ═══ INTERNSHIPS ═══ */}
+                    {/* â•â•â• INTERNSHIPS â•â•â• */}
                     {activeTab === 'internships' && (
                         <motion.div key="internships" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
                             {/* Stats bar */}
@@ -1161,7 +1143,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                 {[
                                     { label: 'Total Listed', value: internships.length, icon: Briefcase, color: 'cyan' },
                                     { label: 'Remote', value: internships.filter(i => i.type === 'Remote' || i.type === 'Virtual').length, icon: Globe, color: 'emerald' },
-                                    { label: 'Paid', value: internships.filter(i => i.stipend.includes('₹')).length, icon: Target, color: 'amber' },
+                                    { label: 'Paid', value: internships.filter(i => i.stipend.includes('â‚¹')).length, icon: Target, color: 'amber' },
                                     { label: 'Govt / AICTE', value: internships.filter(i => i.tags.some(t => t.includes('AI') || t.includes('IoT'))).length, icon: Award, color: 'violet' },
                                 ].map((s, i) => (
                                     <div key={i} className="bg-[#0c0f17] rounded-xl p-3.5 border border-white/[0.05] text-center">
@@ -1222,7 +1204,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                         </motion.div>
                     )}
 
-                    {/* ═══ HACKATHONS ═══ */}
+                    {/* â•â•â• HACKATHONS â•â•â• */}
                     {activeTab === 'hackathons' && (
                         <motion.div key="hackathons" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
                             {/* Status filters */}
@@ -1278,7 +1260,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                                 <span key={t} className="px-2 py-1 bg-black/40 text-white/50 text-[9px] font-semibold rounded-md border border-white/[0.05]">{t}</span>
                                                             ))}
                                                         </div>
-                                                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20 shadow-[0_0_10px_rgba(251,191,36,0.1)]">🏆 {hack.prizes}</span>
+                                                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20 shadow-[0_0_10px_rgba(251,191,36,0.1)]">ðŸ† {hack.prizes}</span>
                                                     </div>
                                                 </motion.a>
                                             );
@@ -1308,7 +1290,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                 </div>
                                                 <div className="flex-1 min-w-0 relative z-10">
                                                     <h4 className="text-white/90 text-base font-bold truncate group-hover:text-white transition-colors">{hack.name}</h4>
-                                                    <p className="text-white/40 text-xs mt-0.5 font-medium">{hack.organizer} <span className="mx-2 text-white/20">•</span> {hack.mode}</p>
+                                                    <p className="text-white/40 text-xs mt-0.5 font-medium">{hack.organizer} <span className="mx-2 text-white/20">â€¢</span> {hack.mode}</p>
                                                     <div className="flex gap-2 mt-2">
                                                         {hack.tags.map(t => (
                                                             <span key={t} className="px-2 py-0.5 bg-black/40 text-white/40 text-[10px] font-medium rounded-md border border-white/[0.05]">{t}</span>
@@ -1317,7 +1299,7 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
                                                 </div>
                                                 <div className="text-right flex-shrink-0 relative z-10 flex flex-col items-end gap-1">
                                                     <p className="text-xs text-blue-400/80 font-medium flex items-center gap-1.5 bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20"><Calendar size={11} /> {hack.date}</p>
-                                                    <p className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">🏆 {hack.prizes}</p>
+                                                    <p className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">ðŸ† {hack.prizes}</p>
                                                 </div>
                                                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/[0.02] group-hover:bg-white/[0.08] transition-colors relative z-10 ml-2">
                                                     <ExternalLink size={16} className="text-white/20 group-hover:text-white/80 transition-colors" />
@@ -1335,3 +1317,5 @@ Return ONLY a JSON object like: {"feedback": ["tip1", "tip2", "tip3"], "suggesti
         </motion.div>
     );
 }
+
+

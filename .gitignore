@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vitgroww logs
+boot_log.txt
+build-log-utf8.txt
+build-log.txt
+build_err.txt
+clean_error.txt
+gitlog.txt
+gitreflog.txt
+headstat.txt
+reflog.txt
+reflog_utf8.txt
+server_error.txt
+e722cdf.patch

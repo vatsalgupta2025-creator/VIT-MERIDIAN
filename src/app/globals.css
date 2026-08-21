@@ -1,13 +1,71 @@
 @import "tailwindcss";
 
-body {
-  background: #040812;
-  color: #e2e8f0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+/* ═══════════════════════════════════════════════════════════
+   VITGROWW Design Tokens — "Chalkboard & Campus" System
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surfaces — from blackboard to classroom materials */
+  --surface-base: #0B0E14;
+  --surface-raised: #141921;
+  --surface-overlay: #1C2230;
+  --surface-sunken: #080A0F;
+
+  /* Accent — from exam papers, highlighters, and campus greens */
+  --accent-primary: #E85D3A;
+  --accent-primary-hover: #F06B4A;
+  --accent-primary-muted: rgba(232, 93, 58, 0.12);
+  --accent-secondary: #F2C94C;
+  --accent-secondary-muted: rgba(242, 201, 76, 0.12);
+  --accent-tertiary: #34A88F;
+  --accent-tertiary-muted: rgba(52, 168, 143, 0.12);
+
+  /* Text — chalk and pencil tones */
+  --text-primary: #E8E6E1;
+  --text-secondary: #8B8D94;
+  --text-muted: #4A4D56;
+  --text-inverse: #0B0E14;
+
+  /* Borders — ruled-line notebook */
+  --border: #1E2533;
+  --border-hover: #2A3344;
+  --border-active: rgba(232, 93, 58, 0.3);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+  /* Font families */
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 }
 
-/* Custom Scrollbar */
+body {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -18,139 +76,175 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--border);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--border-hover);
 }
 
-/* Animations */
-@keyframes float {
+/* ── Card System (replaces glassmorphism) ──────────────── */
 
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
+.card-raised {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
 }
 
-@keyframes glow-pulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
-  }
+.card-raised:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
 }
 
-@keyframes aurora {
-  0% {
-    background-position: 50% 50%, 50% 50%;
-  }
-
-  100% {
-    background-position: 350% 50%, 350% 50%;
-  }
+.card-overlay {
+  background: var(--surface-overlay);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+/* ── Accent Card Variants ─────────────────────────────── */
+
+.card-accent-red {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-md);
 }
 
-.animate-glow {
-  animation: glow-pulse 2s ease-in-out infinite;
+.card-accent-yellow {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-secondary);
+  border-radius: var(--radius-md);
 }
 
-.aurora-bg {
-  position: relative;
+.card-accent-green {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-tertiary);
+  border-radius: var(--radius-md);
 }
 
-.aurora-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(110deg,
-      rgba(14, 165, 233, 0.1) 0%,
-      rgba(14, 165, 233, 0.1) 10%,
-      rgba(139, 92, 246, 0.1) 20%,
-      rgba(139, 92, 246, 0.1) 30%);
-  background-size: 200vw 200vh;
-  animation: aurora 60s linear infinite;
-  filter: blur(80px);
-  z-index: 0;
-  pointer-events: none;
+/* ── Typography Utilities ─────────────────────────────── */
+
+.font-display {
+  font-family: var(--font-display);
 }
 
-/* Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+/* ── Background Patterns ──────────────────────────────── */
+
+.bg-grid {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.3;
 }
 
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-  pointer-events: none;
+.bg-ruled-lines {
+  background-image: linear-gradient(
+    transparent 31px,
+    rgba(232, 93, 58, 0.06) 31px,
+    rgba(232, 93, 58, 0.06) 32px,
+    transparent 32px
+  );
+  background-size: 100% 32px;
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(6, 182, 212, 0.25);
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 182, 212, 0.1);
-}
-
-/* Entrance Animation */
-.animate-in {
-  animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+/* ── Entrance Animations ──────────────────────────────── */
 
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
     transform: translateY(12px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Background Grid */
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-  background-size: 80px 80px;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Custom scrollbar for specific elements */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes typewriterLine {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 58, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(232, 93, 58, 0);
+  }
+}
+
+@keyframes thresholdPulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: fadeSlideUp 0.4s var(--ease-out) forwards;
+}
+
+.animate-fade {
+  animation: fadeIn 0.3s var(--ease-out) forwards;
+}
+
+.animate-scale {
+  animation: scaleIn 0.3s var(--ease-spring) forwards;
+}
+
+/* ── Reduced Motion ───────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Focus States ─────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Custom scrollbar for specific elements ───────────── */
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -160,17 +254,37 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(6, 182, 212, 0.3);
+  background: var(--border);
   border-radius: 999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 182, 212, 0.5);
+  background: var(--border-hover);
 }
 
-/* ── Campus Explorer Map Styles ───────────────────────────── */
+/* ── Legacy compat — glass classes mapped to new system ── */
 
-/* Custom Marker */
+.glass {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+}
+
+.glass-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-normal) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Campus Explorer Map Styles ───────────────────────── */
+
 .custom-marker {
   background: none !important;
   border: none !important;
@@ -194,7 +308,7 @@ body {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(4px);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border: 1.5px solid var(--border);
   transition: transform 0.2s ease;
 }
 
@@ -211,7 +325,7 @@ body {
 
 .campus-marker-active .campus-marker-inner {
   transform: scale(1.4);
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-primary);
 }
 
 .campus-marker-ring {
@@ -228,14 +342,12 @@ body {
     transform: scale(0.8);
     opacity: 0.6;
   }
-
   100% {
     transform: scale(1.8);
     opacity: 0;
   }
 }
 
-/* Event Marker */
 .event-marker {
   position: relative;
   width: 24px;
@@ -266,14 +378,12 @@ body {
     transform: scale(0.4);
     opacity: 0.5;
   }
-
   100% {
     transform: scale(1.6);
     opacity: 0;
   }
 }
 
-/* Destination Marker */
 .dest-marker {
   display: flex;
   flex-direction: column;
@@ -285,65 +395,60 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.2);
+  background: var(--accent-primary);
+  box-shadow: 0 0 16px rgba(232, 93, 58, 0.5), 0 0 40px rgba(232, 93, 58, 0.2);
   animation: dest-glow 2s ease-in-out infinite;
 }
 
 @keyframes dest-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(232, 93, 58, 0.4);
   }
-
   50% {
-    box-shadow: 0 0 24px rgba(6, 182, 212, 0.7), 0 0 48px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 24px rgba(232, 93, 58, 0.7), 0 0 48px rgba(232, 93, 58, 0.3);
   }
 }
 
 .dest-marker-label {
   font-size: 10px;
   font-weight: 700;
-  color: #06b6d4;
+  color: var(--accent-primary);
   white-space: nowrap;
   padding: 2px 8px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+  border: 1px solid var(--border);
 }
 
 /* Dark themed popup */
 .campus-popup .leaflet-popup-content-wrapper {
-  background: rgba(10, 14, 26, 0.92) !important;
+  background: var(--surface-overlay) !important;
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border) !important;
   border-radius: 14px !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 1px rgba(6, 182, 212, 0.1) !important;
-  color: #e2e8f0 !important;
+  box-shadow: var(--shadow-lg) !important;
+  color: var(--text-primary) !important;
   padding: 4px !important;
 }
 
 .campus-popup .leaflet-popup-tip {
-  background: rgba(10, 14, 26, 0.92) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-overlay) !important;
+  border: 1px solid var(--border);
   box-shadow: none !important;
 }
 
 .campus-popup .leaflet-popup-close-button {
-  color: rgba(255, 255, 255, 0.3) !important;
+  color: var(--text-muted) !important;
   font-size: 18px !important;
   top: 6px !important;
   right: 8px !important;
 }
 
 .campus-popup .leaflet-popup-close-button:hover {
-  color: rgba(6, 182, 212, 0.8) !important;
+  color: var(--accent-primary) !important;
 }
 
-/* Route line animation */
 .route-line {
   animation: route-dash 30s linear infinite;
 }
@@ -354,53 +459,47 @@ body {
   }
 }
 
-/* Leaflet zoom controls dark theme */
 .leaflet-control-zoom a {
-  background: rgba(10, 14, 26, 0.8) !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: var(--surface-overlay) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
   backdrop-filter: blur(8px);
 }
 
 .leaflet-control-zoom a:hover {
-  background: rgba(10, 14, 26, 0.95) !important;
-  color: #06b6d4 !important;
+  background: var(--surface-raised) !important;
+  color: var(--accent-primary) !important;
 }
 
-/* People density dots */
 .people-dot {
   background: none !important;
   border: none !important;
 }
 
 @keyframes dot-pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
     opacity: 0.9;
   }
-
   50% {
     transform: scale(1.5);
     opacity: 0.5;
   }
 }
 
-/* Density tooltip */
 .density-tooltip {
-  background: rgba(10, 14, 26, 0.9) !important;
+  background: var(--surface-overlay) !important;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 10px !important;
-  color: #e2e8f0 !important;
+  color: var(--text-primary) !important;
   font-size: 11px !important;
   padding: 6px 10px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .density-tooltip::before {
-  border-top-color: rgba(10, 14, 26, 0.9) !important;
+  border-top-color: var(--surface-overlay) !important;
 }
 
 /* Radar SVG Pin */
@@ -444,62 +543,29 @@ body {
   animation-name: tick42;
 }
 
-.pl__tick:nth-child(2) {
-  animation-delay: -1.75s;
-}
-
-.pl__tick:nth-child(3) {
-  animation-delay: -1.5s;
-}
-
-.pl__tick:nth-child(4) {
-  animation-delay: -1.25s;
-}
-
-.pl__tick:nth-child(5) {
-  animation-delay: -1s;
-}
-
-.pl__tick:nth-child(6) {
-  animation-delay: -0.75s;
-}
-
-.pl__tick:nth-child(7) {
-  animation-delay: -0.5s;
-}
-
-.pl__tick:nth-child(8) {
-  animation-delay: -0.25s;
-}
+.pl__tick:nth-child(2) { animation-delay: -1.75s; }
+.pl__tick:nth-child(3) { animation-delay: -1.5s; }
+.pl__tick:nth-child(4) { animation-delay: -1.25s; }
+.pl__tick:nth-child(5) { animation-delay: -1s; }
+.pl__tick:nth-child(6) { animation-delay: -0.75s; }
+.pl__tick:nth-child(7) { animation-delay: -0.5s; }
+.pl__tick:nth-child(8) { animation-delay: -0.25s; }
 
 @keyframes arrows42 {
-  from {
-    transform: rotate(45deg);
-  }
-
-  to {
-    transform: rotate(405deg);
-  }
+  from { transform: rotate(45deg); }
+  to { transform: rotate(405deg); }
 }
 
 @keyframes ringRotate42 {
-  from {
-    transform: rotate(0);
-  }
-
-  to {
-    transform: rotate(720deg);
-  }
+  from { transform: rotate(0); }
+  to { transform: rotate(720deg); }
 }
 
 @keyframes ringStroke42 {
-
-  from,
-  to {
+  from, to {
     stroke-dashoffset: 452;
     transform: rotate(-45deg);
   }
-
   50% {
     stroke-dashoffset: 169.5;
     transform: rotate(-180deg);
@@ -507,16 +573,10 @@ body {
 }
 
 @keyframes tick42 {
-
-  from,
-  3%,
-  47%,
-  to {
+  from, 3%, 47%, to {
     stroke-dashoffset: -12;
   }
-
-  14%,
-  36% {
+  14%, 36% {
     stroke-dashoffset: 0;
   }
 }

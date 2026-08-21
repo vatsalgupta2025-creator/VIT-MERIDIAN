@@ -6,10 +6,10 @@ import {
     Bell, Sun, Calendar, AlertTriangle, BookOpen, Sparkles, Volume2,
     Check, ChevronRight, Clock, X, Mail, Star, Tag, Archive, Trash2,
     RefreshCw, Filter, Search, Plus, ExternalLink, Pin, Bookmark,
-    TrendingUp, Users, FileText, Zap, Eye, EyeOff, Settings, Link2,
-    CalendarPlus, MessageSquare, Send, Inbox, Loader2
+    CalendarPlus, MessageSquare, Send, Inbox, Loader2, FileText
 } from 'lucide-react';
 import { currentUser } from '@/data/mockData';
+import { useUser } from '@/context/UserContext';
 
 // Types
 interface Email {
@@ -214,6 +214,7 @@ interface SmartBriefingProps {
 }
 
 export default function SmartBriefing({ fullPage = false }: SmartBriefingProps) {
+    const { user } = useUser();
     const [emails, setEmails] = useState<Email[]>(MOCK_EMAILS);
     const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
     const [filter, setFilter] = useState<string>('all');
@@ -540,7 +541,7 @@ export default function SmartBriefing({ fullPage = false }: SmartBriefingProps) 
                     <div className="flex items-center justify-between mb-3">
                         <div>
                             <p className="text-lg font-semibold text-white/80">
-                                {greeting}, {currentUser.name.split(' ')[0]}!
+                                {greeting}, {user.name ? user.name.split(' ')[0] : 'Student'}!
                             </p>
                             <p className="text-xs text-white/30 mt-1 flex items-center gap-1.5">
                                 <Calendar size={12} /> {getDate()}

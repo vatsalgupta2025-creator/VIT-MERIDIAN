@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,11 +14,11 @@ import {
 import Tesseract from 'tesseract.js';
 import confetti from 'canvas-confetti';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-// ── Types ──
+// â”€â”€ Types â”€â”€
 interface PaperQuestion {
     id: string;
     partLabel: string;
@@ -59,7 +59,7 @@ interface StudyPlan {
     dailyGoals: { day: number; topics: string[]; hours: number; completed: boolean }[];
 }
 
-// ── Templates ──
+// â”€â”€ Templates â”€â”€
 const EXAM_TEMPLATES: ExamTemplate[] = [
     { id: 'cat1', name: 'CAT-1 Standard', title: 'Continuous Assessment Test - I', course: '', maxMarks: 50, time: '1.5 Hours', questionCount: 10, difficulty: 'Mixed' },
     { id: 'cat2', name: 'CAT-2 Standard', title: 'Continuous Assessment Test - II', course: '', maxMarks: 50, time: '1.5 Hours', questionCount: 10, difficulty: 'Mixed' },
@@ -68,7 +68,7 @@ const EXAM_TEMPLATES: ExamTemplate[] = [
     { id: 'lab', name: 'Lab Exam', title: 'Laboratory Assessment', course: '', maxMarks: 40, time: '2 Hours', questionCount: 8, difficulty: 'Practical' },
 ];
 
-// ── Glass Card Component ──
+// â”€â”€ Glass Card Component â”€â”€
 function GlassCard({ children, className = '', delay = 0, hover = true, gradient = false }: { children: React.ReactNode; className?: string; delay?: number; hover?: boolean; gradient?: boolean }) {
     return (
         <motion.div
@@ -83,7 +83,7 @@ function GlassCard({ children, className = '', delay = 0, hover = true, gradient
     );
 }
 
-// ── Animated Counter ──
+// â”€â”€ Animated Counter â”€â”€
 function AnimatedCounter({ value, duration = 1.5 }: { value: number; duration?: number }) {
     const [count, setCount] = useState(0);
     useEffect(() => {
@@ -99,7 +99,7 @@ function AnimatedCounter({ value, duration = 1.5 }: { value: number; duration?: 
     return <span>{count}</span>;
 }
 
-// ── Confetti Effect ──
+// â”€â”€ Confetti Effect â”€â”€
 function triggerConfetti() {
     confetti({
         particleCount: 100,
@@ -114,7 +114,7 @@ export default function AnswerKeyManager() {
     const [aiGenerating, setAiGenerating] = useState(false);
     const [showWelcome, setShowWelcome] = useState(true);
 
-    // ── Tab 1: AI Question Paper Generator ──
+    // â”€â”€ Tab 1: AI Question Paper Generator â”€â”€
     const [paperTopic, setPaperTopic] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState<ExamTemplate>(EXAM_TEMPLATES[0]);
     const [paperConfig, setPaperConfig] = useState({ title: 'Final Assessment Test (FAT)', course: 'CSE301', maxMarks: 100, time: '3 Hours' });
@@ -265,13 +265,13 @@ export default function AnswerKeyManager() {
                     </div>
                 `).join('')}
             </div>
-            <div class="footer">Best of luck! · Generated with VITGROWW Academic Toolkit</div>
+            <div class="footer">Best of luck! Â· Generated with VITGROWW Academic Toolkit</div>
             <script>window.print();</script></body></html>
         `);
         printWindow.document.close();
     };
 
-    // ── Tab 2: AI Grading Evaluator ──
+    // â”€â”€ Tab 2: AI Grading Evaluator â”€â”€
     const [gradingQuestionId, setGradingQuestionId] = useState<string>('');
     const [studentName, setStudentName] = useState('');
     const [extractedText, setExtractedText] = useState('');
@@ -366,7 +366,7 @@ export default function AnswerKeyManager() {
         a.click();
     };
 
-    // ── Tab 3: Smart Exam Prep ──
+    // â”€â”€ Tab 3: Smart Exam Prep â”€â”€
     const [prepCourse, setPrepCourse] = useState('');
     const [prepType, setPrepType] = useState('CAT1');
     const [prepData, setPrepData] = useState<{ topics: string[], questions: { q: string, a: string }[] } | null>(null);
@@ -405,7 +405,7 @@ export default function AnswerKeyManager() {
         }
     };
 
-    // ── Tab 4: Analytics ──
+    // â”€â”€ Tab 4: Analytics â”€â”€
     const stats = useMemo(() => {
         const totalQuestions = questions.length;
         const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
@@ -418,7 +418,7 @@ export default function AnswerKeyManager() {
         return { totalQuestions, totalMarks, avgDifficulty, byTopic };
     }, [questions]);
 
-    // ── Tabs Config ──
+    // â”€â”€ Tabs Config â”€â”€
     const tabs = [
         { id: 'generator' as const, label: 'Generator', icon: FileText, color: 'emerald', desc: 'Create question papers' },
         { id: 'evaluator' as const, label: 'Grading', icon: Award, color: 'blue', desc: 'AI-powered evaluation' },
@@ -488,7 +488,7 @@ export default function AnswerKeyManager() {
                     </motion.div>
                     <div>
                         <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Academic Toolkit</h2>
-                        <p className="text-white/40 text-sm">AI Question Generation • Smart Grading • Exam Prep</p>
+                        <p className="text-white/40 text-sm">AI Question Generation â€¢ Smart Grading â€¢ Exam Prep</p>
                     </div>
                 </div>
 
@@ -695,7 +695,7 @@ export default function AnswerKeyManager() {
                                                 <div key={paper.id} className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.05] flex items-center justify-between group">
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-white/70 text-xs font-medium truncate">{paper.name}</p>
-                                                        <p className="text-white/30 text-[10px]">{paper.questions.length} questions · {paper.date.toLocaleDateString()}</p>
+                                                        <p className="text-white/30 text-[10px]">{paper.questions.length} questions Â· {paper.date.toLocaleDateString()}</p>
                                                     </div>
                                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button onClick={() => loadPaper(paper)} className="p-1.5 text-white/40 hover:text-emerald-400"><Upload size={12} /></button>
@@ -1092,5 +1092,7 @@ export default function AnswerKeyManager() {
         </div>
     );
 }
+
+
 
 

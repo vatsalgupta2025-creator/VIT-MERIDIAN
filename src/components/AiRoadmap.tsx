@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -52,12 +52,8 @@ export default function AiRoadmap() {
         e.preventDefault();
 
         if (!topic.trim()) return;
-        if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-            setError("Gemini API Key is missing.");
-            return;
-        }
 
-        const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+        const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
         setIsGenerating(true);
         setError(null);
@@ -335,3 +331,5 @@ export default function AiRoadmap() {
         </div>
     );
 }
+
+

@@ -21,6 +21,7 @@ import {
     Filter,
     MoreVertical
 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 interface StudySession {
     id: number;
@@ -136,6 +137,7 @@ const sessionTypes = [
 ];
 
 export default function GroupStudy() {
+    const { user } = useUser();
     const [sessions, setSessions] = useState<StudySession[]>(mockSessions);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSubject, setSelectedSubject] = useState("All Subjects");
@@ -187,7 +189,7 @@ export default function GroupStudy() {
             description: newSession.description,
             subject: newSession.subject,
             course: newSession.course || "General",
-            host: { name: "Ayush Upadhyay", avatar: "AU" },
+            host: { name: user.name, avatar: user.avatar },
             scheduledAt: `${newSession.date}T${newSession.time}:00`,
             duration: newSession.duration,
             maxParticipants: newSession.maxParticipants,

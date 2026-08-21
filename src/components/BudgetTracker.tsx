@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import { ShaderAnimation } from './ui/shader-lines';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, Filler);
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -115,8 +115,8 @@ export default function BudgetTracker() {
     const getAdvice = async () => {
         setGenerating(true);
         try {
-            const catSummary = CATEGORIES.map(c => `${c.label}: ₹${categoryBreakdown[c.id] || 0}`).join(', ');
-            const prompt = `As a financial advisor for a college student in India, give 4 short practical tips based on their spending: Total: ₹${totalSpent}, Budget: ₹${monthlyBudget}, Breakdown: ${catSummary}.
+            const catSummary = CATEGORIES.map(c => `${c.label}: â‚¹${categoryBreakdown[c.id] || 0}`).join(', ');
+            const prompt = `As a financial advisor for a college student in India, give 4 short practical tips based on their spending: Total: â‚¹${totalSpent}, Budget: â‚¹${monthlyBudget}, Breakdown: ${catSummary}.
             Return ONLY valid JSON: {"tips": ["tip 1", "tip 2", "tip 3", "tip 4"]}. No markdown.`;
 
             const res = await fetch(GEMINI_URL, {
@@ -149,7 +149,7 @@ export default function BudgetTracker() {
     const barData = useMemo(() => ({
         labels: weeklyData.labels,
         datasets: [{
-            label: 'Spent (₹)',
+            label: 'Spent (â‚¹)',
             data: weeklyData.data,
             backgroundColor: 'rgba(6,182,212,0.6)',
             borderColor: 'rgba(6,182,212,1)',
@@ -192,7 +192,7 @@ export default function BudgetTracker() {
                         className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 flex-shrink-0 overflow-hidden">
                         <div className="grid grid-cols-3 gap-4">
                             <div>
-                                <label className="text-white/30 text-[10px] uppercase tracking-wider block mb-1">Amount (₹)</label>
+                                <label className="text-white/30 text-[10px] uppercase tracking-wider block mb-1">Amount (â‚¹)</label>
                                 <input type="number" value={newAmount} onChange={e => setNewAmount(e.target.value)} placeholder="500"
                                     className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-500/40" />
                             </div>
@@ -224,9 +224,9 @@ export default function BudgetTracker() {
                         {/* Stats Row */}
                         <div className="grid grid-cols-3 gap-4">
                             {[
-                                { label: 'Total Spent', value: `₹${totalSpent.toLocaleString()}`, icon: TrendingDown, color: 'rose', sub: `of ₹${monthlyBudget.toLocaleString()}` },
-                                { label: 'Remaining', value: `₹${Math.max(0, remaining).toLocaleString()}`, icon: TrendingUp, color: remaining > 0 ? 'emerald' : 'rose', sub: remaining > 0 ? 'On track' : 'Over budget!' },
-                                { label: 'Savings', value: `${Math.round(savingsProgress)}%`, icon: PiggyBank, color: 'amber', sub: `Goal: ₹${savingsGoal.toLocaleString()}` },
+                                { label: 'Total Spent', value: `â‚¹${totalSpent.toLocaleString()}`, icon: TrendingDown, color: 'rose', sub: `of â‚¹${monthlyBudget.toLocaleString()}` },
+                                { label: 'Remaining', value: `â‚¹${Math.max(0, remaining).toLocaleString()}`, icon: TrendingUp, color: remaining > 0 ? 'emerald' : 'rose', sub: remaining > 0 ? 'On track' : 'Over budget!' },
+                                { label: 'Savings', value: `${Math.round(savingsProgress)}%`, icon: PiggyBank, color: 'amber', sub: `Goal: â‚¹${savingsGoal.toLocaleString()}` },
                             ].map((stat, i) => (
                                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                                     className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5">
@@ -246,7 +246,7 @@ export default function BudgetTracker() {
                                     <DollarSign size={14} className="text-amber-400" /> By Category
                                 </h3>
                                 <div className="h-[170px]">
-                                    <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', cornerRadius: 10, padding: 10, callbacks: { label: (c) => ` ₹${c.parsed}` } } } }} />
+                                    <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', cornerRadius: 10, padding: 10, callbacks: { label: (c) => ` â‚¹${c.parsed}` } } } }} />
                                 </div>
                                 <div className="grid grid-cols-3 gap-1 mt-3">
                                     {CATEGORIES.map((c, i) => (
@@ -265,7 +265,7 @@ export default function BudgetTracker() {
                                     <BarChart3 size={14} className="text-cyan-400" /> Weekly Trend
                                 </h3>
                                 <div className="h-[190px]">
-                                    <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', cornerRadius: 10, padding: 10, callbacks: { label: (c) => ` ₹${c.parsed.y}` } } }, scales: { y: { display: false }, x: { grid: { display: false }, border: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } } } } }} />
+                                    <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', cornerRadius: 10, padding: 10, callbacks: { label: (c) => ` â‚¹${c.parsed.y}` } } }, scales: { y: { display: false }, x: { grid: { display: false }, border: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } } } } }} />
                                 </div>
                             </motion.div>
                         </div>
@@ -305,12 +305,12 @@ export default function BudgetTracker() {
                             <h3 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-4">Settings</h3>
                             <div className="space-y-3">
                                 <div>
-                                    <label className="text-white/30 text-[10px] uppercase block mb-1">Monthly Budget (₹)</label>
+                                    <label className="text-white/30 text-[10px] uppercase block mb-1">Monthly Budget (â‚¹)</label>
                                     <input type="number" value={monthlyBudget} onChange={e => setMonthlyBudget(Number(e.target.value))}
                                         className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/40" />
                                 </div>
                                 <div>
-                                    <label className="text-white/30 text-[10px] uppercase block mb-1">Savings Goal (₹)</label>
+                                    <label className="text-white/30 text-[10px] uppercase block mb-1">Savings Goal (â‚¹)</label>
                                     <input type="number" value={savingsGoal} onChange={e => setSavingsGoal(Number(e.target.value))}
                                         className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/40" />
                                 </div>
@@ -354,7 +354,7 @@ export default function BudgetTracker() {
                                                 <p className="text-white/70 text-xs font-medium truncate">{e.description}</p>
                                                 <p className="text-white/30 text-[10px]">{new Date(e.date).toLocaleDateString()}</p>
                                             </div>
-                                            <span className="text-white font-bold text-sm">₹{e.amount}</span>
+                                            <span className="text-white font-bold text-sm">â‚¹{e.amount}</span>
                                             <button onClick={() => deleteExpense(e.id)}
                                                 className="opacity-0 group-hover:opacity-100 p-1 text-white/20 hover:text-red-400 transition-all">
                                                 <Trash2 size={12} />
@@ -370,3 +370,5 @@ export default function BudgetTracker() {
         </div>
     );
 }
+
+

@@ -24,6 +24,7 @@ import {
     Tag,
     Upload
 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 interface Note {
     id: number;
@@ -148,6 +149,7 @@ const subjects = ["All Subjects", "Data Structures", "Programming Fundamentals",
 const tags = ["algorithms", "python", "database", "recursion", "trees", "SQL", "calculus", "networking"];
 
 export default function NoteShare() {
+    const { user } = useUser();
     const [notes, setNotes] = useState<Note[]>(mockNotes);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCourse, setSelectedCourse] = useState("All Courses");
@@ -209,8 +211,8 @@ export default function NoteShare() {
             id: notes.length + 1,
             title: newNote.title,
             content: newNote.content,
-            author: "Ayush Upadhyay",
-            authorAvatar: "AU",
+            author: user.name,
+            authorAvatar: user.avatar,
             course: newNote.course || "General",
             subject: newNote.subject || "General",
             tags: newNote.tags.split(',').map(t => t.trim()).filter(t => t),

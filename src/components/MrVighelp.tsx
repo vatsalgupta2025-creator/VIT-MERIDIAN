@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
@@ -11,8 +11,8 @@ import { Bot, X, Send, Paperclip, Mic, Globe, Download, Loader2, ChevronDown, Ch
 // Languages configuration
 const LANGUAGES = [
     { code: 'en-US', name: 'English', greeting: 'Hello! I am Mr. Vighelp, your AI assistant. How can I help you today?' },
-    { code: 'hi-IN', name: 'Hindi', greeting: 'नमस्ते! मैं मिस्टर विगहेल्प हूँ, आपका AI सहायक। मैं आपकी कैसे मदद कर सकता हूँ?' },
-    { code: 'es-ES', name: 'Spanish', greeting: '¡Hola! Soy el Sr. Vighelp, su asistente de IA. ¿Cómo puedo ayudarle hoy?' },
+    { code: 'hi-IN', name: 'Hindi', greeting: 'à¤¨à¤®à¤¸à¥à¤¤à¥‡! à¤®à¥ˆà¤‚ à¤®à¤¿à¤¸à¥à¤Ÿà¤° à¤µà¤¿à¤—à¤¹à¥‡à¤²à¥à¤ª à¤¹à¥‚à¤, à¤†à¤ªà¤•à¤¾ AI à¤¸à¤¹à¤¾à¤¯à¤•à¥¤ à¤®à¥ˆà¤‚ à¤†à¤ªà¤•à¥€ à¤•à¥ˆà¤¸à¥‡ à¤®à¤¦à¤¦ à¤•à¤° à¤¸à¤•à¤¤à¤¾ à¤¹à¥‚à¤?' },
+    { code: 'es-ES', name: 'Spanish', greeting: 'Â¡Hola! Soy el Sr. Vighelp, su asistente de IA. Â¿CÃ³mo puedo ayudarle hoy?' },
     { code: 'fr-FR', name: 'French', greeting: 'Bonjour! Je suis M. Vighelp, votre assistant IA. Comment puis-je vous aider aujourd\'hui?' }
 ];
 
@@ -67,10 +67,7 @@ export default function MrVighelp() {
 
     // Init Gemini
     const initGemini = useCallback(async () => {
-        if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-            console.error('Gemini API key is missing');
-            return;
-        }
+        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
         try {
             // Mock User Data passed to AI for contextual learning
@@ -84,7 +81,7 @@ STUDENT PROFILE (ALEX SHARMA):
 - Strengths: Frontend Architecture, Mathematics
 `;
 
-            const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+            const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({
                 model: 'gemini-2.5-flash',
                 systemInstruction: `You are a highly advanced AI assistant named Mr. Vighelp integrated into the SYNAPSE OS application.
@@ -251,7 +248,7 @@ STUDENT PROFILE (ALEX SHARMA):
 
             try {
                 // Using the requested model
-                const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+                const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE');
                 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
                 const imageParts = [
@@ -379,7 +376,7 @@ STUDENT PROFILE (ALEX SHARMA):
                         <h2 className="text-base font-bold text-white/90">Mr. Vighelp</h2>
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span className="text-xs text-white/50">Online • AI Assistant</span>
+                            <span className="text-xs text-white/50">Online â€¢ AI Assistant</span>
                         </div>
                     </div>
                 </div>
@@ -551,3 +548,4 @@ STUDENT PROFILE (ALEX SHARMA):
         </div>
     );
 }
+

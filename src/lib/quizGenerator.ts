@@ -1,11 +1,11 @@
-// ============================================================
-// SYNAPSE Learning Hub — AI Quiz Generator Service
+﻿// ============================================================
+// SYNAPSE Learning Hub â€” AI Quiz Generator Service
 // ============================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Quiz, QuizQuestion } from '@/types/learning';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
 
 interface GeneratedQuiz {
@@ -326,7 +326,7 @@ function getFallbackQuiz(videoTitle: string): GeneratedQuiz {
                     options: [
                         'O(log n)',
                         'O(n)',
-                        'O(n²)',
+                        'O(nÂ²)',
                         'O(1)',
                     ],
                     correctAnswer: 0,
@@ -361,9 +361,9 @@ function getFallbackQuiz(videoTitle: string): GeneratedQuiz {
                     question: 'Which sorting algorithm has the best average-case time complexity?',
                     options: [
                         'Merge Sort - O(n log n)',
-                        'Bubble Sort - O(n²)',
-                        'Selection Sort - O(n²)',
-                        'Insertion Sort - O(n²)',
+                        'Bubble Sort - O(nÂ²)',
+                        'Selection Sort - O(nÂ²)',
+                        'Insertion Sort - O(nÂ²)',
                     ],
                     correctAnswer: 0,
                     explanation: 'Merge Sort has O(n log n) average and worst-case time complexity.',
@@ -572,3 +572,5 @@ export async function createQuizForVideo(
         rewardPoints: 100,
     };
 }
+
+

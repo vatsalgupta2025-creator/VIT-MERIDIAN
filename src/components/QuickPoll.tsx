@@ -13,6 +13,7 @@ import {
     Calendar,
     MoreVertical
 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 interface Poll {
     id: number;
@@ -113,6 +114,7 @@ const categories = [
 ];
 
 export default function QuickPoll() {
+    const { user } = useUser();
     const [polls, setPolls] = useState<Poll[]>(mockPolls);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -166,7 +168,7 @@ export default function QuickPoll() {
             totalVotes: 0,
             status: 'active',
             category: newPoll.category,
-            createdBy: "Ayush Upadhyay",
+            createdBy: user.name,
             createdAt: new Date().toISOString().split('T')[0],
             endsAt: new Date(Date.now() + newPoll.duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             isVoted: false

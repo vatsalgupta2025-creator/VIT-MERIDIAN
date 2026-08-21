@@ -6,10 +6,8 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import DashboardOverview from '@/components/DashboardOverview';
 import SearchBar from '@/components/SearchBar';
-
 import SmartBriefing from '@/components/SmartBriefing';
 import LearningComponent from '@/components/LearningComponent';
-
 import FocusMode from '@/components/FocusMode';
 import FileShare from '@/components/FileShare';
 import OracleSearch from '@/components/OracleSearch';
@@ -36,10 +34,11 @@ import CampusExplorer from '@/components/CampusExplorer';
 import VisualAlgorithms from '@/components/VisualAlgorithms';
 import TravelPool from '@/components/TravelPool';
 import BusTransportation from '@/components/BusTransportation';
+import ProfileView from '@/components/ProfileView';
 import FacultyManagement from '@/components/FacultyManagement';
+import StudentDetailsModal from '@/components/StudentDetailsModal';
+import { UserProvider } from '@/context/UserContext';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
-import HostelHub from '@/components/HostelHub';
-import ParentPortal from '@/components/ParentPortal';
 
 const BootScreen = dynamic(() => import('@/components/BootScreen'), { ssr: false });
 
@@ -70,37 +69,11 @@ export default function Home() {
         return <OracleSearch />;
       case 'campus':
         return <CampusExplorer />;
-
       case 'briefing':
         return <SmartBriefing fullPage />;
       case 'profile':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-white/90">Profile</h2>
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white shadow-xl shadow-violet-500/20">
-                AU
-              </div>
-              <h3 className="text-lg font-bold text-white/80">Ayush Upadhyay</h3>
-              <p className="text-sm text-white/40">BTech CSE AIML · 3rd Year</p>
-              <p className="text-xs text-white/25 mt-1">ayush.upadhyay@vitgroww.edu · STU-2023-0847</p>
-              <div className="grid grid-cols-3 gap-4 mt-6">
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  <p className="text-2xl font-bold text-cyan-400">3.72</p>
-                  <p className="text-[11px] text-white/30">GPA</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  <p className="text-2xl font-bold text-violet-400">1,250</p>
-                  <p className="text-[11px] text-white/30">XP Points</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  <p className="text-2xl font-bold text-emerald-400">74</p>
-                  <p className="text-[11px] text-white/30">RUVI</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+      case 'settings':
+        return <ProfileView />;
       case 'learning':
         return <LearningComponent />;
       case 'fileshare':
@@ -111,11 +84,6 @@ export default function Home() {
         return <CareerHub />;
       case 'lost-found':
         return <LostAndFound />;
-      case 'hostel':
-        return <HostelHub />;
-      case 'parent-portal':
-        return <ParentPortal />;
-
       case 'clubs-events':
         return <ClubsEvents />;
       case 'roommate':
@@ -161,47 +129,41 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-[#040812] aurora-bg overflow-hidden relative">
-      {/* Ambient glow orbs */}
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="fixed top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/[0.04] blur-[150px] pointer-events-none"
-      />
-      <motion.div
-        animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="fixed bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/[0.04] blur-[120px] pointer-events-none"
-      />
+    <UserProvider>
+      <div 
+        className="flex h-screen overflow-hidden relative bg-ruled-lines" 
+        style={{ backgroundColor: 'var(--surface-base)' }}
+      >
+        {/* Sidebar */}
+        <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
 
-      {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
+        {/* Main content area */}
+        <div className="flex-1 flex overflow-hidden relative z-10">
+          {/* Primary content */}
+          <main className={`flex-1 overflow-y-auto ${activeSection === 'campus' ? 'p-0 relative' : 'p-6 lg:p-8'}`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className={`${activeSection === 'campus' ? 'w-full h-full' : 'max-w-5xl mx-auto'} animate-in`}
+              >
+                {renderMainContent()}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
 
-      {/* Main content area */}
-      <div className="flex-1 flex overflow-hidden relative z-10">
-        {/* Primary content */}
-        <main className={`flex-1 overflow-y-auto ${activeSection === 'campus' ? 'p-0 relative' : 'p-6 lg:p-8'}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeSection}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className={`${activeSection === 'campus' ? 'w-full h-full' : 'max-w-5xl mx-auto'} animate-in`}
-            >
-              {renderMainContent()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+        <AnimatePresence>
+          {activeSection === 'focus' && (
+            <FocusMode onClose={() => setActiveSection('dashboard')} />
+          )}
+        </AnimatePresence>
+        <StudentDetailsModal />
+        <MrVighelp />
       </div>
-
-      <AnimatePresence>
-        {activeSection === 'focus' && (
-          <FocusMode onClose={() => setActiveSection('dashboard')} />
-        )}
-      </AnimatePresence>
-      <MrVighelp />
-    </div>
+    </UserProvider>
   );
 }
