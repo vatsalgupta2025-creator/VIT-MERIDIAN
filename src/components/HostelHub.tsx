@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2, Wind, Fan, Utensils, Phone, Mail, Users, ChevronRight,
@@ -361,7 +362,7 @@ function WardenCard({ warden, label, accent, accentBg, accentText }: {
 
 // ─── Central Admin Screen ─────────────────────────────────────────────────────
 function CentralAdminScreen({ onBack }: { onBack: () => void }) {
-  const roleIcons: Record<string, JSX.Element> = {
+  const roleIcons: Record<string, ReactNode> = {
     'Director': <Star size={16} className="text-yellow-400" />,
     'Deputy': <Shield size={16} className="text-blue-400" />,
     'Food': <Utensils size={16} className="text-green-400" />,
