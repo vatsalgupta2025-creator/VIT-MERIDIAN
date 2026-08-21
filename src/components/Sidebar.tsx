@@ -32,6 +32,7 @@ import {
     MapPin,
     Binary,
     Bot,
+    Bus,
     Car,
     Building2,
     HeartHandshake
@@ -70,6 +71,8 @@ const navItems = [
     { id: 'group-study', label: 'Group Study', icon: HandHeart },
     { id: 'quick-poll', label: 'Quick Poll', icon: Vote },
     { id: 'travel-pool', label: 'Travel Pool', icon: Car },
+    { id: 'bus-transport', label: 'Bus Transport', icon: Bus },
+    { id: 'faculty', label: 'Faculty', icon: GraduationCap },
     { id: 'mock-interview', label: 'Mock Interview', icon: Users },
     { id: 'ai-chat', label: 'AI Chat', icon: Bot },
     { id: 'focus', label: 'Zen Focus', icon: Brain },
