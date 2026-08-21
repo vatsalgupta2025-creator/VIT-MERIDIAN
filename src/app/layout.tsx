@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VitGroww — Learn & Grow",
+  title: "VitGroww — Smart Campus OS",
   description:
-    "The AI-native learning platform for students. Unified search, gamified learning, engagement intelligence, and smart briefings — all in one modern platform.",
+    "The Smart Campus OS for VIT students. 27+ modules unifying timetables, attendance, PYQs, AI mock interviews, roommate matching, lost & found, budget tracking, and more — powered by Gemini AI.",
   keywords: [
     "vitgroww",
-    "education technology",
-    "AI",
+    "VIT",
+    "campus OS",
     "student portal",
-    "engagement analytics",
-    "gamification",
+    "attendance tracker",
+    "timetable",
+    "AI assistant",
   ],
 };
 
@@ -26,7 +27,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
         <link
@@ -35,9 +36,17 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className="antialiased bg-[#040812] text-white" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }} suppressHydrationWarning>
+      <body
+        className="antialiased text-[var(--text-primary)]"
+        style={{
+          fontFamily: "'Figtree', system-ui, -apple-system, sans-serif",
+          backgroundColor: "var(--surface-base)",
+        }}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
   );
 }
+
