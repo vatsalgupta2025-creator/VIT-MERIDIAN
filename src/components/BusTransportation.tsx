@@ -239,7 +239,7 @@ export default function BusTransportation() {
             </motion.div>
 
             {/* Bus Cards */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar pb-6">
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pb-6">
                 <AnimatePresence mode="wait">
                     <motion.div key="buses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredBuses.length > 0 ? (
