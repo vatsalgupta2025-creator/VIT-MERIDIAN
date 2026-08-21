@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import DashboardOverview from '@/components/DashboardOverview';
+import { DarkGradientBg } from '@/components/ui/elegant-dark-pattern';
 import SearchBar from '@/components/SearchBar';
 import SmartBriefing from '@/components/SmartBriefing';
 import LearningComponent from '@/components/LearningComponent';
@@ -136,40 +137,39 @@ export default function Home() {
 
   return (
     <UserProvider>
-      <div 
-        className="flex h-screen overflow-hidden relative bg-ruled-lines" 
-        style={{ backgroundColor: 'var(--surface-base)' }}
-      >
-        {/* Sidebar */}
-        <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
+      <DarkGradientBg>
+        <div className="flex h-screen overflow-hidden w-full relative">
+          {/* Sidebar */}
+          <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
 
-        {/* Main content area */}
-        <div className="flex-1 flex overflow-hidden relative z-10">
-          {/* Primary content */}
-          <main className={`flex-1 overflow-y-auto ${activeSection === 'campus' ? 'p-0 relative' : 'p-6 lg:p-8'}`}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className={`${activeSection === 'campus' ? 'w-full h-full' : 'max-w-5xl mx-auto'} animate-in`}
-              >
-                {renderMainContent()}
-              </motion.div>
-            </AnimatePresence>
-          </main>
+          {/* Main content area */}
+          <div className="flex-1 flex overflow-hidden relative z-10">
+            {/* Primary content */}
+            <main className={`flex-1 overflow-y-auto ${activeSection === 'campus' ? 'p-0 relative' : 'p-6 lg:p-8'}`}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeSection}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className={`${activeSection === 'campus' ? 'w-full h-full' : 'max-w-5xl mx-auto'} animate-in`}
+                >
+                  {renderMainContent()}
+                </motion.div>
+              </AnimatePresence>
+            </main>
+          </div>
+
+          <AnimatePresence>
+            {activeSection === 'focus' && (
+              <FocusMode onClose={() => setActiveSection('dashboard')} />
+            )}
+          </AnimatePresence>
+          <StudentDetailsModal />
+          <MrVighelp />
         </div>
-
-        <AnimatePresence>
-          {activeSection === 'focus' && (
-            <FocusMode onClose={() => setActiveSection('dashboard')} />
-          )}
-        </AnimatePresence>
-        <StudentDetailsModal />
-        <MrVighelp />
-      </div>
+      </DarkGradientBg>
     </UserProvider>
   );
 }

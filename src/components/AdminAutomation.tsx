@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ShaderDemo_ATC from '@/components/ui/atc-shader';
 import {
     Bot,
     Play,
@@ -261,7 +262,7 @@ export default function AdminAutomation() {
         switch (status) {
             case 'active': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
             case 'paused': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-            case 'scheduled': return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
+            case 'scheduled': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
             case 'error': return 'bg-red-500/20 text-red-400 border-red-500/30';
             default: return 'bg-white/[0.06] text-white/40 border-white/[0.06]';
         }
@@ -278,19 +279,24 @@ export default function AdminAutomation() {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
+        <div className="relative min-h-screen overflow-hidden">
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-color-dodge">
+                <ShaderDemo_ATC />
+            </div>
+            
+            <div className="relative z-10 space-y-6 p-6">
+                {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-white/90 flex items-center gap-3">
-                        <Bot className="w-7 h-7 text-violet-400" />
+                        <Bot className="w-7 h-7 text-red-400" />
                         Admin Automation
                     </h2>
                     <p className="text-sm text-white/40 mt-1">Automate repetitive admin tasks and workflows</p>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-600 rounded-xl text-white font-medium text-sm hover:shadow-lg hover:shadow-violet-500/20 transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-zinc-600 rounded-xl text-white font-medium text-sm hover:shadow-lg hover:shadow-red-500/20 transition-all"
                 >
                     <Plus size={18} />
                     Create Automation
@@ -300,9 +306,9 @@ export default function AdminAutomation() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total Runs', value: stats.totalRuns.toLocaleString(), icon: Activity, color: 'cyan' },
+                    { label: 'Total Runs', value: stats.totalRuns.toLocaleString(), icon: Activity, color: 'zinc' },
                     { label: 'Success Rate', value: `${stats.successRate.toFixed(1)}%`, icon: Target, color: 'emerald' },
-                    { label: 'Active Tasks', value: stats.activeTasks, icon: Zap, color: 'violet' },
+                    { label: 'Active Tasks', value: stats.activeTasks, icon: Zap, color: 'red' },
                     { label: 'Time Saved', value: `${stats.timeSaved}m`, icon: Timer, color: 'amber' }
                 ].map((stat, idx) => (
                     <div key={idx} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4">
@@ -331,7 +337,7 @@ export default function AdminAutomation() {
                             setActiveTab(tab.id as any);
                             if (tab.id === 'create') setShowCreateModal(true);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
                     >
                         <tab.icon size={16} />
                         {tab.label}
@@ -345,7 +351,7 @@ export default function AdminAutomation() {
                     <button
                         key={cat.id}
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat.id ? 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
                     >
                         <cat.icon size={14} />
                         {cat.label}
@@ -438,10 +444,10 @@ export default function AdminAutomation() {
                     <div className="divide-y divide-white/[0.04]">
                         {logs.map(log => (
                             <div key={log.id} className="p-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${log.status === 'success' ? 'bg-emerald-500/20' : log.status === 'failed' ? 'bg-red-500/20' : 'bg-cyan-500/20'}`}>
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${log.status === 'success' ? 'bg-emerald-500/20' : log.status === 'failed' ? 'bg-red-500/20' : 'bg-zinc-500/20'}`}>
                                     {log.status === 'success' ? <CheckCircle size={16} className="text-emerald-400" /> :
                                         log.status === 'failed' ? <AlertCircle size={16} className="text-red-400" /> :
-                                            <Activity size={16} className="text-cyan-400" />}
+                                            <Activity size={16} className="text-zinc-400" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-white/80">{log.taskName}</p>
@@ -476,7 +482,7 @@ export default function AdminAutomation() {
                         >
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-white/90 flex items-center gap-2">
-                                    <Bot size={20} className="text-violet-400" />
+                                    <Bot size={20} className="text-red-400" />
                                     Create New Automation
                                 </h3>
                                 <button
@@ -493,7 +499,7 @@ export default function AdminAutomation() {
                                     <input
                                         type="text"
                                         placeholder="e.g., Auto-Submit Weekly Reports"
-                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                                     />
                                 </div>
 
@@ -502,14 +508,14 @@ export default function AdminAutomation() {
                                     <textarea
                                         placeholder="Describe what this automation does..."
                                         rows={3}
-                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none"
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">Category</label>
-                                        <select className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 focus:outline-none focus:ring-2 focus:ring-violet-500/50">
+                                        <select className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 focus:outline-none focus:ring-2 focus:ring-red-500/50">
                                             {categories.slice(1).map(cat => (
                                                 <option key={cat.id} value={cat.id} className="bg-slate-800">{cat.label}</option>
                                             ))}
@@ -517,7 +523,7 @@ export default function AdminAutomation() {
                                     </div>
                                     <div>
                                         <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">Trigger Type</label>
-                                        <select className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 focus:outline-none focus:ring-2 focus:ring-violet-500/50">
+                                        <select className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 focus:outline-none focus:ring-2 focus:ring-red-500/50">
                                             <option value="scheduled" className="bg-slate-800">Scheduled</option>
                                             <option value="event" className="bg-slate-800">On Event</option>
                                             <option value="manual" className="bg-slate-800">Manual</option>
@@ -531,7 +537,7 @@ export default function AdminAutomation() {
                                     <input
                                         type="text"
                                         placeholder="e.g., Every day at 9:00 AM"
-                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                                     />
                                 </div>
 
@@ -540,7 +546,7 @@ export default function AdminAutomation() {
                                     <div className="space-y-2">
                                         {['Send Email Notification', 'Update Database', 'Generate Report', 'Create Form Entry', 'Sync Data'].map((action, idx) => (
                                             <label key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.05]">
-                                                <input type="checkbox" className="w-4 h-4 rounded bg-white/[0.06] border-white/[0.1] text-violet-500 focus:ring-violet-500/50" />
+                                                <input type="checkbox" className="w-4 h-4 rounded bg-white/[0.06] border-white/[0.1] text-red-500 focus:ring-red-500/50" />
                                                 <span className="text-sm text-white/70">{action}</span>
                                             </label>
                                         ))}
@@ -555,7 +561,7 @@ export default function AdminAutomation() {
                                 >
                                     Cancel
                                 </button>
-                                <button className="flex-1 px-5 py-3 bg-gradient-to-r from-violet-500 to-cyan-600 rounded-xl text-white font-medium hover:shadow-lg hover:shadow-violet-500/20 transition-all flex items-center justify-center gap-2">
+                                <button className="flex-1 px-5 py-3 bg-gradient-to-r from-red-500 to-zinc-600 rounded-xl text-white font-medium hover:shadow-lg hover:shadow-red-500/20 transition-all flex items-center justify-center gap-2">
                                     <Play size={16} />
                                     Create Automation
                                 </button>
@@ -564,6 +570,7 @@ export default function AdminAutomation() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
         </div>
     );
 }

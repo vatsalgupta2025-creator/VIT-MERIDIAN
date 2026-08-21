@@ -111,13 +111,9 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
             className={`relative flex flex-col h-screen transition-all duration-300 ease-out ${collapsed ? 'w-[64px]' : 'w-[250px]'
                 }`}
         >
-            {/* Solid background */}
+            {/* Glass background */}
             <div
-                className="absolute inset-0"
-                style={{
-                    background: 'var(--surface-raised)',
-                    borderRight: '1px solid var(--border)',
-                }}
+                className="absolute inset-0 bg-black/30 backdrop-blur-xl border-r border-white/5"
             />
 
             <div className="relative z-10 flex flex-col h-full">
@@ -128,15 +124,15 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                             <div
                                 className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm"
                                 style={{
-                                    background: 'var(--accent-primary)',
-                                    color: 'var(--text-inverse)',
+                                    background: 'linear-gradient(135deg, #06b6d4, #10b981)',
+                                    color: '#000',
+                                    boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
                                 }}
                             >
                                 V
                             </div>
                             <span
-                                className="font-display font-bold text-base tracking-tight"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="font-display font-bold text-base tracking-tight text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
                             >
                                 VITGROWW
                             </span>
@@ -171,14 +167,16 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                 <div className="px-2 mb-1">
                     <button
                         onClick={() => onNavigate('dashboard')}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${collapsed ? 'justify-center' : ''
+                        className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 overflow-hidden group ${collapsed ? 'justify-center' : ''
                             }`}
                         style={{
-                            background: activeSection === 'dashboard' ? 'var(--accent-primary-muted)' : 'transparent',
-                            color: activeSection === 'dashboard' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                            borderLeft: activeSection === 'dashboard' ? '3px solid var(--accent-primary)' : '3px solid transparent',
+                            background: activeSection === 'dashboard' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                            color: activeSection === 'dashboard' ? '#fff' : 'rgba(255, 255, 255, 0.6)',
                         }}
                     >
+                        {activeSection === 'dashboard' && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b from-cyan-400 to-emerald-400 rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                        )}
                         <LayoutDashboard size={18} />
                         {!collapsed && <span className="font-medium">Dashboard</span>}
                     </button>
@@ -224,27 +222,29 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                                             <button
                                                 key={item.id}
                                                 onClick={() => onNavigate(item.id)}
-                                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${collapsed ? 'justify-center' : ''
+                                                className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 overflow-hidden group ${collapsed ? 'justify-center' : ''
                                                     }`}
                                                 style={{
-                                                    background: isActive ? 'var(--accent-primary-muted)' : 'transparent',
-                                                    color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                                                    borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
+                                                    background: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                                                    color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
                                                 }}
                                                 onMouseEnter={e => {
                                                     if (!isActive) {
-                                                        e.currentTarget.style.background = 'var(--surface-overlay)';
-                                                        e.currentTarget.style.color = 'var(--text-primary)';
+                                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
                                                     }
                                                 }}
                                                 onMouseLeave={e => {
                                                     if (!isActive) {
                                                         e.currentTarget.style.background = 'transparent';
-                                                        e.currentTarget.style.color = 'var(--text-secondary)';
+                                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                                                     }
                                                 }}
                                                 title={collapsed ? item.label : undefined}
                                             >
+                                                {isActive && (
+                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b from-cyan-400 to-emerald-400 rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                                                )}
                                                 <Icon size={17} />
                                                 {!collapsed && (
                                                     <span className="font-medium truncate">{item.label}</span>

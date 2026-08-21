@@ -10,16 +10,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/context/UserContext';
 import SearchBar from './SearchBar';
 
-// New DashCard replacing GlassCard
+// Modern Glass DashCard with Gradient Dots
 function DashCard({ children, className = '', accent }: { children: React.ReactNode, className?: string, accent?: 'red' | 'yellow' | 'green' }) {
-    let cardClass = 'card-raised';
-    if (accent === 'red') cardClass = 'card-accent-red';
-    if (accent === 'yellow') cardClass = 'card-accent-yellow';
-    if (accent === 'green') cardClass = 'card-accent-green';
+    let borderAccent = 'border-white/5';
+    let dotAccent = 'rgba(255,255,255,0.1)';
+    if (accent === 'red') { borderAccent = 'border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'; dotAccent = 'rgba(244,63,94,0.2)'; }
+    if (accent === 'yellow') { borderAccent = 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]'; dotAccent = 'rgba(245,158,11,0.2)'; }
+    if (accent === 'green') { borderAccent = 'border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'; dotAccent = 'rgba(16,185,129,0.2)'; }
 
     return (
-        <div className={`p-5 ${cardClass} ${className}`}>
-            {children}
+        <div className={`relative p-5 rounded-2xl bg-black/30 backdrop-blur-md border ${borderAccent} overflow-hidden group transition-all duration-300 hover:bg-black/50 ${className}`}>
+            {/* Gradient dots pattern */}
+            <div 
+                className="absolute inset-0 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                    backgroundImage: `radial-gradient(circle at 2px 2px, ${dotAccent} 1px, transparent 0)`,
+                    backgroundSize: '16px 16px'
+                }}
+            />
+            {/* Top edge highlight */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative z-10">
+                {children}
+            </div>
         </div>
     );
 }
