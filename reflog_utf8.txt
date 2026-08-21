@@ -1,8 +1,0 @@
-﻿1859d57 HEAD@{0}: rebase (finish): returning to refs/heads/main
-1859d57 HEAD@{1}: rebase (continue): Fix API keys, update mock interview to gemini-2.5-flash with MediaPipe face tracking, and add leaflet dependency
-b39e3a6 HEAD@{2}: pull --rebase (start): checkout b39e3a65dfa8947f537235783745b6ac51e4fda7
-2336bfb HEAD@{3}: commit: Fix API keys, update mock interview to gemini-2.5-flash with MediaPipe face tracking, and add leaflet dependency
-e722cdf HEAD@{4}: pull: Fast-forward
-2f0554f HEAD@{5}: reset: moving to HEAD
-2f0554f HEAD@{6}: commit: Enhance AI Roadmap, add 3D BootScreen, and update LearningHub UI
-65eb595 HEAD@{7}: commit (initial): first commit

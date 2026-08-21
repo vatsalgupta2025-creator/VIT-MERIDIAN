@@ -6,7 +6,7 @@ import {
     Bell, Sun, Calendar, AlertTriangle, BookOpen, Sparkles, Volume2,
     Check, ChevronRight, Clock, X, Mail, Star, Tag, Archive, Trash2,
     RefreshCw, Filter, Search, Plus, ExternalLink, Pin, Bookmark,
-    CalendarPlus, MessageSquare, Send, Inbox, Loader2, FileText
+     CalendarPlus, MessageSquare, Send, Inbox, Loader2, FileText, Eye, Zap
 } from 'lucide-react';
 import { currentUser } from '@/data/mockData';
 import { useUser } from '@/context/UserContext';

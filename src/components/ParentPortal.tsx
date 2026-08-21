@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, MessageSquare, FileText, Bell, Phone, Settings, ChevronRight,
@@ -617,7 +617,16 @@ function EmergencyContacts({ studentId }: { studentId: string }) {
       bg: 'rgba(139,92,246,0.12)',
       priority: 'Escalation',
     },
-  ].filter(Boolean) as NonNullable<typeof contacts[0]>[];
+  ].filter(Boolean) as Array<{
+    label: string;
+    name: string;
+    email: string;
+    phone: string;
+    icon: ComponentType<any>;
+    color: string;
+    bg: string;
+    priority: string;
+  }>;
 
   return (
     <div className="space-y-5">
