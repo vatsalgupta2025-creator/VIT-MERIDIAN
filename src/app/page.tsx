@@ -33,7 +33,9 @@ import AiRoadmap from '@/components/AiRoadmap';
 import CampusExplorer from '@/components/CampusExplorer';
 import VisualAlgorithms from '@/components/VisualAlgorithms';
 import TravelPool from '@/components/TravelPool';
+import BusTransportation from '@/components/BusTransportation';
 import ProfileView from '@/components/ProfileView';
+import FacultyManagement from '@/components/FacultyManagement';
 import StudentDetailsModal from '@/components/StudentDetailsModal';
 import { UserProvider } from '@/context/UserContext';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
@@ -112,6 +114,10 @@ export default function Home() {
         return <VisualAlgorithms />;
       case 'travel-pool':
         return <TravelPool />;
+      case 'bus-transport':
+        return <BusTransportation />;
+      case 'faculty':
+        return <FacultyManagement />;
       default:
         return <DashboardOverview />;
     }

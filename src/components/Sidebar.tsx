@@ -28,8 +28,10 @@ import {
     MapPin,
     Binary,
     Bot,
+    Bus,
     Car,
-    Edit3
+    Edit3,
+    UserCheck
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
@@ -61,8 +63,10 @@ const navItems = [
     { id: 'group-study', label: 'Group Study', icon: HandHeart },
     { id: 'quick-poll', label: 'Quick Poll', icon: Vote },
     { id: 'travel-pool', label: 'Travel Pool', icon: Car },
+    { id: 'bus-transport', label: 'Bus Transport', icon: Bus },
     { id: 'mock-interview', label: 'Mock Interview', icon: Users },
     { id: 'ai-chat', label: 'AI Chat', icon: Bot },
+    { id: 'faculty', label: 'Faculty Portal', icon: UserCheck },
     { id: 'focus', label: 'Zen Focus', icon: Brain },
 ];
 
