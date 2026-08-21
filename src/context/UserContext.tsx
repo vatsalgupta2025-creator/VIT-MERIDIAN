@@ -24,7 +24,7 @@ interface UserContextType {
     setIsEditModalOpen: (open: boolean) => void;
 }
 
-const STORAGE_KEY = 'vitgroww_user_profile';
+const STORAGE_KEY = 'vit-meridian_user_profile';
 
 function getInitials(name: string): string {
     if (!name || !name.trim()) return 'ST';
@@ -38,7 +38,7 @@ function getInitials(name: string): string {
 const initialDefaultUser: UserData = {
     name: 'Ayush Upadhyay',
     regNo: '23BCE10482',
-    email: 'student@vitgroww.edu',
+    email: 'student@vit-meridian.edu',
     avatar: 'AU',
     major: 'BTech CSE AIML',
     year: '3rd Year',

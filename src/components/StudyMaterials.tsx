@@ -96,6 +96,18 @@ const resources: Resource[] = [
         featured: true,
         stats: 'Open Source'
     },
+    {
+        id: '12',
+        title: 'VIT PYQ',
+        description: 'VIT previous year question papers and solutions curated by CodeChef VIT — browse PYQs by course, semester, and exam type (CAT/FAT).',
+        url: 'https://www.papers.codechefvit.com/',
+        icon: Globe,
+        color: 'violet',
+        category: 'pyq',
+        tags: ['CAT Papers', 'FAT Papers', 'Solutions'],
+        featured: true,
+        stats: 'PYQs'
+    },
     // ── AI & Career Resources ──
     {
         id: '6',
@@ -231,7 +243,7 @@ export default function StudyMaterials() {
                     {/* Quick Stats */}
                     <div className="hidden md:flex gap-3">
                         {[
-                            { icon: FileText, value: '2', label: 'PYQ Sites', color: 'violet' },
+                            { icon: FileText, value: '3', label: 'PYQ Sites', color: 'violet' },
                             { icon: BookOpen, value: '2', label: 'Study Hubs', color: 'cyan' },
                             { icon: Sparkles, value: '6', label: 'AI & Career', color: 'emerald' },
                             { icon: Zap, value: '1', label: 'Tool', color: 'amber' }

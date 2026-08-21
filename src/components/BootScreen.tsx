@@ -10,12 +10,12 @@ interface BootScreenProps {
 
 const bootStages = [
     { text: "Initializing Neural Architecture...", duration: 600, color: "from-cyan-400 to-blue-500" },
-    { text: "Connecting to VitGroww Mesh...", duration: 700, color: "from-blue-500 to-indigo-500" },
+    { text: "Connecting to Vit-Meridian Mesh...", duration: 700, color: "from-blue-500 to-indigo-500" },
     { text: "Loading Oracle Search Engine...", duration: 600, color: "from-indigo-500 to-violet-500" },
     { text: "Calibrating Engagement Sensors...", duration: 500, color: "from-violet-500 to-purple-500" },
     { text: "Syncing Process Orchestrator...", duration: 600, color: "from-purple-500 to-fuchsia-500" },
-    { text: "Activating VitGroww Intelligence...", duration: 500, color: "from-fuchsia-500 to-pink-500" },
-    { text: "VITGROWW ONLINE ✓", duration: 800, color: "from-cyan-400 via-violet-400 to-emerald-400" },
+    { text: "Activating Vit-Meridian Intelligence...", duration: 500, color: "from-fuchsia-500 to-pink-500" },
+    { text: "VIT-MERIDIAN ONLINE ✓", duration: 800, color: "from-cyan-400 via-violet-400 to-emerald-400" },
 ];
 
 export default function BootScreen({ onComplete }: BootScreenProps) {
@@ -119,7 +119,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
                                         className="text-center relative z-10 w-full"
                                     >
                                         <h2 className={`text-4xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r ${stage.color}`}>
-                                            {index === bootStages.length - 1 ? 'VITGROWW' : `Stage ${index + 1}`}
+                                            {index === bootStages.length - 1 ? 'VIT-MERIDIAN' : `Stage ${index + 1}`}
                                         </h2>
                                         <p className="text-slate-400 text-sm font-light leading-relaxed">
                                             {stage.text}
@@ -186,7 +186,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
                                 </motion.div>
 
                                 <h1 className="text-4xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 to-cyan-600 relative z-10 px-4 text-center">
-                                    VITGROWW
+                                    VIT-MERIDIAN
                                 </h1>
                                 <p className="text-violet-400/80 tracking-[0.4em] text-xs mt-4 relative z-10 font-bold">SMART CAMPUS OS</p>
                             </div>

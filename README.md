@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 VITGROWW — The Smart Campus OS
+# 🚀 VIT-MERIDIAN — The Smart Campus OS
 
 ### *One platform. Every student need. Powered by AI.*
 
@@ -26,13 +26,13 @@
 
 Campus life is fragmented. Students juggle **10+ apps, 5+ portals, and countless WhatsApp groups** just to survive a single semester. Critical information lives in silos. Administrative processes are manual, slow, and opaque. And through it all, there's zero intelligent layer helping students make better decisions.
 
-**VITGROWW is the operating system layer that unifies it all — with AI at the core.**
+**VIT-MERIDIAN is the operating system layer that unifies it all — with AI at the core.**
 
 ---
 
-## ✨ What is VITGROWW?
+## ✨ What is VIT-MERIDIAN?
 
-VITGROWW is a **full-stack, AI-powered Smart Campus Platform** built specifically for VIT students. Think of it as your personal campus co-pilot — part productivity suite, part AI mentor, part social network, all wrapped in a stunning, OS-like interface that feels native to your screen.
+VIT-MERIDIAN is a **full-stack, AI-powered Smart Campus Platform** built specifically for VIT students. Think of it as your personal campus co-pilot — part productivity suite, part AI mentor, part social network, all wrapped in a stunning, OS-like interface that feels native to your screen.
 
 It doesn't just aggregate information. It **understands context, predicts needs, and takes action** on your behalf.
 
@@ -105,7 +105,7 @@ It doesn't just aggregate information. It **understands context, predicts needs,
 
 ## 🎨 The Experience
 
-VITGROWW isn't just functional — it's **visually arresting**.
+VIT-MERIDIAN isn't just functional — it's **visually arresting**.
 
 - **Boot Screen** — A cinematic, animated OS boot sequence on first load
 - **Shader Backgrounds** — Three.js WebGL aurora shaders breathe life into every page
@@ -119,7 +119,7 @@ VITGROWW isn't just functional — it's **visually arresting**.
 ## 🏗️ Architecture
 
 ```
-vitgroww/
+vit-meridian/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── page.tsx            # Main OS shell with router
@@ -162,7 +162,7 @@ vitgroww/
 
 ## ⚡ Pain Points Eliminated
 
-| Before VITGROWW | After VITGROWW |
+| Before VIT-MERIDIAN | After VIT-MERIDIAN |
 |---|---|
 | 10+ apps for daily campus tasks | 1 unified platform |
 | VTOP portal crashes during exams | Offline-ready cached views |
@@ -180,8 +180,8 @@ vitgroww/
 
 ```bash
 # Clone the repository
-git clone https://github.com/vatsalgupta2025-creator/VITGROWW.git
-cd VITGROWW
+git clone https://github.com/vatsalgupta2025-creator/VIT-MERIDIAN.git
+cd VIT-MERIDIAN
 
 # Install dependencies
 npm install
@@ -217,7 +217,7 @@ NEXT_PUBLIC_YOUTUBE_API_KEY=your_youtube_api_key
 
 ---
 
-## 🏆 Why VITGROWW Wins
+## 🏆 Why VIT-MERIDIAN Wins
 
 1. **Depth over breadth** — Every single module is fully functional, not a mockup
 2. **Real AI, not chatbots** — Gemini 2.0 Flash with multimodal input (text + camera frames) for genuine intelligence

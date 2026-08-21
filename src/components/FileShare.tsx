@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 // @ts-ignore
 import confetti from 'canvas-confetti';
+import { UploadCard } from '@/components/ui/upload-ui';
 
 // Uploadcare config
 const UPLOADCARE_PUBLIC_KEY = 'cd36361088f525c26903';
@@ -172,14 +173,14 @@ export default function FileShare() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 border border-violet-500/20">
-            <Share2 size={20} className="text-violet-400" />
+          <div className="p-2 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+            <Share2 size={20} className="text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold text-zinc-100">
               File Share
             </h2>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-zinc-500">
               Upload, share, and generate QR codes for your files
             </p>
           </div>
@@ -203,12 +204,12 @@ export default function FileShare() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-1 w-fit">
+      <div className="flex items-center gap-1 bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-1 w-fit">
         <button
           onClick={() => setActiveTab('upload')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'upload'
-            ? 'bg-violet-500/10 text-violet-400'
-            : 'text-white/40 hover:text-white/70'
+            ? 'bg-zinc-800 text-zinc-100'
+            : 'text-zinc-500 hover:text-zinc-300'
             }`}
         >
           <Upload size={16} />
@@ -217,8 +218,8 @@ export default function FileShare() {
         <button
           onClick={() => setActiveTab('myfiles')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'myfiles'
-            ? 'bg-violet-500/10 text-violet-400'
-            : 'text-white/40 hover:text-white/70'
+            ? 'bg-zinc-800 text-zinc-100'
+            : 'text-zinc-500 hover:text-zinc-300'
             }`}
         >
           <History size={16} />
@@ -238,14 +239,26 @@ export default function FileShare() {
           >
             {/* Upload Area */}
             <div className="space-y-4">
+              {uploading ? (
+                <div className="flex justify-center w-full">
+                  <UploadCard
+                    status="uploading"
+                    progress={50}
+                    title="Uploading File"
+                    description="Please wait while we process your upload..."
+                    primaryButtonText="Cancel"
+                    onPrimaryButtonClick={() => setUploading(false)}
+                  />
+                </div>
+              ) : (
               <motion.div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => inputRef.current?.click()}
-                className={`relative h-[300px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${dragActive
-                  ? 'border-violet-500 bg-violet-500/10'
-                  : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                className={`relative h-[300px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center ${dragActive
+                  ? 'border-zinc-500 bg-zinc-800/30'
+                  : 'border-zinc-700 bg-zinc-900/30 hover:border-zinc-600 hover:bg-zinc-800/50'
                   }`}
               >
                 <input
@@ -254,39 +267,18 @@ export default function FileShare() {
                   onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
                   className="hidden"
                 />
-
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-                  <motion.div
-                    animate={{ y: dragActive ? -10 : 0, scale: dragActive ? 1.1 : 1 }}
-                    className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-4 ${dragActive ? 'bg-violet-500/20' : 'bg-white/5'
-                      }`}
-                  >
-                    {uploading ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                      >
-                        <Zap size={32} className="text-violet-400" />
-                      </motion.div>
-                    ) : (
-                      <Upload size={32} className={dragActive ? 'text-violet-400' : 'text-white/40'} />
-                    )}
-                  </motion.div>
-
-                  <p className="text-lg font-medium text-white/80 mb-2">
-                    {uploading ? 'Uploading...' : dragActive ? 'Drop file here' : 'Drop files or click to upload'}
-                  </p>
-                  <p className="text-sm text-white/40 text-center">
-                    Supports PDF, Images, Documents up to 100MB
-                  </p>
+                
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 bg-zinc-800/50 border border-zinc-700/50">
+                  <Upload size={32} className={dragActive ? 'text-zinc-300' : 'text-zinc-500'} />
                 </div>
-
-                {/* Background decoration */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-violet-500/5 blur-xl" />
-                  <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-pink-500/5 blur-xl" />
-                </div>
+                <p className="text-lg font-medium text-zinc-300 mb-2">
+                  {dragActive ? 'Drop file here' : 'Drop files or click to upload'}
+                </p>
+                <p className="text-sm text-zinc-500 text-center">
+                  Supports PDF, Images, Documents up to 100MB
+                </p>
               </motion.div>
+              )}
 
               {/* Options */}
               <div className="space-y-4 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">

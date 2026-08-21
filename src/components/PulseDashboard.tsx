@@ -162,7 +162,7 @@ export default function PulseDashboard() {
             <div>
                 <h2 className="text-xl font-bold text-white/90 flex items-center gap-2">
                     <Activity size={20} className="text-violet-400" />
-                    VitGroww Intelligence — Pulse
+                    Vit-Meridian Intelligence — Pulse
                 </h2>
                 <p className="text-xs text-white/30 mt-0.5">Your engagement analytics & RUVI score</p>
             </div>
@@ -172,7 +172,7 @@ export default function PulseDashboard() {
                 <StatCard label="RUVI Score" value={currentUser.ruviScore} icon={Target} color="text-cyan-400" suffix="/100" />
                 <StatCard label="XP Points" value={currentUser.totalPoints} icon={Zap} color="text-violet-400" />
                 <StatCard label="Day Streak" value={currentUser.streak} icon={Flame} color="text-amber-400" />
-                <StatCard label="VitGroww Rank" value={currentUser.rank} icon={Trophy} color="text-emerald-400" suffix="th" />
+                <StatCard label="Vit-Meridian Rank" value={currentUser.rank} icon={Trophy} color="text-emerald-400" suffix="th" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -22,9 +22,18 @@ import {
     Lock,
     Globe,
     Tag,
-    Upload
+    Upload,
+    BookMarked
 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+
+interface NoteComment {
+    id: number;
+    author: string;
+    authorAvatar: string;
+    text: string;
+    createdAt: string;
+}
 
 interface Note {
     id: number;
@@ -156,7 +165,7 @@ export default function NoteShare() {
     const [selectedSubject, setSelectedSubject] = useState("All Subjects");
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [showFilters, setShowFilters] = useState(false);
-    const [activeTab, setActiveTab] = useState<'all' | 'popular' | 'recent' | 'my-notes'>('all');
+    const [activeTab, setActiveTab] = useState<'all' | 'popular' | 'recent' | 'my-notes' | 'bookmarked'>('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newNote, setNewNote] = useState({
         title: '',
@@ -166,6 +175,27 @@ export default function NoteShare() {
         tags: '',
         visibility: 'public' as 'public' | 'private' | 'course'
     });
+    const [openCommentsNoteId, setOpenCommentsNoteId] = useState<number | null>(null);
+    const [commentInput, setCommentInput] = useState('');
+    const [noteComments, setNoteComments] = useState<Record<number, NoteComment[]>>({
+        1: [
+            { id: 1, author: 'Ravi Kumar', authorAvatar: 'RK', text: 'The recursion breakdown saved my DSA finals!', createdAt: '2025-02-22' },
+            { id: 2, author: 'Sneha M', authorAvatar: 'SM', text: 'Could you add iterative traversals too?', createdAt: '2025-02-23' }
+        ],
+        2: [
+            { id: 3, author: 'Karan S', authorAvatar: 'KS', text: 'Nested comprehensions finally make sense. Awesome!', createdAt: '2025-02-20' }
+        ],
+        3: [
+            { id: 4, author: 'Neha P', authorAvatar: 'NP', text: '3NF example was super helpful for my quiz.', createdAt: '2025-02-19' },
+            { id: 5, author: 'Yash R', authorAvatar: 'YR', text: 'Add denormalization examples?', createdAt: '2025-02-21' }
+        ],
+        4: [
+            { id: 6, author: 'Amit K', authorAvatar: 'AK', text: 'Gantt charts made this clear. Thanks!', createdAt: '2025-02-18' }
+        ],
+        5: [
+            { id: 7, author: 'Priya N', authorAvatar: 'PN', text: 'The Stokes viz helped a ton. More calculus notes please!', createdAt: '2025-02-17' }
+        ]
+    });
 
     const filteredNotes = notes.filter(note => {
         const matchesSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -174,8 +204,9 @@ export default function NoteShare() {
         const matchesCourse = selectedCourse === "All Courses" || note.course === selectedCourse;
         const matchesSubject = selectedSubject === "All Subjects" || note.subject === selectedSubject;
         const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => note.tags.includes(tag));
+        const matchesBookmark = activeTab !== 'bookmarked' || note.isBookmarked;
 
-        return matchesSearch && matchesCourse && matchesSubject && matchesTags;
+        return matchesSearch && matchesCourse && matchesSubject && matchesTags && matchesBookmark;
     }).sort((a, b) => {
         if (activeTab === 'popular') return b.likes - a.likes;
         if (activeTab === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -201,6 +232,21 @@ export default function NoteShare() {
                 return { ...note, isBookmarked: !note.isBookmarked };
             }
             return note;
+        }));
+    };
+
+    const handleAddComment = (noteId: number, text: string) => {
+        if (!text.trim()) return;
+        const newComment: NoteComment = {
+            id: Date.now(),
+            author: user.name || 'Anonymous',
+            authorAvatar: user.avatar || 'U',
+            text: text.trim(),
+            createdAt: new Date().toISOString().split('T')[0]
+        };
+        setNoteComments(prev => ({
+            ...prev,
+            [noteId]: [...(prev[noteId] || []), newComment]
         }));
     };
 
@@ -342,7 +388,8 @@ export default function NoteShare() {
                     { id: 'all', label: 'All Notes', icon: FileText },
                     { id: 'popular', label: 'Popular', icon: TrendingUp },
                     { id: 'recent', label: 'Recent', icon: Clock },
-                    { id: 'my-notes', label: 'My Notes', icon: BookOpen }
+                    { id: 'my-notes', label: 'My Notes', icon: BookOpen },
+                    { id: 'bookmarked', label: 'Bookmarked', icon: BookMarked }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -415,10 +462,13 @@ export default function NoteShare() {
                                         <Heart size={14} className={note.isLiked ? 'fill-current' : ''} />
                                         {note.likes}
                                     </button>
-                                    <span className="flex items-center gap-1.5 text-xs text-white/30">
+                                    <button
+                                        onClick={() => setOpenCommentsNoteId(note.id)}
+                                        className="flex items-center gap-1.5 text-xs text-white/30 hover:text-cyan-400 transition-colors"
+                                    >
                                         <MessageCircle size={14} />
                                         {note.comments}
-                                    </span>
+                                    </button>
                                     <span className="flex items-center gap-1.5 text-xs text-white/30">
                                         <Eye size={14} />
                                         {note.views}
@@ -580,6 +630,65 @@ export default function NoteShare() {
                         </motion.div>
                     </motion.div>
                 )}
+            </AnimatePresence>
+
+            {/* Comments Drawer */}
+            <AnimatePresence>
+                {openCommentsNoteId !== null && (() => {
+                    const note = notes.find(n => n.id === openCommentsNoteId);
+                    if (!note) return null;
+                    return (
+                        <motion.div
+                            key="comments-drawer"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end p-4"
+                            onClick={() => setOpenCommentsNoteId(null)}
+                        >
+                            <motion.div
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 25 }}
+                                className="w-full max-w-lg bg-slate-900 border border-white/[0.1] rounded-t-2xl p-5 flex flex-col max-h-[70vh]"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <h3 className="text-lg font-bold text-white/90 mb-4">Comments</h3>
+                                <p className="text-xs text-white/30 mb-3 break-words">{note.title}</p>
+                                <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+                                    {(noteComments[note.id] || []).length === 0 ? (
+                                        <p className="text-white/30 text-sm text-center py-8">No comments yet. Be the first to comment!</p>
+                                    ) : (noteComments[note.id] || []).map(c => (
+                                        <div key={c.id} className="flex items-start gap-3">
+                                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                                                {c.authorAvatar}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-white/40">{c.author} · {c.createdAt}</p>
+                                                <p className="text-sm text-white/80 mt-0.5">{c.text}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="pt-3 mt-3 border-t border-white/[0.06] flex gap-2">
+                                    <input
+                                        value={commentInput}
+                                        onChange={e => setCommentInput(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' && commentInput.trim()) {
+                                                handleAddComment(note.id, commentInput);
+                                                setCommentInput('');
+                                            }
+                                        }}
+                                        placeholder="Write a comment..."
+                                        className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white/80 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                                    />
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    );
+                })()}
             </AnimatePresence>
         </div>
     );

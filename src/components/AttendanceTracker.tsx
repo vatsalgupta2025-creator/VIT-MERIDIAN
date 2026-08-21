@@ -38,7 +38,7 @@ export default function AttendanceTracker() {
 
     // Load data
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_attendance');
+        const saved = localStorage.getItem('vit-meridian_attendance');
         if (saved) {
             try { setSubjects(JSON.parse(saved)); } catch { }
         }
@@ -47,7 +47,7 @@ export default function AttendanceTracker() {
     // Save data
     useEffect(() => {
         if (subjects.length > 0) {
-            localStorage.setItem('vitgroww_attendance', JSON.stringify(subjects));
+            localStorage.setItem('vit-meridian_attendance', JSON.stringify(subjects));
         }
     }, [subjects]);
 

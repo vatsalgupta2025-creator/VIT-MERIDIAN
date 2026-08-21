@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VitGroww — Smart Campus OS",
+  title: "Vit-Meridian — Smart Campus OS",
   description:
     "The Smart Campus OS for VIT students. 27+ modules unifying timetables, attendance, PYQs, AI mock interviews, roommate matching, lost & found, budget tracking, and more — powered by Gemini AI.",
   keywords: [
-    "vitgroww",
+    "vit-meridian",
     "VIT",
     "campus OS",
     "student portal",
@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     "timetable",
     "AI assistant",
   ],
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

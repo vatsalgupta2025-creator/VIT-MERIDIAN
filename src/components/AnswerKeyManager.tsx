@@ -125,7 +125,7 @@ export default function AnswerKeyManager() {
 
     // Load saved papers on mount
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_saved_papers');
+        const saved = localStorage.getItem('vit-meridian_saved_papers');
         if (saved) {
             try {
                 setSavedPapers(JSON.parse(saved).map((p: any) => ({ ...p, date: new Date(p.date) })));
@@ -179,7 +179,7 @@ export default function AnswerKeyManager() {
         };
         const updated = [newPaper, ...savedPapers];
         setSavedPapers(updated);
-        localStorage.setItem('vitgroww_saved_papers', JSON.stringify(updated));
+        localStorage.setItem('vit-meridian_saved_papers', JSON.stringify(updated));
         triggerConfetti();
     };
 
@@ -190,7 +190,7 @@ export default function AnswerKeyManager() {
     const deletePaper = (id: string) => {
         const updated = savedPapers.filter(p => p.id !== id);
         setSavedPapers(updated);
-        localStorage.setItem('vitgroww_saved_papers', JSON.stringify(updated));
+        localStorage.setItem('vit-meridian_saved_papers', JSON.stringify(updated));
     };
 
     const exportPaper = (format: 'pdf' | 'json' | 'docx') => {
@@ -265,7 +265,7 @@ export default function AnswerKeyManager() {
                     </div>
                 `).join('')}
             </div>
-            <div class="footer">Best of luck! Â· Generated with VITGROWW Academic Toolkit</div>
+            <div class="footer">Best of luck! Â· Generated with VIT-MERIDIAN Academic Toolkit</div>
             <script>window.print();</script></body></html>
         `);
         printWindow.document.close();

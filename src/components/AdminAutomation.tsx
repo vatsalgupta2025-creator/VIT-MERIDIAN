@@ -307,9 +307,9 @@ export default function AdminAutomation() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                     { label: 'Total Runs', value: stats.totalRuns.toLocaleString(), icon: Activity, color: 'zinc' },
-                    { label: 'Success Rate', value: `${stats.successRate.toFixed(1)}%`, icon: Target, color: 'emerald' },
-                    { label: 'Active Tasks', value: stats.activeTasks, icon: Zap, color: 'red' },
-                    { label: 'Time Saved', value: `${stats.timeSaved}m`, icon: Timer, color: 'amber' }
+                    { label: 'Success Rate', value: `${stats.successRate.toFixed(1)}%`, icon: Target, color: 'zinc' },
+                    { label: 'Active Tasks', value: stats.activeTasks, icon: Zap, color: 'zinc' },
+                    { label: 'Time Saved', value: `${stats.timeSaved}m`, icon: Timer, color: 'zinc' }
                 ].map((stat, idx) => (
                     <div key={idx} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4">
                         <div className="flex items-center justify-between mb-2">
@@ -337,7 +337,7 @@ export default function AdminAutomation() {
                             setActiveTab(tab.id as any);
                             if (tab.id === 'create') setShowCreateModal(true);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white text-black border border-transparent' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
                     >
                         <tab.icon size={16} />
                         {tab.label}
@@ -351,7 +351,7 @@ export default function AdminAutomation() {
                     <button
                         key={cat.id}
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat.id ? 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === cat.id ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:text-white/70'}`}
                     >
                         <cat.icon size={14} />
                         {cat.label}
@@ -374,8 +374,8 @@ export default function AdminAutomation() {
                             >
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.status === 'active' ? 'bg-emerald-500/20' : task.status === 'error' ? 'bg-red-500/20' : 'bg-white/[0.06]'}`}>
-                                            <Workflow size={20} className={task.status === 'active' ? 'text-emerald-400' : task.status === 'error' ? 'text-red-400' : 'text-white/40'} />
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.status === 'active' ? 'bg-white/[0.1]' : task.status === 'error' ? 'bg-red-500/20' : 'bg-white/[0.06]'}`}>
+                                            <Workflow size={20} className={task.status === 'active' ? 'text-white' : task.status === 'error' ? 'text-red-400' : 'text-white/40'} />
                                         </div>
                                         <div>
                                             <h3 className="text-base font-semibold text-white/90">{task.name}</h3>
@@ -419,7 +419,7 @@ export default function AdminAutomation() {
                                         {task.status === 'active' || task.status === 'paused' ? (
                                             <button
                                                 onClick={() => toggleTaskStatus(task.id)}
-                                                className={`p-2 rounded-lg transition-all ${task.status === 'active' ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'}`}
+                                                className={`p-2 rounded-lg transition-all ${task.status === 'active' ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-white/[0.1] text-white hover:bg-white/[0.15]'}`}
                                             >
                                                 {task.status === 'active' ? <Pause size={14} /> : <Play size={14} />}
                                             </button>

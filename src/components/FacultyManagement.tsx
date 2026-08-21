@@ -396,7 +396,7 @@ function LoginScreen({ onLogin }: { onLogin: (auth: AuthState) => void }) {
                     studentId,
                     token: btoa(email + ':' + Date.now()),
                 };
-                localStorage.setItem('vitgroww_faculty_auth', JSON.stringify({ ...authObj, ts: Date.now() }));
+                localStorage.setItem('vit-meridian_faculty_auth', JSON.stringify({ ...authObj, ts: Date.now() }));
                 onLogin(authObj);
             } else {
                 setError('Authentication failed. Please check your credentials.');
@@ -494,7 +494,7 @@ function LoginScreen({ onLogin }: { onLogin: (auth: AuthState) => void }) {
 export default function FacultyManagement() {
     const [auth, setAuth] = useState<AuthState>(() => {
         try {
-            const stored = localStorage.getItem('vitgroww_faculty_auth');
+            const stored = localStorage.getItem('vit-meridian_faculty_auth');
             if (stored) {
                 const parsed = JSON.parse(stored);
                 if (Date.now() - parsed.ts < 24 * 60 * 60 * 1000) {
@@ -529,7 +529,7 @@ export default function FacultyManagement() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('vitgroww_faculty_auth');
+        localStorage.removeItem('vit-meridian_faculty_auth');
         setAuth({ isAuthenticated: false, studentEmail: '', studentName: '', studentId: '', token: '' });
     };
 

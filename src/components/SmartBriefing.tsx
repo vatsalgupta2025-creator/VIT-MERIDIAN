@@ -196,17 +196,17 @@ const MOCK_EMAILS: Email[] = [
 ];
 
 const categoryConfig = {
-    important: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', label: 'Important', icon: AlertTriangle },
-    academic: { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', label: 'Academic', icon: BookOpen },
-    events: { color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20', label: 'Events', icon: Calendar },
-    general: { color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', label: 'General', icon: Mail },
-    spam: { color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20', label: 'Spam', icon: Archive },
+    important: { color: 'text-zinc-300', bg: 'bg-zinc-800', border: 'border-zinc-600', label: 'Important', icon: AlertTriangle },
+    academic: { color: 'text-zinc-400', bg: 'bg-zinc-800/50', border: 'border-zinc-700', label: 'Academic', icon: BookOpen },
+    events: { color: 'text-zinc-400', bg: 'bg-zinc-800/50', border: 'border-zinc-700', label: 'Events', icon: Calendar },
+    general: { color: 'text-zinc-500', bg: 'bg-zinc-900', border: 'border-zinc-800', label: 'General', icon: Mail },
+    spam: { color: 'text-zinc-600', bg: 'bg-zinc-900/50', border: 'border-zinc-800/50', label: 'Spam', icon: Archive },
 };
 
 const priorityConfig = {
-    high: { color: 'text-red-400', bg: 'bg-red-500/20', label: 'High' },
-    medium: { color: 'text-amber-400', bg: 'bg-amber-500/20', label: 'Medium' },
-    low: { color: 'text-green-400', bg: 'bg-green-500/20', label: 'Low' },
+    high: { color: 'text-zinc-300', bg: 'bg-zinc-800', label: 'High' },
+    medium: { color: 'text-zinc-400', bg: 'bg-zinc-800/50', label: 'Medium' },
+    low: { color: 'text-zinc-500', bg: 'bg-zinc-900', label: 'Low' },
 };
 
 interface SmartBriefingProps {
@@ -345,16 +345,16 @@ export default function SmartBriefing({ fullPage = false }: SmartBriefingProps) 
             >
                 {/* Unread indicator */}
                 {!email.read && (
-                    <div className="absolute top-4 left-1.5 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.5)]" />
+                    <div className="absolute top-4 left-1.5 w-2 h-2 rounded-full bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.3)]" />
                 )}
 
                 <div className="flex items-start gap-3 ml-3">
                     {/* Avatar */}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${email.isVIT ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20' : 'bg-white/[0.05]'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${email.isVIT ? 'bg-zinc-800 border border-zinc-700' : 'bg-zinc-900 border border-zinc-800'}`}>
                         {email.isVIT ? (
-                            <span className="text-sm font-bold text-cyan-400">VIT</span>
+                            <span className="text-sm font-bold text-zinc-300">VIT</span>
                         ) : (
-                            <Mail size={18} className="text-white/40" />
+                            <Mail size={18} className="text-zinc-500" />
                         )}
                     </div>
 
@@ -437,9 +437,9 @@ export default function SmartBriefing({ fullPage = false }: SmartBriefingProps) 
                     <div className="flex-1" />
                     <button
                         onClick={() => toggleStar(email.id)}
-                        className={`p-2 rounded-lg transition-colors ${email.starred ? 'text-amber-400' : 'text-white/30 hover:text-white/50'}`}
+                        className={`p-2 rounded-lg transition-colors ${email.starred ? 'text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                        <Star size={18} className={email.starred ? 'fill-amber-400' : ''} />
+                        <Star size={18} className={email.starred ? 'fill-zinc-300 text-zinc-300' : ''} />
                     </button>
                     <button className="p-2 rounded-lg text-white/30 hover:text-white/50 transition-colors">
                         <Archive size={18} />

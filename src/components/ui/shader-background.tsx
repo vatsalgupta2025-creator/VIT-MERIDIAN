@@ -83,7 +83,7 @@ const ShaderBackground = () => {
 
       vec4 lines = vec4(0.0);
       
-      // Improved background colors to match VitGroww aesthetic
+      // Improved background colors to match Vit-Meridian aesthetic
       vec4 bgColor1 = vec4(0.015, 0.031, 0.07, 1.0); // very dark blue
       vec4 bgColor2 = vec4(0.05, 0.02, 0.16, 1.0);   // deep dark violet
 

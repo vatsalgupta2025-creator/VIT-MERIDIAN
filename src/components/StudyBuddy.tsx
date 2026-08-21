@@ -58,7 +58,7 @@ export default function StudyBuddy() {
 
     // Load saved decks
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_flashcard_decks');
+        const saved = localStorage.getItem('vit-meridian_flashcard_decks');
         if (saved) {
             try {
                 setSavedDecks(JSON.parse(saved).map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) })));
@@ -158,7 +158,7 @@ export default function StudyBuddy() {
         };
         const updated = [deck, ...savedDecks];
         setSavedDecks(updated);
-        localStorage.setItem('vitgroww_flashcard_decks', JSON.stringify(updated));
+        localStorage.setItem('vit-meridian_flashcard_decks', JSON.stringify(updated));
     };
 
     const loadDeck = (deck: Deck) => {
@@ -170,7 +170,7 @@ export default function StudyBuddy() {
     const deleteDeck = (id: string) => {
         const updated = savedDecks.filter(d => d.id !== id);
         setSavedDecks(updated);
-        localStorage.setItem('vitgroww_flashcard_decks', JSON.stringify(updated));
+        localStorage.setItem('vit-meridian_flashcard_decks', JSON.stringify(updated));
     };
 
     const markCard = (correct: boolean) => {

@@ -1,40 +1,40 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   VITGROWW Design Tokens — "Chalkboard & Campus" System
+   VIT-MERIDIAN Design Tokens — "Chalkboard & Campus" System
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Surfaces — from blackboard to classroom materials */
-  --surface-base: #0B0E14;
-  --surface-raised: #141921;
-  --surface-overlay: #1C2230;
-  --surface-sunken: #080A0F;
+  /* Surfaces — dark metallic / dashfolio+ style */
+  --surface-base: #0C0C0C;
+  --surface-raised: #141414;
+  --surface-overlay: #1A1A1A;
+  --surface-sunken: #050505;
 
-  /* Accent — from exam papers, highlighters, and campus greens */
-  --accent-primary: #E85D3A;
-  --accent-primary-hover: #F06B4A;
-  --accent-primary-muted: rgba(232, 93, 58, 0.12);
-  --accent-secondary: #F2C94C;
-  --accent-secondary-muted: rgba(242, 201, 76, 0.12);
-  --accent-tertiary: #34A88F;
-  --accent-tertiary-muted: rgba(52, 168, 143, 0.12);
+  /* Accent — monotonic silvers and whites */
+  --accent-primary: #FFFFFF;
+  --accent-primary-hover: #E5E5E5;
+  --accent-primary-muted: rgba(255, 255, 255, 0.1);
+  --accent-secondary: #A1A1AA;
+  --accent-secondary-muted: rgba(161, 161, 170, 0.1);
+  --accent-tertiary: #52525B;
+  --accent-tertiary-muted: rgba(82, 82, 91, 0.1);
 
-  /* Text — chalk and pencil tones */
-  --text-primary: #E8E6E1;
-  --text-secondary: #8B8D94;
-  --text-muted: #4A4D56;
-  --text-inverse: #0B0E14;
+  /* Text */
+  --text-primary: #EDEDED;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-inverse: #0C0C0C;
 
-  /* Borders — ruled-line notebook */
-  --border: #1E2533;
-  --border-hover: #2A3344;
-  --border-active: rgba(232, 93, 58, 0.3);
+  /* Borders */
+  --border: #222222;
+  --border-hover: #333333;
+  --border-active: rgba(255, 255, 255, 0.3);
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.8);
 
   /* Font families */
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;

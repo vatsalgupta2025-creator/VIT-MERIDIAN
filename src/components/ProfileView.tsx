@@ -46,7 +46,7 @@ export default function ProfileView() {
                         </div>
                         <p className="text-sm text-white/50">{user.major} · {user.year}</p>
                         <p className="text-xs text-white/30 mt-1 flex items-center justify-center md:justify-start gap-2">
-                            <Mail size={12} /> {user.name.toLowerCase().replace(/\s+/g, '.') || 'student'}@vitgroww.edu
+                            <Mail size={12} /> {user.name.toLowerCase().replace(/\s+/g, '.') || 'student'}@vit-meridian.edu
                         </p>
                     </div>
 

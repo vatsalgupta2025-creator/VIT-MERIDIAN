@@ -456,7 +456,7 @@ export default function CareerHub() {
 
     // Load saved resume from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_resume');
+        const saved = localStorage.getItem('vit-meridian_resume');
         if (saved) {
             try {
                 setResume(JSON.parse(saved));
@@ -467,7 +467,7 @@ export default function CareerHub() {
     // Auto-save resume
     useEffect(() => {
         const timer = setTimeout(() => {
-            localStorage.setItem('vitgroww_resume', JSON.stringify(resume));
+            localStorage.setItem('vit-meridian_resume', JSON.stringify(resume));
         }, 1000);
         return () => clearTimeout(timer);
     }, [resume]);

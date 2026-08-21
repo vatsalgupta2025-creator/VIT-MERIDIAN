@@ -116,7 +116,7 @@ export default function TimetableHelper() {
 
     // Load timetable from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_timetable');
+        const saved = localStorage.getItem('vit-meridian_timetable');
         if (saved) {
             try {
                 setTimetable(JSON.parse(saved));
@@ -127,7 +127,7 @@ export default function TimetableHelper() {
     // Save timetable when changed
     useEffect(() => {
         if (timetable) {
-            localStorage.setItem('vitgroww_timetable', JSON.stringify(timetable));
+            localStorage.setItem('vit-meridian_timetable', JSON.stringify(timetable));
         }
     }, [timetable]);
 

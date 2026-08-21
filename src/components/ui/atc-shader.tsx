@@ -30,7 +30,7 @@ void main(){
   vec3 v = vec3(1.0, 2.0, 6.0);
   float i = 0.0, z = 1.0, d = 1.0, f = 1.0;
 
-  for ( ; i++ < 5e1;
+  for ( ; i++ < 3e1;
         o.rgb += (cos((p.x + z + v) * 0.1) + 1.0) / d / f / z )
   {
     p = z * normalize(FC * 2.0 - r.xyy);
@@ -45,7 +45,7 @@ void main(){
   }
 
   o = tanh4(0.2 * o);
-  o.rgb *= vec3(1.2, 0.1, 0.1); // Red tint for red and black shade
+  o.rgb *= vec3(0.5, 0.5, 0.5); // Monochromatic metallic gray tint
   o.a = 1.0;
   fragColor = o;
 }`

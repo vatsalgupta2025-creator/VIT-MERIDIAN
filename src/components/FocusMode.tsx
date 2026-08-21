@@ -54,6 +54,14 @@ export default function FocusMode({ onClose }: FocusModeProps) {
   const [showStats, setShowStats] = useState(false);
   const [ambientSound, setAmbientSound] = useState<'none' | 'rain' | 'lofi' | 'waves' | 'wind'>('none');
   
+  const AMBIENT_URLS = {
+    none: '',
+    rain: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Rain_on_a_Tin_Roof.ogg',
+    lofi: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Lofi_Beat_2.ogg',
+    waves: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Ocean_Waves_at_night.ogg',
+    wind: 'https://upload.wikimedia.org/wikipedia/commons/8/85/Wind_in_trees.ogg'
+  };
+  
   // Stats
   const [sessions, setSessions] = useState<Session[]>([]);
   const [streak, setStreak] = useState(0);
@@ -97,6 +105,18 @@ export default function FocusMode({ onClose }: FocusModeProps) {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isActive, timeLeft]);
+
+  // Audio logic
+  useEffect(() => {
+    if (audioRef.current) {
+      if (ambientSound === 'none') {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.src = AMBIENT_URLS[ambientSound];
+        audioRef.current.play().catch(e => console.log('Audio playback prevented', e));
+      }
+    }
+  }, [ambientSound]);
 
   const handleTimerComplete = () => {
     setIsActive(false);
@@ -249,8 +269,11 @@ export default function FocusMode({ onClose }: FocusModeProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-50 flex flex-col bg-[#040812] overflow-hidden"
+      className="fixed inset-0 z-50 flex flex-col bg-[#09090b] overflow-hidden font-sans"
     >
+      {/* Audio element */}
+      <audio ref={audioRef} loop />
+
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Breathing glow */}
@@ -367,12 +390,8 @@ export default function FocusMode({ onClose }: FocusModeProps) {
                 onClick={() => switchMode(m)}
                 className={`px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
                   mode === m
-                    ? m === 'focus' 
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
-                      : m === 'break'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
-                    : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+                    ? 'bg-zinc-800 text-zinc-100 border border-zinc-600 shadow-md'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
                 }`}
               >
                 {m === 'focus' && <Zap size={16} />}
@@ -464,8 +483,8 @@ export default function FocusMode({ onClose }: FocusModeProps) {
               onClick={toggleTimer}
               className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
                 isActive
-                  ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                  : 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-[0_0_50px_rgba(6,182,212,0.4)] hover:shadow-[0_0_60px_rgba(6,182,212,0.6)]'
+                  ? 'bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700/80 border border-zinc-600/50'
+                  : 'bg-zinc-100 text-zinc-900 shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.2)]'
               }`}
             >
               {isActive ? <Pause size={36} fill="currentColor" /> : <Play size={36} fill="currentColor" className="ml-1" />}
@@ -504,7 +523,7 @@ export default function FocusMode({ onClose }: FocusModeProps) {
               initial={{ opacity: 0, x: 300 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 300 }}
-              className="absolute right-8 top-24 w-80 bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-2xl"
+              className="absolute right-8 top-24 w-80 bg-zinc-950/80 backdrop-blur-xl rounded-2xl border border-zinc-800 p-6 shadow-2xl"
             >
               <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                 <Settings2 size={18} />
@@ -564,8 +583,8 @@ export default function FocusMode({ onClose }: FocusModeProps) {
                       onClick={() => setAmbientSound(sound.id as any)}
                       className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-1 ${
                         ambientSound === sound.id
-                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
-                          : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'
+                          ? 'bg-zinc-800 border-zinc-600 text-zinc-100'
+                          : 'bg-zinc-900/50 border-zinc-800/50 text-zinc-500 hover:bg-zinc-800/50'
                       }`}
                     >
                       <sound.icon size={18} />
@@ -585,7 +604,7 @@ export default function FocusMode({ onClose }: FocusModeProps) {
               initial={{ opacity: 0, x: -300 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -300 }}
-              className="absolute left-8 top-24 w-80 bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-2xl"
+              className="absolute left-8 top-24 w-80 bg-zinc-950/80 backdrop-blur-xl rounded-2xl border border-zinc-800 p-6 shadow-2xl"
             >
               <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                 <Trophy size={18} className="text-amber-400" />

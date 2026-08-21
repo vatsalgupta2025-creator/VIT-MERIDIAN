@@ -49,7 +49,7 @@ export default function BudgetTracker() {
 
     // Load data
     useEffect(() => {
-        const saved = localStorage.getItem('vitgroww_budget');
+        const saved = localStorage.getItem('vit-meridian_budget');
         if (saved) {
             try {
                 const d = JSON.parse(saved);
@@ -62,7 +62,7 @@ export default function BudgetTracker() {
 
     // Save data
     useEffect(() => {
-        localStorage.setItem('vitgroww_budget', JSON.stringify({ expenses, budget: monthlyBudget, savingsGoal }));
+        localStorage.setItem('vit-meridian_budget', JSON.stringify({ expenses, budget: monthlyBudget, savingsGoal }));
     }, [expenses, monthlyBudget, savingsGoal]);
 
     const addExpense = () => {

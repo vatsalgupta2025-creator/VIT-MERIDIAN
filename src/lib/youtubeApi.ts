@@ -1,5 +1,5 @@
 // ============================================================
-// VITGROWW Learning Hub — YouTube API Service
+// VIT-MERIDIAN Learning Hub — YouTube API Service
 // Supports both env-var API key and runtime user-supplied key
 // ============================================================
 

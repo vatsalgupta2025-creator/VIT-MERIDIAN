@@ -88,7 +88,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                 transition={{ delay: 0.2 }}
                 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent mb-2"
             >
-                VITGROWW
+                VIT-MERIDIAN
             </motion.h1>
 
             <motion.p

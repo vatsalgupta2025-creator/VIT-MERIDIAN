@@ -535,7 +535,7 @@ export interface UserProfile {
 
 export const currentUser: UserProfile = {
   name: "Ayush Upadhyay",
-  email: "ayush.upadhyay@vitgroww.edu",
+  email: "ayush.upadhyay@vit-meridian.edu",
   avatar: "AU",
   studentId: "STU-2023-0847",
   major: "BTech CSE AIML",

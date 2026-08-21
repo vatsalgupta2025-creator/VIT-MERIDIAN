@@ -521,14 +521,14 @@ function MyVideosTab({
     // Load saved videos
     useEffect(() => {
         try {
-            const saved = localStorage.getItem('vitgroww_my_videos');
+            const saved = localStorage.getItem('vit-meridian_my_videos');
             if (saved) setMyVideos(JSON.parse(saved));
         } catch { }
     }, []);
 
     // Persist
     useEffect(() => {
-        localStorage.setItem('vitgroww_my_videos', JSON.stringify(myVideos));
+        localStorage.setItem('vit-meridian_my_videos', JSON.stringify(myVideos));
     }, [myVideos]);
 
     const addVideo = async () => {
@@ -683,19 +683,19 @@ export default function LearningHub() {
     // Load API key from localStorage
     useEffect(() => {
         try {
-            const savedKey = localStorage.getItem('vitgroww_yt_api_key');
+            const savedKey = localStorage.getItem('vit-meridian_yt_api_key');
             if (savedKey) setYoutubeApiKey(savedKey);
             else {
                 // Pre-save the built-in key so users see green immediately
                 const defaultKey = 'AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA';
-                localStorage.setItem('vitgroww_yt_api_key', defaultKey);
+                localStorage.setItem('vit-meridian_yt_api_key', defaultKey);
             }
         } catch { }
     }, []);
 
     const saveApiKey = (key: string) => {
         setYoutubeApiKey(key);
-        localStorage.setItem('vitgroww_yt_api_key', key);
+        localStorage.setItem('vit-meridian_yt_api_key', key);
         setShowKeyPanel(false);
     };
 

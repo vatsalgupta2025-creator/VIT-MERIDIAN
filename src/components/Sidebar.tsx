@@ -111,9 +111,9 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
             className={`relative flex flex-col h-screen transition-all duration-300 ease-out ${collapsed ? 'w-[64px]' : 'w-[250px]'
                 }`}
         >
-            {/* Glass background */}
+            {/* Solid metallic background */}
             <div
-                className="absolute inset-0 bg-black/30 backdrop-blur-xl border-r border-white/5"
+                className="absolute inset-0 bg-[var(--surface-base)] border-r border-[var(--border)]"
             />
 
             <div className="relative z-10 flex flex-col h-full">
@@ -121,33 +121,24 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                 <div className="flex items-center justify-between h-16 px-4">
                     {!collapsed && (
                         <div className="flex items-center gap-2.5">
-                            <div
-                                className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm"
-                                style={{
-                                    background: 'linear-gradient(135deg, #06b6d4, #10b981)',
-                                    color: '#000',
-                                    boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
-                                }}
-                            >
-                                V
-                            </div>
+                            <img 
+                                src="/logo.png" 
+                                alt="VIT-MERIDIAN Logo" 
+                                className="w-8 h-8 rounded-lg object-cover bg-transparent"
+                            />
                             <span
-                                className="font-display font-bold text-base tracking-tight text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                                className="font-display font-bold text-base tracking-tight text-[var(--text-primary)]"
                             >
-                                VITGROWW
+                                VIT-MERIDIAN
                             </span>
                         </div>
                     )}
                     {collapsed && (
-                        <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm mx-auto"
-                            style={{
-                                background: 'var(--accent-primary)',
-                                color: 'var(--text-inverse)',
-                            }}
-                        >
-                            V
-                        </div>
+                            <img 
+                                src="/logo.png" 
+                                alt="VIT-MERIDIAN Logo" 
+                                className="w-8 h-8 rounded-lg object-cover bg-transparent mx-auto"
+                            />
                     )}
                     {!collapsed && (
                         <button
@@ -175,7 +166,7 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                         }}
                     >
                         {activeSection === 'dashboard' && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b from-cyan-400 to-emerald-400 rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-white rounded-r-full" />
                         )}
                         <LayoutDashboard size={18} />
                         {!collapsed && <span className="font-medium">Dashboard</span>}
@@ -243,7 +234,7 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
                                                 title={collapsed ? item.label : undefined}
                                             >
                                                 {isActive && (
-                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b from-cyan-400 to-emerald-400 rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-white rounded-r-full" />
                                                 )}
                                                 <Icon size={17} />
                                                 {!collapsed && (
