@@ -1,0 +1,8 @@
+﻿09060f9 fix: resolve globals.css encoding and finalize Animated AI Chat integration
+7763876 feat: integrate premium WebGL shader background with Vitgroww color grading
+39f5f22 feat: Add 3D smooth page-flipping book animation to BootScreen and fix Visual Algos routing
+c3e430c Merge AI Mock Interview and MrVighelp with Vitgroww frontend
+b28a345 Update README.md
+5c06f1e Merged remote main with campus-explorer map and svg icon fixes
+73d4ed3 Update package-lock for merged dependencies
+1c9200e Fix package.json formatting

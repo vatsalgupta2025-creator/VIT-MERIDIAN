@@ -1,0 +1,14 @@
+﻿commit 09060f983a782e63e205dd5ad3e606f29ecd1f3f
+Author: Vatsal Gupta <vatsalgupta2025-creator@users.noreply.github.com>
+Date:   Tue Feb 24 05:49:14 2026 +0530
+
+    fix: resolve globals.css encoding and finalize Animated AI Chat integration
+
+ package-lock.json                      |  21 ++
+ package.json                           |   2 +
+ src/app/globals.css                    |   7 +
+ src/app/page.tsx                       |   3 +
+ src/components/Sidebar.tsx             |   4 +-
+ src/components/ui/animated-ai-chat.tsx | 647 +++++++++++++++++++++++++++++++++
+ src/lib/utils.ts                       |   6 +
+ 7 files changed, 689 insertions(+), 1 deletion(-)

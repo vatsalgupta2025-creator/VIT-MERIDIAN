@@ -1,0 +1,9 @@
+﻿73d4ed3 HEAD@{0}: commit: Update package-lock for merged dependencies
+1c9200e HEAD@{1}: rebase (finish): returning to refs/heads/main
+1c9200e HEAD@{2}: rebase (continue): Fix package.json formatting
+a14a1d8 HEAD@{3}: pull --rebase origin main (start): checkout a14a1d82f8e92f22afc6e2fb5e0309158b8b0123
+da9ea2b HEAD@{4}: commit: Fix package.json formatting
+e722cdf HEAD@{5}: commit: Merged remote main with campus-explorer map and svg icon fixes
+2f0554f HEAD@{6}: pull origin main: Fast-forward
+65eb595 HEAD@{7}: reset: moving to HEAD
+65eb595 HEAD@{8}: clone: from https://github.com/vatsalgupta2025-creator/VITGROWW.git
