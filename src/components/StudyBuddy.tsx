@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +8,7 @@ import {
     Layers, RotateCcw, Zap, Target, Award, FileText, Copy, BookOpen
 } from 'lucide-react';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyD2Q4_VL9jOzpgcDBXW3m0dfwoNec-T0LI';
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -286,7 +286,7 @@ export default function StudyBuddy() {
                                                 />
                                             </div>
                                             <span className="text-white/50 text-xs">{reviewed}/{cards.length}</span>
-                                            <span className="text-emerald-400 text-xs font-bold">{correctCount} ✓</span>
+                                            <span className="text-emerald-400 text-xs font-bold">{correctCount} âœ“</span>
                                         </div>
 
                                         {/* Card */}
@@ -303,7 +303,7 @@ export default function StudyBuddy() {
                                                     className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 backdrop-blur-xl border border-cyan-500/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center"
                                                     style={{ backfaceVisibility: 'hidden' }}
                                                 >
-                                                    <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 text-[10px] font-bold rounded-full mb-4">QUESTION · Card {currentIndex + 1}/{cards.length}</span>
+                                                    <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 text-[10px] font-bold rounded-full mb-4">QUESTION Â· Card {currentIndex + 1}/{cards.length}</span>
                                                     <p className="text-white/90 text-lg font-medium leading-relaxed">{cards[currentIndex]?.front}</p>
                                                     <p className="text-white/20 text-xs mt-4">Click to flip</p>
                                                 </div>
@@ -418,7 +418,7 @@ export default function StudyBuddy() {
                                     <Award size={64} className="text-violet-400 mx-auto mb-4" />
                                     <h3 className="text-3xl font-bold text-white mb-2">Quiz Complete!</h3>
                                     <p className="text-5xl font-black bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent my-4">{quizScore}/{quizQuestions.length}</p>
-                                    <p className="text-white/50 mb-6">{quizScore === quizQuestions.length ? 'Perfect score! 🎉' : quizScore >= quizQuestions.length * 0.7 ? 'Great job! 🌟' : 'Keep practicing! 💪'}</p>
+                                    <p className="text-white/50 mb-6">{quizScore === quizQuestions.length ? 'Perfect score! ðŸŽ‰' : quizScore >= quizQuestions.length * 0.7 ? 'Great job! ðŸŒŸ' : 'Keep practicing! ðŸ’ª'}</p>
                                     <button onClick={() => { setQuizIndex(0); setQuizScore(0); setQuizComplete(false); setSelectedAnswer(null); }}
                                         className="px-6 py-3 bg-violet-500/20 text-violet-400 rounded-xl hover:bg-violet-500/30 transition-all flex items-center gap-2 mx-auto">
                                         <RotateCcw size={16} /> Retry Quiz
@@ -461,7 +461,7 @@ export default function StudyBuddy() {
                                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                                                 <p className="text-white/50 text-xs">{quizQuestions[quizIndex].explanation}</p>
                                                 <button onClick={nextQuizQuestion} className="mt-3 px-5 py-2 bg-violet-500/20 text-violet-400 rounded-lg hover:bg-violet-500/30 text-sm transition-all">
-                                                    {quizIndex < quizQuestions.length - 1 ? 'Next Question →' : 'See Results'}
+                                                    {quizIndex < quizQuestions.length - 1 ? 'Next Question â†’' : 'See Results'}
                                                 </button>
                                             </motion.div>
                                         )}
@@ -475,3 +475,5 @@ export default function StudyBuddy() {
         </div>
     );
 }
+
+
