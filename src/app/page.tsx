@@ -130,19 +130,10 @@ export default function Home() {
 
   return (
     <UserProvider>
-      <div className="flex h-screen bg-[#040812] aurora-bg overflow-hidden relative">
-        {/* Ambient glow orbs */}
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="fixed top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/[0.04] blur-[150px] pointer-events-none"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="fixed bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/[0.04] blur-[120px] pointer-events-none"
-        />
-
+      <div 
+        className="flex h-screen overflow-hidden relative bg-ruled-lines" 
+        style={{ backgroundColor: 'var(--surface-base)' }}
+      >
         {/* Sidebar */}
         <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
 
