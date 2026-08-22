@@ -6,7 +6,7 @@
 import { YouTubeVideo } from '@/types/learning';
 import { YOUTUBE_API_CONFIG, parseDuration, formatViewCount } from '@/data/learningData';
 
-const ENV_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyDwrXOb_52JLUDn8GC3ygKoO5als-eIcmA';
+const ENV_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyBO51V6jlM98u5BvRyfyE6PPbWyHC7S_tI';
 
 
 // ── Internal helpers ─────────────────────────────────────────

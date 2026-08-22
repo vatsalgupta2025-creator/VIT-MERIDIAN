@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/context/UserContext';
+import { useRBAC } from '@/context/RBACContext';
+import { Role } from '@/types/canonical';
 import SearchBar from './SearchBar';
 
 // Modern Glass DashCard with Gradient Dots
@@ -108,8 +110,9 @@ function AttendancePulse({ percentage }: { percentage: number }) {
 }
 
 export default function DashboardOverview() {
-    const { user } = useUser();
-    const [currentTime, setCurrentTime] = useState(new Date());
+  const { user } = useUser();
+  const { activeRole, setActiveRole } = useRBAC();
+  const [currentTime, setCurrentTime] = useState(new Date());
     const [activeTab, setActiveTab] = useState('all');
 
     useEffect(() => {
@@ -146,6 +149,20 @@ export default function DashboardOverview() {
 
     return (
         <div className="space-y-6 pb-20">
+            {/* ROLE SWITCHER DEBUG TOOL */}
+            <div className="flex flex-wrap items-center gap-2 md:gap-4 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                <span className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">Debug Role:</span>
+                {(['STUDENT', 'FACULTY', 'WARDEN', 'PLACEMENT_OFFICER', 'ADMIN'] as Role[]).map(role => (
+                    <button
+                        key={role}
+                        onClick={() => setActiveRole(role)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all ${activeRole === role ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-transparent text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                        {role}
+                    </button>
+                ))}
+            </div>
+
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
