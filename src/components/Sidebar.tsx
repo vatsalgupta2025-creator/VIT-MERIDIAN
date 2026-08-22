@@ -101,7 +101,7 @@ const allCategories = [
       { id: 'attendance-admin', label: 'Attendance Rollup', icon: BarChart3 },
       { id: 'fees-finance', label: 'Fees & Finance', icon: Wallet },
       { id: 'examinations', label: 'Examinations', icon: FileText },
-      { id: 'faculty-admin', label: 'Faculty Mgmt', icon: Users },
+      { id: 'faculty-admin', label: 'Class Attendance', icon: UserCheck },
       { id: 'placement-admin', label: 'Placement Cell', icon: Rocket },
       { id: 'hostel-admin', label: 'Hostel Mgmt', icon: Building2 },
       { id: 'communication-hub', label: 'Communication', icon: Megaphone },
@@ -174,7 +174,7 @@ const bottomItems = [
 
 export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const { user, setIsEditModalOpen } = useUser();
+  const { user, setIsEditModalOpen, logout } = useUser();
   const { activeRole } = useRBAC();
 
   // Filter categories based on RBAC
@@ -389,40 +389,54 @@ export default function Sidebar({ activeSection, onNavigate }: SidebarProps) {
  );
  })}
 
- {/* Student info */}
- {!collapsed && (
- <button
- onClick={() => setIsEditModalOpen(true)}
- className="mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left group"
- style={{ background: 'var(--surface-overlay)', border: '1px solid var(--border)' }}
- >
- <div
- className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-xs flex-shrink-0"
- style={{ background: 'var(--accent-primary-muted)', color: 'var(--accent-primary)' }}
- >
- {(user.name || 'U').charAt(0).toUpperCase()}
- </div>
- <div className="flex-1 min-w-0">
- <p
- className="text-sm font-semibold truncate"
- style={{ color: 'var(--text-primary)' }}
- >
- {user.name || 'Set your name'}
- </p>
- <p
- className="text-[10px] font-mono truncate"
- style={{ color: 'var(--text-muted)' }}
- >
- {user.regNo || 'Set reg. number'}
- </p>
- </div>
- <Edit3
- size={12}
- className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
- style={{ color: 'var(--text-muted)' }}
- />
- </button>
- )}
+  {/* Student info */}
+  {!collapsed && (
+  <div className="mt-2 flex items-center gap-2">
+    <button
+    onClick={() => setIsEditModalOpen(true)}
+    className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left group"
+    style={{ background: 'var(--surface-overlay)', border: '1px solid var(--border)' }}
+    >
+    <div
+    className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-xs flex-shrink-0"
+    style={{ background: 'var(--accent-primary-muted)', color: 'var(--accent-primary)' }}
+    >
+    {(user.name || 'U').charAt(0).toUpperCase()}
+    </div>
+    <div className="flex-1 min-w-0">
+    <p
+    className="text-sm font-semibold truncate"
+    style={{ color: 'var(--text-primary)' }}
+    >
+    {user.name || 'Set your name'}
+    </p>
+    <p
+    className="text-[10px] font-mono truncate"
+    style={{ color: 'var(--text-muted)' }}
+    >
+    {user.regNo || 'Set reg. number'}
+    </p>
+    </div>
+    <Edit3
+    size={12}
+    className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+    style={{ color: 'var(--text-muted)' }}
+    />
+    </button>
+    
+    <button
+      onClick={() => {
+        if (logout) logout();
+        localStorage.removeItem('vit-meridian_user_profile');
+        window.location.reload();
+      }}
+      className="p-3 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors border border-transparent hover:border-rose-500/20"
+      title="Logout"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+    </button>
+  </div>
+  )}
 
  {/* Collapse toggle when collapsed */}
  {collapsed && (

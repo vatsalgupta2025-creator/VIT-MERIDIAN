@@ -36,7 +36,7 @@ import VisualAlgorithms from '@/components/VisualAlgorithms';
 import TravelPool from '@/components/TravelPool';
 import BusTransportation from '@/components/BusTransportation';
 import ProfileView from '@/components/ProfileView';
-import FacultyManagement from '@/components/FacultyManagement';
+import FacultyAttendance from '@/components/FacultyAttendance';
 import StudentDetailsModal from '@/components/StudentDetailsModal';
 import HostelHub from '@/components/HostelHub';
 import ParentPortal from '@/components/ParentPortal';
@@ -54,18 +54,22 @@ import StudentWellbeing from '@/components/StudentWellbeing';
 import CommunicationHub from '@/components/CommunicationHub';
 import ComplaintsModule from '@/components/ComplaintsModule';
 import TransportAdmin from '@/components/TransportAdmin';
-import { UserProvider } from '@/context/UserContext';
-import { RBACProvider } from '@/context/RBACContext';
+import { UserProvider, useUser } from '@/context/UserContext';
+import { RBACProvider, useRBAC } from '@/context/RBACContext';
 import { AuditLogProvider } from '@/context/AuditLogContext';
 import { EventBusProvider } from '@/context/EventBusContext';
 import { AnimatedAIChat } from '@/components/ui/animated-ai-chat';
+import GlobalLogin from '@/components/GlobalLogin';
+import { canonicalStudents, canonicalFaculties } from '@/data/canonicalData';
 const VitgrowwSafe = dynamic(() => import('@/components/VitgrowwSafe'), { ssr: false });
 
 const BootScreen = dynamic(() => import('@/components/BootScreen'), { ssr: false });
 
-export default function Home() {
+function AppContent() {
   const [booted, setBooted] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
+  const { user } = useUser();
+  const { activeRole } = useRBAC();
 
   // Listen for custom navigate events from dashboard widgets
   useEffect(() => {
@@ -149,7 +153,7 @@ export default function Home() {
         return <Examinations />;
       case 'faculty':
       case 'faculty-admin':
-        return <FacultyManagement />;
+        return <FacultyAttendance />;
       case 'hostel-hub':
       case 'hostel-admin':
         return <HostelHub />;
@@ -180,17 +184,21 @@ export default function Home() {
     }
   };
 
+
+
   // Boot screen
   if (!booted) {
     return <BootScreen onComplete={handleBootComplete} />;
   }
 
+  // Global Login
+  const isValidUser = user?.regNo && (canonicalStudents[user.regNo.toUpperCase()] || canonicalFaculties[user.regNo.toUpperCase()]);
+  if (!isValidUser) {
+    return <GlobalLogin onLoginSuccess={() => {}} />;
+  }
+
   return (
-    <EventBusProvider>
-      <RBACProvider>
-        <AuditLogProvider>
-          <UserProvider>
-            <DarkGradientBg>
+    <DarkGradientBg>
               <div className="flex h-screen overflow-hidden w-full relative">
                 {/* Sidebar */}
                 <Sidebar activeSection={activeSection} onNavigate={setActiveSection} />
@@ -223,6 +231,16 @@ export default function Home() {
                 <MrVighelp />
               </div>
             </DarkGradientBg>
+  );
+}
+
+export default function Home() {
+  return (
+    <EventBusProvider>
+      <RBACProvider>
+        <AuditLogProvider>
+          <UserProvider>
+            <AppContent />
           </UserProvider>
         </AuditLogProvider>
       </RBACProvider>

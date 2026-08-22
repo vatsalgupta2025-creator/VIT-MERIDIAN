@@ -20,6 +20,7 @@ export interface UserData {
 interface UserContextType {
     user: UserData;
     updateUser: (data: Partial<UserData>) => void;
+    logout: () => void;
     isEditModalOpen: boolean;
     setIsEditModalOpen: (open: boolean) => void;
 }
@@ -52,6 +53,7 @@ const initialDefaultUser: UserData = {
 const UserContext = createContext<UserContextType>({
     user: initialDefaultUser,
     updateUser: () => { },
+    logout: () => { },
     isEditModalOpen: false,
     setIsEditModalOpen: () => { },
 });
@@ -97,8 +99,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
+    const logout = () => {
+        setUser(initialDefaultUser);
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+            console.error('Failed to clear user profile from storage', e);
+        }
+    };
+
     return (
-        <UserContext.Provider value={{ user, updateUser, isEditModalOpen, setIsEditModalOpen }}>
+        <UserContext.Provider value={{ user, updateUser, logout, isEditModalOpen, setIsEditModalOpen }}>
             {children}
         </UserContext.Provider>
     );

@@ -1,5 +1,11 @@
-export { seedStudents as canonicalStudents } from './seed/students';
-export { seedFaculty as canonicalFaculties } from './seed/faculty';
+import { seedStudents } from './seed/students';
+import { seedFaculties } from './seed/faculties';
+import { CanonicalStudent, LedgerEntry, ExamScore, ClassSchedule, Event, SafetyReport, WellbeingProfile, Feedback } from '@/types/canonical';
+
+// ── 1. Re-export base records ──
+export const canonicalStudents = seedStudents as Record<string, CanonicalStudent>;
+export const canonicalFaculties = seedFaculties as Record<string, any>;
+
 export { 
   seedIncidents as incidents,
   seedSafetyReports as safetyReports,
