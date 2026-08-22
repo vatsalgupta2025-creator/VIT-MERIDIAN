@@ -36,17 +36,17 @@ function getInitials(name: string): string {
 }
 
 const initialDefaultUser: UserData = {
-    name: 'Ayush Upadhyay',
-    regNo: '23BCE10482',
-    email: 'student@vit-meridian.edu',
-    avatar: 'AU',
-    major: 'BTech CSE AIML',
-    year: '3rd Year',
-    gpa: 3.72,
-    ruviScore: 74,
-    totalPoints: 1250,
-    streak: 12,
-    rank: 47,
+    name: '',
+    regNo: '',
+    email: '',
+    avatar: 'ST',
+    major: '',
+    year: '',
+    gpa: 0,
+    ruviScore: 0,
+    totalPoints: 0,
+    streak: 0,
+    rank: 0,
 };
 
 const UserContext = createContext<UserContextType>({

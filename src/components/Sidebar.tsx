@@ -43,6 +43,7 @@ const moduleAccess: Record<string, string[]> = {
   'communication-hub': ['FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN', 'STUDENT'],
   'complaints': ['STUDENT', 'FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
   'transport-admin': ['STUDENT', 'INSTITUTION_ADMIN', 'TRANSPORT_COORDINATOR'],
+  'safe': ['STUDENT', 'FACULTY', 'ADMIN', 'SECURITY_OFFICER', 'INSTITUTION_ADMIN'],
 
   // Existing
   'timetable': ['STUDENT', 'FACULTY', 'ADMIN'],
@@ -112,6 +113,7 @@ const allCategories = [
     id: 'campus',
     label: 'Campus Life',
     items: [
+      { id: 'safe', label: '🛡 VITGROWW SAFE', icon: ShieldAlert },
       { id: 'campus', label: 'Campus Explorer', icon: MapPin },
       { id: 'hostel-hub', label: 'Hostel Hub', icon: Building2 },
       { id: 'parent-portal', label: 'Parent Portal', icon: ShieldAlert },

@@ -39,6 +39,11 @@ export interface CanonicalStudent {
     type: 'NAC' | 'AC';
     messType: 'VEG' | 'NON_VEG' | 'SPECIAL';
   };
+  projectInfo?: {
+    guideId: string;
+    guideName: string;
+    teamMembers: string[];
+  };
 }
 
 // Financial Ledger (Fees)
