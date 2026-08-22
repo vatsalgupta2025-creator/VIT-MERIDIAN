@@ -26,9 +26,9 @@ interface SidebarProps {
 const moduleAccess: Record<string, string[]> = {
   // Institution
   'student-info': ['STUDENT', 'FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
-  'attendance-admin': ['FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
-  'fees-finance': ['DEPT_ADMIN', 'INSTITUTION_ADMIN'],
-  'examinations': ['FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
+  'attendance-admin': ['STUDENT', 'FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
+  'fees-finance': ['STUDENT', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
+  'examinations': ['STUDENT', 'FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
   'faculty-admin': ['FACULTY', 'DEPT_ADMIN', 'INSTITUTION_ADMIN'],
   'placement-admin': ['DEPT_ADMIN', 'INSTITUTION_ADMIN'],
   'hostel-admin': ['HOSTEL_WARDEN', 'INSTITUTION_ADMIN'],

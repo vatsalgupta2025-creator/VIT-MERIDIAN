@@ -18,6 +18,7 @@ export interface CanonicalStudent {
     bloodGroup: string;
     guardianName: string;
     guardianContact: string;
+    avatarUrl?: string;
   };
   enrollment: {
     program: string;
@@ -61,6 +62,25 @@ export interface AttendanceRecord {
   attendedClasses: number;
   percentage: number;
   lastUpdated: string;
+}
+
+export interface ClassSchedule {
+  id: string; // e.g., BACSE201-TH-AB3-104-ALL
+  courseName: string;
+  facultyId: string;
+  slots: string[]; // e.g., ['Mon 08:00-08:50', 'Wed 10:00-10:50']
+  students: string[]; // studentIds
+}
+
+export interface AttendanceSlotLog {
+  id: string;
+  classId: string;
+  slot: string;
+  date: string;
+  records: {
+    studentId: string;
+    status: 'PRESENT' | 'ABSENT';
+  }[];
 }
 
 // Examinations & Results

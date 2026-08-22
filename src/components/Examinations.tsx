@@ -2,135 +2,193 @@
 
 import React, { useState } from 'react';
 import { useRBAC } from '@/context/RBACContext';
-import { useAuditLog } from '@/context/AuditLogContext';
-import { examRecords, canonicalStudents, ledgerEntries } from '@/data/canonicalData';
-import { FileText, AlertTriangle, ShieldCheck, CheckCircle } from 'lucide-react';
+import { examScores, canonicalStudents, classSchedules } from '@/data/canonicalData';
+import { FileText, AlertTriangle, TrendingUp, Award, Users } from 'lucide-react';
 import { ExamRecord } from '@/types/canonical';
 
 export default function Examinations() {
-  const { activeRole, can } = useRBAC();
-  const { logAction } = useAuditLog();
-  const [records, setRecords] = useState<ExamRecord[]>(examRecords);
+  const { activeRole } = useRBAC();
+  const [records] = useState<ExamRecord[]>(examScores);
   
-  // Faculty views all records for their courses, Students view their own, Admins view all
-  const canEnterMarks = can('write', 'marks');
-  const [selectedStudentId, setSelectedStudentId] = useState<string>('21BCE0001');
+  const [selectedClassId, setSelectedClassId] = useState(classSchedules[0]?.id);
+  const currentClass = classSchedules.find(c => c.id === selectedClassId) || classSchedules[0];
 
-  // Check if student is gated from exams (fees unpaid)
-  const studentLedger = ledgerEntries.filter(l => l.studentId === selectedStudentId);
-  const totalDue = studentLedger.reduce((acc, curr) => acc + (curr.amountDue - curr.amountPaid), 0);
-  const isGated = totalDue > 0;
+  // For the selected class, get all exam records
+  const classRecords = records.filter(r => r.courseId === currentClass.id);
+  
+  // Group by student for the table
+  const studentsData = currentClass.students.map(studentId => {
+    const student = canonicalStudents[studentId];
+    const cat1 = classRecords.find(r => r.studentId === studentId && r.examType === 'CAT1');
+    const cat2 = classRecords.find(r => r.studentId === studentId && r.examType === 'CAT2');
+    const fat = classRecords.find(r => r.studentId === studentId && r.examType === 'FAT');
+    
+    const totalMarks = (cat1?.marksObtained || 0) + (cat2?.marksObtained || 0) + (fat?.marksObtained || 0);
+    const maxTotal = (cat1?.maxMarks || 50) + (cat2?.maxMarks || 50) + (fat?.maxMarks || 100);
+    const percentage = Math.round((totalMarks / maxTotal) * 100);
 
-  const handleUpdateMarks = (recordId: string, newMarks: string) => {
-    if (!canEnterMarks) return;
-    const num = parseInt(newMarks);
-    if (isNaN(num)) return;
+    return { student, cat1, cat2, fat, totalMarks, maxTotal, percentage };
+  }).filter(s => s.student);
 
-    setRecords(prev => prev.map(r => {
-      if (r.id === recordId) {
-        logAction({
-          actorId: 'CURRENT_USER',
-          actorRole: activeRole,
-          action: 'UPDATE',
-          resourceType: 'MARKS',
-          resourceId: r.id,
-          oldValue: r.marksObtained?.toString() || 'PENDING',
-          newValue: num.toString()
-        });
-        return { ...r, marksObtained: num, status: 'ENTERED' };
-      }
-      return r;
-    }));
-  };
-
-  const studentRecords = canEnterMarks ? records : records.filter(r => r.studentId === selectedStudentId);
+  // Analytics
+  const classAverage = Math.round(
+    studentsData.reduce((acc, curr) => acc + curr.percentage, 0) / (studentsData.length || 1)
+  );
+  const avgCAT1 = Math.round(
+    studentsData.reduce((acc, curr) => acc + (curr.cat1?.marksObtained || 0), 0) / (studentsData.length || 1)
+  );
+  const avgCAT2 = Math.round(
+    studentsData.reduce((acc, curr) => acc + (curr.cat2?.marksObtained || 0), 0) / (studentsData.length || 1)
+  );
+  const avgFAT = Math.round(
+    studentsData.reduce((acc, curr) => acc + (curr.fat?.marksObtained || 0), 0) / (studentsData.length || 1)
+  );
+  const topStudent = studentsData.reduce((best, curr) => curr.percentage > (best?.percentage || 0) ? curr : best, studentsData[0]);
+  const failingCount = studentsData.filter(s => s.percentage < 50).length;
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
-          <FileText className="text-blue-500" size={28} />
-          Examinations & Results
+          <TrendingUp className="text-blue-500" size={28} />
+          Examination Results
         </h1>
-        {canEnterMarks && (
-          <select 
-            value={selectedStudentId} 
-            onChange={e => setSelectedStudentId(e.target.value)}
-            className="bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-white/90 outline-none focus:border-blue-500/50"
-          >
-            {Object.values(canonicalStudents).map(s => (
-              <option key={s.id} value={s.id}>{s.id} - {s.personalInfo.fullName}</option>
-            ))}
-          </select>
-        )}
+        <select 
+          value={selectedClassId} 
+          onChange={e => setSelectedClassId(e.target.value)}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500/50"
+        >
+          {classSchedules.map(c => (
+            <option key={c.id} value={c.id} className="bg-neutral-900">{c.id} — {c.courseName}</option>
+          ))}
+        </select>
       </div>
 
-      {isGated && (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 flex items-start gap-4">
-          <AlertTriangle className="text-red-400 mt-1 flex-shrink-0" size={24} />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="p-4 rounded-2xl bg-black/40 border border-blue-500/20">
+          <h3 className="text-[10px] text-blue-400/60 uppercase tracking-widest font-semibold mb-1">Class Average</h3>
+          <p className="text-3xl font-mono font-bold text-blue-400">{classAverage}%</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-cyan-500/20">
+          <h3 className="text-[10px] text-cyan-400/60 uppercase tracking-widest font-semibold mb-1">Avg CAT 1</h3>
+          <p className="text-3xl font-mono font-bold text-cyan-400">{avgCAT1}<span className="text-sm text-white/30">/50</span></p>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-purple-500/20">
+          <h3 className="text-[10px] text-purple-400/60 uppercase tracking-widest font-semibold mb-1">Avg CAT 2</h3>
+          <p className="text-3xl font-mono font-bold text-purple-400">{avgCAT2}<span className="text-sm text-white/30">/50</span></p>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-amber-500/20">
+          <h3 className="text-[10px] text-amber-400/60 uppercase tracking-widest font-semibold mb-1">Avg FAT</h3>
+          <p className="text-3xl font-mono font-bold text-amber-400">{avgFAT}<span className="text-sm text-white/30">/100</span></p>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-red-500/20">
+          <h3 className="text-[10px] text-red-400/60 uppercase tracking-widest font-semibold mb-1">Failing (&lt;50%)</h3>
+          <p className="text-3xl font-mono font-bold text-red-400">{failingCount}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-emerald-500/20">
+          <h3 className="text-[10px] text-emerald-400/60 uppercase tracking-widest font-semibold mb-1">Total Students</h3>
+          <p className="text-3xl font-mono font-bold text-emerald-400">{studentsData.length}</p>
+        </div>
+      </div>
+
+      {/* Topper Card */}
+      {topStudent && topStudent.student && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-yellow-500/5 border border-amber-500/20 flex items-center gap-4">
+          <Award className="text-amber-400 flex-shrink-0" size={28} />
           <div>
-            <h3 className="font-semibold text-red-400">Exam Hall Ticket Blocked</h3>
-            <p className="text-sm text-red-400/80 mt-1">
-              Outstanding fee dues detected. Hall tickets cannot be generated until financial clearance is obtained.
-            </p>
+            <p className="text-xs text-amber-400/60 uppercase tracking-widest font-semibold">Class Topper</p>
+            <p className="text-lg font-bold text-amber-300">{topStudent.student.personalInfo.fullName} <span className="text-sm font-mono text-white/40">({topStudent.student.id})</span> — {topStudent.percentage}%</p>
           </div>
         </div>
       )}
 
-      {!isGated && activeRole === 'STUDENT' && (
-        <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 flex items-start gap-4">
-          <ShieldCheck className="text-emerald-400 mt-1 flex-shrink-0" size={24} />
-          <div>
-            <h3 className="font-semibold text-emerald-400">Hall Ticket Generated</h3>
-            <p className="text-sm text-emerald-400/80 mt-1">
-              Financial and attendance clearance verified. You can download your hall ticket.
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Results Table */}
+      <div className="rounded-2xl border border-white/[0.05] bg-black/40 overflow-hidden overflow-x-auto">
+        <table className="w-full text-left text-sm min-w-[900px]">
+          <thead className="bg-white/[0.02] border-b border-white/[0.05]">
+            <tr>
+              <th className="p-4 font-semibold text-white/60 w-12">#</th>
+              <th className="p-4 font-semibold text-white/60">Reg No</th>
+              <th className="p-4 font-semibold text-white/60">Student Name</th>
+              <th className="p-4 font-semibold text-cyan-400/80 text-center">CAT 1 (50)</th>
+              <th className="p-4 font-semibold text-purple-400/80 text-center">CAT 2 (50)</th>
+              <th className="p-4 font-semibold text-amber-400/80 text-center">FAT (100)</th>
+              <th className="p-4 font-semibold text-blue-400/80 text-center">Total</th>
+              <th className="p-4 font-semibold text-white/60 text-center">%</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/[0.05]">
+            {studentsData.map(({ student, cat1, cat2, fat, totalMarks, maxTotal, percentage }, index) => {
+              if (!student) return null;
+              const isFailing = percentage < 50;
+              const isTopper = topStudent && student.id === topStudent.student?.id;
 
-      <div className="grid grid-cols-1 gap-4 mt-6">
-        {studentRecords.map((record) => (
-          <div key={record.id} className="p-5 rounded-2xl bg-black/40 border border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-lg">{record.courseId}</h3>
-              <p className="text-sm text-white/50">{record.examType} - Semester {record.semester}</p>
-            </div>
-
-            <div className="flex items-center gap-8">
-              <div className="text-right">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Status</p>
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
-                  record.status === 'PUBLISHED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                  record.status === 'ENTERED' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                  'bg-zinc-800 text-zinc-400 border border-zinc-700'
+              return (
+                <tr key={student.id} className={`transition-colors ${
+                  isTopper ? 'bg-amber-500/[0.05]' : isFailing ? 'bg-red-500/[0.03]' : 'hover:bg-white/[0.02]'
                 }`}>
-                  {record.status === 'PUBLISHED' && <CheckCircle size={12} />}
-                  {record.status}
-                </span>
-              </div>
-              
-              <div className="text-right min-w-[120px]">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Marks</p>
-                {canEnterMarks && record.status !== 'PUBLISHED' ? (
-                  <div className="flex items-center justify-end gap-2">
-                    <input 
-                      type="number" 
-                      defaultValue={record.marksObtained || ''}
-                      onBlur={(e) => handleUpdateMarks(record.id, e.target.value)}
-                      className="w-16 bg-white/5 border border-white/10 rounded px-2 py-1 text-center font-mono font-bold outline-none focus:border-blue-500"
-                    />
-                    <span className="text-white/40 font-mono">/ {record.maxMarks}</span>
-                  </div>
-                ) : (
-                  <p className="font-mono font-bold text-lg">
-                    {record.marksObtained !== null ? record.marksObtained : '--'} <span className="text-white/40 text-sm">/ {record.maxMarks}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+                  <td className="p-4 text-white/30 font-mono text-xs">{index + 1}</td>
+                  <td className="p-4 font-mono text-white/70">{student.id}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      {isTopper && <Award size={14} className="text-amber-400" />}
+                      <span className="font-medium text-white">{student.personalInfo.fullName}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="p-4 text-center font-mono">
+                    <span className={`px-2 py-1 rounded-lg ${
+                      (cat1?.marksObtained || 0) < 25 ? 'bg-red-500/10 text-red-400' : 'text-cyan-300'
+                    }`}>
+                      {cat1?.marksObtained ?? '—'}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-mono">
+                    <span className={`px-2 py-1 rounded-lg ${
+                      (cat2?.marksObtained || 0) < 25 ? 'bg-red-500/10 text-red-400' : 'text-purple-300'
+                    }`}>
+                      {cat2?.marksObtained ?? '—'}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-mono">
+                    <span className={`px-2 py-1 rounded-lg ${
+                      (fat?.marksObtained || 0) < 40 ? 'bg-red-500/10 text-red-400' : 'text-amber-300'
+                    }`}>
+                      {fat?.marksObtained ?? '—'}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-mono font-bold text-white/80">
+                    {totalMarks}<span className="text-white/30 font-normal">/{maxTotal}</span>
+                  </td>
+                  <td className="p-4 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`font-mono font-bold ${
+                        isFailing ? 'text-red-400' : percentage >= 90 ? 'text-emerald-400' : 'text-blue-300'
+                      }`}>
+                        {percentage}%
+                      </span>
+                      {isFailing && <AlertTriangle size={12} className="text-red-400" />}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          {/* Average Row */}
+          <tfoot className="bg-white/[0.03] border-t-2 border-white/10">
+            <tr>
+              <td className="p-4" colSpan={3}>
+                <span className="font-bold text-white/60 uppercase text-xs tracking-wider">Class Average</span>
+              </td>
+              <td className="p-4 text-center font-mono font-bold text-cyan-400">{avgCAT1}</td>
+              <td className="p-4 text-center font-mono font-bold text-purple-400">{avgCAT2}</td>
+              <td className="p-4 text-center font-mono font-bold text-amber-400">{avgFAT}</td>
+              <td className="p-4 text-center font-mono font-bold text-white">{avgCAT1 + avgCAT2 + avgFAT}</td>
+              <td className="p-4 text-center font-mono font-bold text-blue-400">{classAverage}%</td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   );

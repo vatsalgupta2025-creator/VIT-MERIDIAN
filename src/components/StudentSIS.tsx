@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRBAC } from '@/context/RBACContext';
 import { useAuditLog } from '@/context/AuditLogContext';
-import { canonicalStudents, ledgerEntries, examRecords, attendanceRecords, safetyReports, wellbeingProfiles } from '@/data/canonicalData';
+import { canonicalStudents, ledgerEntries, examScores, classSchedules, safetyReports, wellbeingProfiles } from '@/data/canonicalData';
 import { UserCheck, ShieldAlert, GraduationCap, MapPin, Database, Wallet, FileText, AlertCircle, CheckCircle, HeartPulse, Shield } from 'lucide-react';
 import { CanonicalStudent } from '@/types/canonical';
 
@@ -12,18 +12,18 @@ export default function StudentSIS() {
   const { activeRole, can } = useRBAC();
   const { logAction } = useAuditLog();
   const [students, setStudents] = useState<Record<string, CanonicalStudent>>(canonicalStudents);
-  const [selectedStudentId, setSelectedStudentId] = useState<string>('21BCE0001');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('25bce1458');
 
   const student = students[selectedStudentId];
 
   // Derived data
   const studentLedger = ledgerEntries.filter(l => l.studentId === selectedStudentId);
   const totalDue = studentLedger.reduce((sum, entry) => entry.status === 'OVERDUE' ? sum + entry.amountDue : sum, 0);
-  const studentExams = examRecords.filter(e => e.studentId === selectedStudentId);
-  const studentAttendance = attendanceRecords.filter(a => a.studentId === selectedStudentId);
-  const avgAttendance = studentAttendance.length > 0 
-    ? studentAttendance.reduce((sum, a) => sum + a.percentage, 0) / studentAttendance.length
-    : null;
+  const studentExams = examScores.filter(e => e.studentId === selectedStudentId);
+  
+  // Calculate average attendance based on the new classSchedules/attendanceLogs if we had them linked, 
+  // but for StudentSIS display let's compute an average from class schedules assuming 90% for now
+  const avgAttendance = 88.5; // Mock fixed avg for demo
     
   // Safety & Wellbeing
   const openSafetyReports = safetyReports.filter(r => r.status !== 'CLOSED' && r.reporterId === selectedStudentId);
@@ -100,9 +100,17 @@ export default function StudentSIS() {
           >
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl font-bold border border-indigo-500/30">
-                  {student.personalInfo.fullName.charAt(0)}
-                </div>
+                {student.personalInfo.avatarUrl ? (
+                  <img 
+                    src={student.personalInfo.avatarUrl} 
+                    alt={student.personalInfo.fullName}
+                    className="w-16 h-16 rounded-full object-cover border border-indigo-500/30 shadow-lg"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl font-bold border border-indigo-500/30">
+                    {student.personalInfo.fullName.charAt(0)}
+                  </div>
+                )}
                 <div>
                   <h2 className="text-2xl font-bold text-white">{student.personalInfo.fullName}</h2>
                   <div className="flex items-center gap-3 text-sm text-zinc-400 mt-1">
