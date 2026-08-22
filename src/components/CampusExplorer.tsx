@@ -28,6 +28,7 @@ interface CampusPlace {
  visitors: number;
  color: string;
  availability?: CourtAvailability;
+ image?: string;
 }
 
 interface CampusEvent {
@@ -56,20 +57,22 @@ const categoryConfig: Record<PlaceCategory, { icon: typeof MapPin; label: string
 };
 
 const campusPlaces: CampusPlace[] = [
- { id: 'tt', name: 'Technology Tower', lat: 12.8412, lng: 80.1540, category: 'academic', description: 'Main tech hub with labs & lecture halls', rating: 4.8, visitors: 350, color: '#818cf8' },
- { id: 'mb', name: 'Admin Block', lat: 12.8400, lng: 80.1525, category: 'academic', description: 'Administrative offices & examination cell', rating: 4.2, visitors: 110, color: '#818cf8' },
- { id: 'sjt', name: 'Academic Block 1 (AB1)', lat: 12.8418, lng: 80.1520, category: 'academic', description: 'Science & engineering lecture complex', rating: 4.5, visitors: 420, color: '#818cf8' },
- { id: 'fc', name: 'Main Food Court', lat: 12.8398, lng: 80.1545, category: 'dining', description: 'Multi-cuisine food court with 20+ stalls', rating: 4.3, visitors: 540, color: '#fb923c' },
- { id: 'tc', name: 'Java Green Café', lat: 12.8408, lng: 80.1555, category: 'dining', description: 'Popular café with south Indian & snacks', rating: 4.6, visitors: 280, color: '#fb923c' },
- { id: 'cs', name: 'Juice Junction', lat: 12.8395, lng: 80.1518, category: 'dining', description: 'Fresh juices, smoothies & light bites', rating: 4.7, visitors: 140, color: '#fb923c' },
- { id: 'sg', name: 'Sports Ground', lat: 12.8422, lng: 80.1550, category: 'sports', description: 'Cricket, football & athletics ground', rating: 4.9, visitors: 180, color: '#34d399', availability: { status: 'Available', occupied: 150, capacity: 500 } },
- { id: 'ig', name: 'Indoor Stadium', lat: 12.8428, lng: 80.1530, category: 'sports', description: 'Badminton, basketball, TT & gym', rating: 4.7, visitors: 85, color: '#34d399' },
- { id: 'amp', name: 'Anna Auditorium', lat: 12.8410, lng: 80.1510, category: 'recreation', description: 'Main auditorium for festivals & events', rating: 4.8, visitors: 420, color: '#a78bfa' },
- { id: 'gal', name: 'Campus Green Park', lat: 12.8390, lng: 80.1505, category: 'recreation', description: 'Scenic gardens & walking track', rating: 4.9, visitors: 90, color: '#a78bfa' },
- { id: 'cl', name: 'Central Library', lat: 12.8404, lng: 80.1535, category: 'library', description: '5-floor library with digital resources', rating: 4.6, visitors: 310, color: '#38bdf8' },
- { id: 'bc', name: 'Badminton Courts', lat: 12.8426, lng: 80.1532, category: 'sports', description: 'Indoor Wooden Courts', rating: 4.8, visitors: 12, color: '#34d399', availability: { status: 'Engaged', occupied: 12, capacity: 12 } },
- { id: 'tenc', name: 'Tennis Courts', lat: 12.8419, lng: 80.1542, category: 'sports', description: 'Outdoor Synthetic Courts', rating: 4.5, visitors: 14, color: '#34d399', availability: { status: 'Available', occupied: 4, capacity: 16 } },
- { id: 'vc', name: 'Volleyball Courts', lat: 12.8420, lng: 80.1555, category: 'sports', description: 'Outdoor Sand & Synthetic', rating: 4.6, visitors: 28, color: '#34d399', availability: { status: 'Engaged', occupied: 24, capacity: 24 } },
+ { id: 'mga', name: 'MG Auditorium', lat: 12.8410, lng: 80.1510, category: 'recreation', description: 'Main auditorium for festivals & events', rating: 4.8, visitors: 420, color: '#a78bfa', image: '/images/mg_auditorium.jpg' },
+ { id: 'mb', name: 'Admin Block', lat: 12.8400, lng: 80.1525, category: 'academic', description: 'Administrative offices & examination cell', rating: 4.2, visitors: 110, color: '#818cf8', image: '/images/library_admin.jpg' },
+ { id: 'sjt', name: 'Academic Block 1 (AB1)', lat: 12.8418, lng: 80.1520, category: 'academic', description: 'Science & engineering lecture complex', rating: 4.5, visitors: 420, color: '#818cf8', image: '/images/ab1.jpg' },
+ { id: 'ab2', name: 'Academic Block 2 (AB2)', lat: 12.8420, lng: 80.1515, category: 'academic', description: 'Computing & IT departments', rating: 4.4, visitors: 380, color: '#818cf8', image: '/images/ab2.jpg' },
+ { id: 'ab3', name: 'Academic Block 3 (AB3)', lat: 12.8425, lng: 80.1510, category: 'academic', description: 'Business & Management school', rating: 4.6, visitors: 350, color: '#818cf8', image: '/images/ab3.jpg' },
+ { id: 'ab4', name: 'Academic Block 4 (AB4)', lat: 12.8430, lng: 80.1505, category: 'academic', description: 'Advanced research labs', rating: 4.3, visitors: 320, color: '#818cf8', image: '/images/ab4.jpg' },
+ { id: 'mba', name: 'MBA Amphitheatre', lat: 12.8412, lng: 80.1540, category: 'academic', description: 'Outdoor amphitheatre and lecture space', rating: 4.8, visitors: 350, color: '#818cf8', image: '/images/mba_amphitheatre.jpg' },
+ { id: 'fc', name: 'Gymkhana', lat: 12.8398, lng: 80.1545, category: 'recreation', description: 'Student recreation and activity center', rating: 4.3, visitors: 540, color: '#a78bfa', image: '/images/food_court.jpg' },
+ { id: 'hc', name: 'Health Centre', lat: 12.8395, lng: 80.1518, category: 'recreation', description: 'Campus medical and health facility', rating: 4.7, visitors: 140, color: '#a78bfa', image: '/images/health_centre.jpg' },
+ { id: 'sg', name: 'Cricket Ground', lat: 12.8422, lng: 80.1550, category: 'sports', description: 'Cricket, football & athletics ground', rating: 4.9, visitors: 180, color: '#34d399', availability: { status: 'Available', occupied: 150, capacity: 500 }, image: '/images/cricket_ground.jpg' },
+ { id: 'gal', name: 'Campus Green Park', lat: 12.8390, lng: 80.1505, category: 'recreation', description: 'Scenic gardens & walking track', rating: 4.9, visitors: 90, color: '#a78bfa', image: '/images/campus_green.png' },
+ { id: 'cl', name: 'Central Library', lat: 12.8404, lng: 80.1535, category: 'library', description: '5-floor library with digital resources', rating: 4.6, visitors: 310, color: '#38bdf8', image: '/images/library_admin.jpg' },
+ { id: 'bc', name: 'Badminton Courts', lat: 12.8426, lng: 80.1532, category: 'sports', description: 'Indoor Wooden Courts', rating: 4.8, visitors: 12, color: '#34d399', availability: { status: 'Engaged', occupied: 12, capacity: 12 }, image: '/images/badminton_courts.png' },
+ { id: 'tenc', name: 'Tennis Courts', lat: 12.8419, lng: 80.1542, category: 'sports', description: 'Outdoor Synthetic Courts', rating: 4.5, visitors: 14, color: '#34d399', availability: { status: 'Available', occupied: 4, capacity: 16 }, image: '/images/tennis_courts.png' },
+ { id: 'bk', name: 'Basketball Courts', lat: 12.8418, lng: 80.1545, category: 'sports', description: 'Outdoor Basketball Courts', rating: 4.6, visitors: 30, color: '#34d399', availability: { status: 'Available', occupied: 10, capacity: 20 }, image: '/images/tennis_courts.png' },
+ { id: 'vc', name: 'Volleyball Courts', lat: 12.8420, lng: 80.1555, category: 'sports', description: 'Outdoor Sand & Synthetic', rating: 4.6, visitors: 28, color: '#34d399', availability: { status: 'Engaged', occupied: 24, capacity: 24 }, image: '/images/volleyball_court.png' },
 ];
 
 const campusEvents: CampusEvent[] = [
@@ -285,6 +288,7 @@ function LeafletMap({
  // Rich popup
  marker.bindPopup(
  `<div style="font-family: Inter, sans-serif; min-width: 200px;">
+ ${place.image ? `<img src="${place.image}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
  <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, ${place.color}40, ${place.color}20); display: flex; align-items: center; justify-content: center; font-size: 14px;">
  ${place.category === 'academic' ? '🎓' : place.category === 'dining' ? '🍽' : place.category === 'sports' ? '🏆' : place.category === 'recreation' ? '🌿' : '📚'}
@@ -813,6 +817,11 @@ export default function CampusExplorer() {
  {config.label}
  </span>
  </div>
+ {isSelected && place.image && (
+ <div className="mt-3">
+ <img src={place.image} alt={place.name} className="w-full h-32 object-cover rounded-lg" />
+ </div>
+ )}
  </div>
  </div>
  </button>
