@@ -26,6 +26,8 @@ model User {
   year         Int?
   passwordHash String
   phone        String?
+  guideId      String?
+  guideName    String?
   avatarUrl    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

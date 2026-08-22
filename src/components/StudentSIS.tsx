@@ -14,6 +14,11 @@ export default function StudentSIS() {
   const [students, setStudents] = useState<Record<string, CanonicalStudent>>(canonicalStudents);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('25bce1458');
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
   const student = students[selectedStudentId];
 
   // Derived data
@@ -35,6 +40,18 @@ export default function StudentSIS() {
   const canViewFees = can('read', 'fees');
   const canViewSafety = can('read', 'safety_report');
   const canViewWellbeing = can('read', 'wellbeing');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const uname = username.trim().toUpperCase();
+    if (students[uname] && password === 'student123') {
+      setIsAuthenticated(true);
+      setSelectedStudentId(uname);
+      setError('');
+    } else {
+      setError('Invalid student ID or password');
+    }
+  };
 
   const handleUpdateContact = (newContact: string) => {
     if (!canEditInfo) return;
@@ -61,6 +78,56 @@ export default function StudentSIS() {
     });
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-8 rounded-2xl bg-zinc-900/50 border border-white/10 backdrop-blur-sm max-w-md w-full"
+        >
+          <div className="flex justify-center mb-6">
+            <Database className="w-12 h-12 text-indigo-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white text-center mb-2">Student Portal</h2>
+          <p className="text-zinc-400 text-center mb-8">Sign in to access your 360° record</p>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Student ID (Username)</label>
+              <input 
+                type="text" 
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="e.g. 21BCE0001"
+                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Password</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
+            <button 
+              type="submit"
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-3 rounded-xl transition-colors mt-4"
+            >
+              Sign In
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
@@ -72,20 +139,19 @@ export default function StudentSIS() {
           <p className="text-zinc-400 mt-1">Unified institutional record (Canonical Source)</p>
         </div>
         
-        <div className="flex gap-2">
-          {Object.values(students).slice(0, 3).map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSelectedStudentId(s.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                selectedStudentId === s.id 
-                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' 
-                  : 'bg-zinc-900/50 text-zinc-400 border border-white/5 hover:border-white/10'
-              }`}
-            >
-              {s.id}
-            </button>
-          ))}
+        <div className="flex gap-2 items-center">
+          <label className="text-sm text-zinc-400">Select Student:</label>
+          <select 
+            value={selectedStudentId}
+            onChange={(e) => setSelectedStudentId(e.target.value)}
+            className="bg-zinc-900 border border-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+          >
+            {Object.values(students).map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.id} - {s.personalInfo.fullName}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -184,6 +250,39 @@ export default function StudentSIS() {
                 <div className="p-4 rounded-xl bg-zinc-950/50 border border-white/5 text-center text-zinc-500 text-sm">
                   Day Scholar / No Hostel Allocated
                 </div>
+              )}
+              {/* Team / Project Info (If Available) */}
+              {student.projectInfo && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 border border-zinc-800 rounded-xl bg-zinc-950/50 p-4"
+                >
+                  <h4 className="text-sm font-semibold text-zinc-200 mb-3 flex items-center gap-2">
+                    <Users size={16} className="text-zinc-400" />
+                    Capstone Project Team
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-zinc-500 mb-1">Faculty Guide</p>
+                      <p className="text-sm font-medium text-white flex items-center gap-2">
+                        <GraduationCap size={14} className="text-emerald-500" />
+                        {student.projectInfo.guideName}
+                        <span className="text-xs text-zinc-400">({student.projectInfo.guideId})</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500 mb-1">Team Members</p>
+                      <div className="flex flex-wrap gap-2">
+                        {student.projectInfo.teamMembers.map(reg => (
+                          <span key={reg} className={`px-2 py-1 text-xs font-medium rounded-md ${reg === student.id ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-900 text-zinc-300'}`}>
+                            {reg}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               )}
             </motion.div>
 

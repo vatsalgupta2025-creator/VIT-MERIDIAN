@@ -148,8 +148,10 @@ export default function Home() {
       case 'examinations':
         return <Examinations />;
       case 'faculty':
+      case 'faculty-admin':
         return <FacultyManagement />;
       case 'hostel-hub':
+      case 'hostel-admin':
         return <HostelHub />;
       case 'parent-portal':
         return <ParentPortal />;
