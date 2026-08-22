@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRBAC } from '@/context/RBACContext';
 import { useAuditLog } from '@/context/AuditLogContext';
 import { canonicalStudents, ledgerEntries, examScores, classSchedules, safetyReports, wellbeingProfiles } from '@/data/canonicalData';
-import { UserCheck, ShieldAlert, GraduationCap, MapPin, Database, Wallet, FileText, AlertCircle, CheckCircle, HeartPulse, Shield } from 'lucide-react';
+import { UserCheck, ShieldAlert, GraduationCap, MapPin, Database, Wallet, FileText, AlertCircle, CheckCircle, HeartPulse, Shield, Users } from 'lucide-react';
 import { CanonicalStudent } from '@/types/canonical';
 
 export default function StudentSIS() {
