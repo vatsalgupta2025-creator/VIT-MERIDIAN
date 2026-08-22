@@ -1,34 +1,35 @@
 import { CanonicalStudent } from '@/types/canonical';
 
 export const seedStudents: Record<string, CanonicalStudent> = {
-  // ── Student 1: The "Everything is wrong" case (for end-to-end gating demo)
-  '21BCE0001': {
-    id: '21BCE0001',
+  // ── Primary Student: Real Integration Target
+  '25bce1458': {
+    id: '25bce1458',
     personalInfo: {
-      fullName: 'Arjun Kumar',
-      dob: '2003-05-14',
-      bloodGroup: 'O+',
-      guardianName: 'Ramesh Kumar',
-      guardianContact: '+91-9876543210'
+      fullName: 'Vatsal Gupta', // Assuming user name or generic
+      dob: '2005-08-20',
+      bloodGroup: 'B+',
+      guardianName: 'Parent Guardian',
+      guardianContact: '+91-9876543210',
+      avatarUrl: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=250&auto=format&fit=crop' // Generic placeholder for mock
     },
     enrollment: {
       program: 'B.Tech',
       branch: 'Computer Science',
-      batch: '2021-2025',
-      currentSemester: 6,
+      batch: '2025-2029',
+      currentSemester: 2,
       status: 'ACTIVE'
     },
     academicStanding: {
-      cgpa: 7.2,
-      totalCreditsEarned: 120,
-      activeArrears: 1,
+      cgpa: 9.2,
+      totalCreditsEarned: 24,
+      activeArrears: 0,
       disciplinaryFlags: false
     },
     hostelInfo: {
-      block: 'A Block',
-      room: 'A-214',
-      type: 'NAC',
-      messType: 'SPECIAL'
+      block: 'Q Block',
+      room: 'Q-402',
+      type: 'AC',
+      messType: 'VEG'
     }
   },
 
@@ -89,28 +90,29 @@ export const seedStudents: Record<string, CanonicalStudent> = {
   },
 };
 
-// ── Students 4-15: Generated unremarkable students
-Array.from({ length: 12 }).forEach((_, i) => {
-  const id = `21BCE${(i + 4).toString().padStart(4, '0')}`;
+// ── Students 4-50: Generated unremarkable students
+Array.from({ length: 47 }).forEach((_, i) => {
+  const count = i + 1459;
+  const id = `25bce${count}`;
   seedStudents[id] = {
     id,
     personalInfo: {
-      fullName: `Student ${i + 4}`,
-      dob: '2003-01-01',
+      fullName: `Mock Student ${count}`,
+      dob: '2005-01-01',
       bloodGroup: 'O+',
-      guardianName: `Guardian ${i + 4}`,
-      guardianContact: `+91-90000000${(i + 4).toString().padStart(2, '0')}`
+      guardianName: `Guardian ${count}`,
+      guardianContact: `+91-90000000${(count % 99).toString().padStart(2, '0')}`
     },
     enrollment: {
       program: 'B.Tech',
       branch: ['Computer Science', 'Electronics', 'Mechanical', 'Civil'][i % 4],
-      batch: '2021-2025',
-      currentSemester: 6,
+      batch: '2025-2029',
+      currentSemester: 2,
       status: 'ACTIVE'
     },
     academicStanding: {
       cgpa: 8.0 + (i % 2),
-      totalCreditsEarned: 120,
+      totalCreditsEarned: 24,
       activeArrears: 0,
       disciplinaryFlags: false
     }

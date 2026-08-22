@@ -3,94 +3,110 @@
 import React, { useState } from 'react';
 import { useRBAC } from '@/context/RBACContext';
 import { useAuditLog } from '@/context/AuditLogContext';
-import { canonicalStudents } from '@/data/canonicalData';
-import { BarChart3, Users, AlertTriangle } from 'lucide-react';
-import { AttendanceRecord } from '@/types/canonical';
-
-const initialRecords: AttendanceRecord[] = [
-  {
-    id: 'ATT-1',
-    studentId: '21BCE0001',
-    courseId: 'CSE2005',
-    facultyId: 'FAC001',
-    totalClasses: 40,
-    attendedClasses: 36,
-    percentage: 90,
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: 'ATT-2',
-    studentId: '21BCE0002',
-    courseId: 'CSE2005',
-    facultyId: 'FAC001',
-    totalClasses: 40,
-    attendedClasses: 28,
-    percentage: 70, // Warning threshold
-    lastUpdated: new Date().toISOString()
-  }
-];
+import { canonicalStudents, classSchedules } from '@/data/canonicalData';
+import { BarChart3, Users, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 export default function AttendanceAdmin() {
   const { activeRole, can } = useRBAC();
   const { logAction } = useAuditLog();
-  const [records, setRecords] = useState<AttendanceRecord[]>(initialRecords);
+
+  const [selectedClass, setSelectedClass] = useState(classSchedules[0].id);
+  const [selectedSlot, setSelectedSlot] = useState(classSchedules[0].slots[0]);
+  
+  const currentClass = classSchedules.find(c => c.id === selectedClass) || classSchedules[0];
+  
+  // Local state for attendance toggles (true = present, false = absent)
+  const [attendanceState, setAttendanceState] = useState<Record<string, boolean>>(
+    currentClass.students.reduce((acc, studentId) => ({ ...acc, [studentId]: true }), {})
+  );
 
   const canMarkAttendance = can('write', 'attendance');
 
-  const handleMarkPresent = (recordId: string) => {
-    if (!canMarkAttendance) return;
-    setRecords(prev => prev.map(r => {
-      if (r.id === recordId) {
-        const newAttended = r.attendedClasses + 1;
-        const newTotal = r.totalClasses + 1;
-        const newPercentage = Math.round((newAttended / newTotal) * 100);
-
-        logAction({
-          actorId: 'CURRENT_USER',
-          actorRole: activeRole,
-          action: 'UPDATE',
-          resourceType: 'ATTENDANCE',
-          resourceId: r.id,
-          oldValue: `${r.percentage}%`,
-          newValue: `${newPercentage}%`
-        });
-
-        return { ...r, attendedClasses: newAttended, totalClasses: newTotal, percentage: newPercentage };
-      }
-      return r;
-    }));
+  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newClassId = e.target.value;
+    const newClass = classSchedules.find(c => c.id === newClassId) || classSchedules[0];
+    setSelectedClass(newClassId);
+    setSelectedSlot(newClass.slots[0]);
+    // Reset attendance state to all present for the new class
+    setAttendanceState(newClass.students.reduce((acc, studentId) => ({ ...acc, [studentId]: true }), {}));
   };
 
-  const handleMarkAbsent = (recordId: string) => {
+  const handleToggleAttendance = (studentId: string) => {
     if (!canMarkAttendance) return;
-    setRecords(prev => prev.map(r => {
-      if (r.id === recordId) {
-        const newTotal = r.totalClasses + 1;
-        const newPercentage = Math.round((r.attendedClasses / newTotal) * 100);
-
-        logAction({
-          actorId: 'CURRENT_USER',
-          actorRole: activeRole,
-          action: 'UPDATE',
-          resourceType: 'ATTENDANCE',
-          resourceId: r.id,
-          oldValue: `${r.percentage}%`,
-          newValue: `${newPercentage}%`
-        });
-
-        return { ...r, totalClasses: newTotal, percentage: newPercentage };
-      }
-      return r;
-    }));
+    setAttendanceState(prev => ({ ...prev, [studentId]: !prev[studentId] }));
   };
+
+  const handleMarkAllPresent = () => {
+    if (!canMarkAttendance) return;
+    const newState = { ...attendanceState };
+    Object.keys(newState).forEach(key => { newState[key] = true; });
+    setAttendanceState(newState);
+  };
+
+  const handleSubmitAttendance = () => {
+    if (!canMarkAttendance) return;
+    
+    const presentCount = Object.values(attendanceState).filter(Boolean).length;
+    
+    logAction({
+      actorId: 'CURRENT_USER',
+      actorRole: activeRole,
+      action: 'UPDATE',
+      resourceType: 'ATTENDANCE',
+      resourceId: `${selectedClass}-${selectedSlot}`,
+      oldValue: 'N/A',
+      newValue: `Submitted: ${presentCount}/${currentClass.students.length} present`
+    });
+
+    alert(`Attendance submitted for ${currentClass.id} - ${selectedSlot}`);
+  };
+
+  const presentCount = Object.values(attendanceState).filter(Boolean).length;
+  const absentCount = currentClass.students.length - presentCount;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
           <BarChart3 className="text-emerald-500" size={28} />
-          Attendance Rollup (CSE2005)
+          Class Attendance
         </h1>
+        {canMarkAttendance && (
+          <button 
+            onClick={handleSubmitAttendance}
+            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors"
+          >
+            Submit Register
+          </button>
+        )}
+      </div>
+
+      {/* Selectors */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.05]">
+          <label className="block text-xs text-white/40 uppercase tracking-widest font-semibold mb-2">Select Class</label>
+          <select 
+            value={selectedClass}
+            onChange={handleClassChange}
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-emerald-500/50"
+          >
+            {classSchedules.map(c => (
+              <option key={c.id} value={c.id} className="bg-neutral-900">{c.id} - {c.courseName}</option>
+            ))}
+          </select>
+        </div>
+        <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.05]">
+          <label className="block text-xs text-white/40 uppercase tracking-widest font-semibold mb-2">Select Slot</label>
+          <select 
+            value={selectedSlot}
+            onChange={(e) => setSelectedSlot(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-emerald-500/50"
+          >
+            {currentClass.slots.map(slot => (
+              <option key={slot} value={slot} className="bg-neutral-900">{slot}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -98,40 +114,59 @@ export default function AttendanceAdmin() {
         {/* Left Stats */}
         <div className="lg:col-span-1 space-y-4">
           <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.05]">
-            <h3 className="text-xs text-white/40 uppercase tracking-widest font-semibold mb-2">Class Average</h3>
+            <h3 className="text-xs text-white/40 uppercase tracking-widest font-semibold mb-2">Total Students</h3>
+            <p className="text-4xl font-mono font-bold text-white">
+              {currentClass.students.length}
+            </p>
+          </div>
+          <div className="p-5 rounded-2xl bg-black/40 border border-emerald-500/20">
+            <h3 className="text-xs text-emerald-500/60 uppercase tracking-widest font-semibold mb-2">Present Today</h3>
             <p className="text-4xl font-mono font-bold text-emerald-400">
-              {Math.round(records.reduce((acc, r) => acc + r.percentage, 0) / records.length)}%
+              {presentCount}
             </p>
           </div>
-          <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.05]">
-            <h3 className="text-xs text-white/40 uppercase tracking-widest font-semibold mb-2">Defaulters (&lt;75%)</h3>
+          <div className="p-5 rounded-2xl bg-black/40 border border-red-500/20">
+            <h3 className="text-xs text-red-500/60 uppercase tracking-widest font-semibold mb-2">Absent Today</h3>
             <p className="text-4xl font-mono font-bold text-red-400">
-              {records.filter(r => r.percentage < 75).length}
+              {absentCount}
             </p>
           </div>
+          
+          {canMarkAttendance && (
+            <button 
+              onClick={handleMarkAllPresent}
+              className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-medium transition-colors text-sm"
+            >
+              Mark All Present
+            </button>
+          )}
         </div>
 
-        {/* Right List */}
+        {/* Right List (The Slider UI) */}
         <div className="lg:col-span-3">
           <div className="rounded-2xl border border-white/[0.05] bg-black/40 overflow-hidden">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/[0.02] border-b border-white/[0.05]">
                 <tr>
-                  <th className="p-4 font-semibold text-white/60">Student</th>
-                  <th className="p-4 font-semibold text-white/60">Classes</th>
-                  <th className="p-4 font-semibold text-white/60">Percentage</th>
+                  <th className="p-4 font-semibold text-white/60">Reg No</th>
+                  <th className="p-4 font-semibold text-white/60">Student Name</th>
                   {canMarkAttendance && (
-                    <th className="p-4 font-semibold text-white/60 text-right">Today's Entry</th>
+                    <th className="p-4 font-semibold text-white/60 text-right">Attendance Status</th>
                   )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
-                {records.map((record) => {
-                  const student = canonicalStudents[record.studentId];
-                  const isDefaulter = record.percentage < 75;
+                {currentClass.students.map((studentId) => {
+                  const student = canonicalStudents[studentId];
+                  if (!student) return null;
+                  
+                  const isPresent = attendanceState[studentId];
 
                   return (
-                    <tr key={record.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={studentId} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="p-4 font-mono text-white/70">
+                        {student.id}
+                      </td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
@@ -139,42 +174,28 @@ export default function AttendanceAdmin() {
                           </div>
                           <div>
                             <p className="font-medium">{student.personalInfo.fullName}</p>
-                            <p className="text-xs text-white/40 font-mono">{record.studentId}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 font-mono">
-                        {record.attendedClasses} / {record.totalClasses}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-mono font-bold ${isDefaulter ? 'text-red-400' : 'text-emerald-400'}`}>
-                            {record.percentage}%
-                          </span>
-                          {isDefaulter && <AlertTriangle size={14} className="text-red-400" />}
-                        </div>
-                        {/* Mini progress bar */}
-                        <div className="w-24 h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
-                          <div 
-                            className={`h-full ${isDefaulter ? 'bg-red-400' : 'bg-emerald-400'}`} 
-                            style={{ width: `${record.percentage}%` }} 
-                          />
-                        </div>
-                      </td>
                       {canMarkAttendance && (
-                        <td className="p-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button 
-                              onClick={() => handleMarkPresent(record.id)}
-                              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-medium transition-colors"
+                        <td className="p-4">
+                          <div className="flex items-center justify-end gap-3">
+                            <span className={`text-xs font-bold ${isPresent ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {isPresent ? 'PRESENT' : 'ABSENT'}
+                            </span>
+                            
+                            {/* Slider UI */}
+                            <button
+                              onClick={() => handleToggleAttendance(studentId)}
+                              className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none ${
+                                isPresent ? 'bg-emerald-500/40' : 'bg-red-500/40'
+                              }`}
                             >
-                              Present
-                            </button>
-                            <button 
-                              onClick={() => handleMarkAbsent(record.id)}
-                              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs font-medium transition-colors"
-                            >
-                              Absent
+                              <span
+                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                  isPresent ? 'translate-x-8' : 'translate-x-1'
+                                }`}
+                              />
                             </button>
                           </div>
                         </td>

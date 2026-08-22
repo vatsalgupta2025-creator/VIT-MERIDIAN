@@ -16,6 +16,11 @@ export {
   seedHostel as hostel,
   seedComplaints as complaints
 } from './seed/operational';
+export {
+  seedClasses as classSchedules,
+  seedAttendanceLogs as attendanceLogs,
+  seedExamRecords as examScores
+} from './seed/classes';
 
 // Keep any types needed
 import { AttendanceRecord } from '@/types/canonical';
