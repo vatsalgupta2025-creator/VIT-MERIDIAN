@@ -1,5 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// VITGROWW — Full Campus OS Prisma Schema
+// SQLite-compatible (no enums — string fields with documented valid values)
+// All status/role/type fields use String with default values
 
 generator client {
   provider = "prisma-client-js"
@@ -10,50 +11,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// enum UserRole {
-//   STUDENT
-//   ADMIN
-// }
-
-// enum ReportStatus {
-//   SUBMITTED
-//   UNDER_REVIEW
-//   IN_PROGRESS
-//   RESOLVED
-//   REJECTED
-// }
-
-// enum ReportCategory {
-//   HARASSMENT
-//   SUSPICIOUS_ACTIVITY
-//   ACCIDENT
-//   MEDICAL
-//   THEFT
-//   INFRASTRUCTURE_HAZARD
-//   OTHER
-// }
-
-// enum EmergencyStatus {
-//   CREATED
-//   ACTIVE
-//   ACKNOWLEDGED
-//   RESOLVED
-//   CANCELLED
-// }
-
-// enum SafeWalkStatus {
-//   ACTIVE
-//   COMPLETED
-//   OVERDUE
-//   ESCALATED
-// }
-
-// enum AlertSeverity {
-//   LOW
-//   MEDIUM
-//   HIGH
-//   CRITICAL
-// }
+// ============================================================
+// SHARED: USER
+// role: "STUDENT" | "ADMIN" | "FACULTY" | "PARENT" | "WARDEN"
+// ============================================================
 
 model User {
   id           String   @id @default(cuid())
@@ -61,16 +22,42 @@ model User {
   name         String
   studentId    String?  @unique
   role         String   @default("STUDENT")
+  department   String?
+  year         Int?
   passwordHash String
+  phone        String?
+  avatarUrl    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // Safety relations
   emergencyContacts  EmergencyContact[]
   safetyReports      SafetyReport[]
   emergencyEvents    EmergencyEvent[]
   safeWalkSessions   SafeWalkSession[]
-  notifications      SafetyNotification[]
+  safetyNotifications SafetyNotification[]
+
+  // Other feature relations
+  budgetEntries       BudgetEntry[]
+  timetableSlots      TimetableSlot[]
+  attendanceRecords   AttendanceRecord[]
+  lostItems           LostFoundItem[]
+  travelPosts         TravelPost[]
+  travelRequests      TravelRequest[]
+  studyBuddyProfile   StudyBuddyProfile?
+  studyBuddyMatches   StudyBuddyMatch[]  @relation("MatchUser")
+  studyBuddyMatchedBy StudyBuddyMatch[]  @relation("MatchedByUser")
+  polls               Poll[]
+  pollVotes           PollVote[]
+  hostelComplaints    HostelComplaint[]
+  notifications       AppNotification[]
+  parentLinks         ParentStudentLink[] @relation("StudentLink")
+  parentOf            ParentStudentLink[] @relation("ParentLink")
 }
+
+// ============================================================
+// SAFETY SUBSYSTEM
+// ============================================================
 
 model EmergencyContact {
   id           String   @id @default(cuid())
@@ -84,60 +71,66 @@ model EmergencyContact {
 }
 
 model SafetyReport {
-  id          String         @id @default(cuid())
-  reportId    String         @unique // VS-XXXX format
+  id          String   @id @default(cuid())
+  reportId    String   @unique // VS-XXXX format
   userId      String
+  // category: HARASSMENT | SUSPICIOUS_ACTIVITY | ACCIDENT | MEDICAL | THEFT | INFRASTRUCTURE_HAZARD | OTHER
   category    String
   description String
   location    String
   incidentAt  DateTime
-  status      String         @default("SUBMITTED")
+  // status: SUBMITTED | UNDER_REVIEW | IN_PROGRESS | RESOLVED | REJECTED
+  status      String   @default("SUBMITTED")
   adminNotes  String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SafetyAlert {
-  id          String        @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
   description String
-  severity    String        @default("MEDIUM")
+  // severity: LOW | MEDIUM | HIGH | CRITICAL
+  severity    String   @default("MEDIUM")
   location    String?
-  active      Boolean       @default(true)
+  active      Boolean  @default(true)
   expiresAt   DateTime?
   createdBy   String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model EmergencyEvent {
-  id           String          @id @default(cuid())
-  userId       String
-  type         String          // MEDICAL, FIRE, ASSAULT, OTHER
-  latitude     Float?
-  longitude    Float?
-  accuracy     Float?
-  status       String          @default("CREATED")
-  demoNote     String?
-  resolvedAt   DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  // type: MEDICAL | FIRE | ASSAULT | OTHER
+  type       String
+  latitude   Float?
+  longitude  Float?
+  accuracy   Float?
+  // status: CREATED | ACTIVE | ACKNOWLEDGED | RESOLVED | CANCELLED
+  status     String   @default("CREATED")
+  demoNote   String?
+  resolvedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SafeWalkSession {
-  id              String         @id @default(cuid())
+  id              String   @id @default(cuid())
   userId          String
   startLocation   String
   destination     String
   expectedArrival DateTime
-  status          String         @default("ACTIVE")
+  // status: ACTIVE | COMPLETED | OVERDUE | ESCALATED
+  status          String   @default("ACTIVE")
   lastLatitude    Float?
   lastLongitude   Float?
-  startedAt       DateTime       @default(now())
+  startedAt       DateTime @default(now())
   endedAt         DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -146,7 +139,8 @@ model SafeWalkSession {
 model SafetyLocation {
   id          String  @id @default(cuid())
   name        String
-  type        String  // SECURITY_POST, MEDICAL, HOSTEL, ACADEMIC, EMERGENCY_PHONE, MAIN_GATE
+  // type: SECURITY_POST | MEDICAL | HOSTEL | ACADEMIC | EMERGENCY_PHONE | MAIN_GATE
+  type        String
   latitude    Float
   longitude   Float
   description String?
@@ -159,6 +153,256 @@ model SafetyNotification {
   userId    String
   title     String
   body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// BUDGET TRACKER
+// ============================================================
+
+model BudgetEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  amount      Float
+  // type: INCOME | EXPENSE
+  type        String
+  // category: FOOD | TRANSPORT | STATIONERY | ENTERTAINMENT | RENT | MEDICAL | OTHER
+  category    String   @default("OTHER")
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// TIMETABLE
+// ============================================================
+
+model TimetableSlot {
+  id          String   @id @default(cuid())
+  userId      String
+  subject     String
+  code        String?
+  faculty     String?
+  room        String?
+  // day: MON | TUE | WED | THU | FRI | SAT
+  day         String
+  startTime   String  // "09:00"
+  endTime     String  // "10:00"
+  // type: LECTURE | LAB | TUTORIAL
+  type        String   @default("LECTURE")
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// ATTENDANCE TRACKER
+// ============================================================
+
+model AttendanceRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  date      DateTime
+  // status: PRESENT | ABSENT | LATE | CANCELLED
+  status    String   @default("PRESENT")
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// LOST AND FOUND
+// ============================================================
+
+model LostFoundItem {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  // type: LOST | FOUND
+  type        String
+  // status: OPEN | CLAIMED | CLOSED
+  status      String   @default("OPEN")
+  location    String?
+  imageUrl    String?
+  contactInfo String?
+  lostAt      DateTime?
+  foundAt     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// TRAVEL POOL (Carpooling)
+// ============================================================
+
+model TravelPost {
+  id            String          @id @default(cuid())
+  userId        String
+  from          String
+  to            String
+  departureTime DateTime
+  availableSeats Int
+  // mode: CAR | BIKE | AUTO | OTHER
+  mode          String          @default("CAR")
+  notes         String?
+  // status: OPEN | FULL | COMPLETED | CANCELLED
+  status        String          @default("OPEN")
+  fare          Float?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests TravelRequest[]
+}
+
+model TravelRequest {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  // status: PENDING | ACCEPTED | REJECTED
+  status    String   @default("PENDING")
+  seats     Int      @default(1)
+  message   String?
+  createdAt DateTime @default(now())
+
+  post TravelPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// STUDY BUDDY MATCHING
+// ============================================================
+
+model StudyBuddyProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  subjects    String   // JSON array of subject strings
+  studyStyle  String   @default("FLEXIBLE") // MORNING | EVENING | NIGHT | FLEXIBLE
+  goals       String?
+  bio         String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches StudyBuddyMatch[] @relation("ProfileMatches")
+}
+
+model StudyBuddyMatch {
+  id          String   @id @default(cuid())
+  userId      String
+  matchedById String
+  profileId   String
+  // status: PENDING | ACCEPTED | REJECTED
+  status      String   @default("PENDING")
+  message     String?
+  createdAt   DateTime @default(now())
+
+  user        User              @relation("MatchUser", fields: [userId], references: [id], onDelete: Cascade)
+  matchedBy   User              @relation("MatchedByUser", fields: [matchedById], references: [id], onDelete: Cascade)
+  profile     StudyBuddyProfile @relation("ProfileMatches", fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// QUICK POLLS
+// ============================================================
+
+model Poll {
+  id          String     @id @default(cuid())
+  userId      String
+  question    String
+  options     String     // JSON array of option strings
+  expiresAt   DateTime?
+  // status: ACTIVE | CLOSED
+  status      String     @default("ACTIVE")
+  anonymous   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+}
+
+model PollVote {
+  id           String   @id @default(cuid())
+  pollId       String
+  userId       String
+  selectedIdx  Int      // index into the options JSON array
+  createdAt    DateTime @default(now())
+
+  poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+// ============================================================
+// HOSTEL SUBSYSTEM
+// ============================================================
+
+model HostelComplaint {
+  id          String   @id @default(cuid())
+  userId      String
+  hostelBlock String
+  roomNumber  String?
+  title       String
+  description String
+  // category: MAINTENANCE | CLEANLINESS | SECURITY | WATER | ELECTRICITY | OTHER
+  category    String   @default("OTHER")
+  // status: OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  status      String   @default("OPEN")
+  priority    String   @default("MEDIUM") // LOW | MEDIUM | HIGH
+  adminNotes  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// PARENT PORTAL
+// ============================================================
+
+model ParentStudentLink {
+  id        String   @id @default(cuid())
+  studentId String
+  parentId  String
+  // status: PENDING | VERIFIED | REVOKED
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  student User @relation("StudentLink", fields: [studentId], references: [id], onDelete: Cascade)
+  parent  User @relation("ParentLink",  fields: [parentId],  references: [id], onDelete: Cascade)
+
+  @@unique([studentId, parentId])
+}
+
+// ============================================================
+// GLOBAL APP NOTIFICATIONS
+// ============================================================
+
+model AppNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  // type: SAFETY | HOSTEL | ACADEMIC | TRAVEL | GENERAL
+  type      String   @default("GENERAL")
+  link      String?  // optional deep-link route
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 

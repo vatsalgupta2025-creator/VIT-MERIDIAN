@@ -3,151 +3,248 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Seeding VITGROWW SAFE database...');
+const BRANCHES = ['BCE', 'BAI', 'BRS', 'BMH', 'BME', 'BEC', 'BMC'];
+const YEARS = ['23', '24', '25'];
+const HOSTEL_BLOCKS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const MALE_BLOCKS = ['A', 'D', 'E', 'F'];
+const FEMALE_BLOCKS = ['B', 'C'];
+const FIRST_NAMES = [
+  'Aarav', 'Aditi', 'Advait', 'Ananya', 'Arjun', 'Arya', 'Dhruv', 'Diya',
+  'Ishaan', 'Kavya', 'Krishna', 'Meera', 'Neha', 'Pranav', 'Rhea', 'Rohan',
+  'Saanvi', 'Samarth', 'Shreya', 'Siddharth', 'Tara', 'Vedant', 'Vidya', 'Yash'
+];
+const LAST_NAMES = [
+  'Sharma', 'Verma', 'Gupta', 'Patel', 'Singh', 'Kumar', 'Reddy', 'Nair',
+  'Iyer', 'Menon', 'Das', 'Sen', 'Bose', 'Chowdhury', 'Roy', 'Joshi',
+  'Deshmukh', 'Kulkarni', 'Jain', 'Agarwal', 'Shah', 'Nath', 'Malhotra'
+];
+const COURSES = [
+  { code: 'BACSE201', name: 'Data Structures and Algorithms' },
+  { code: 'BACSE301', name: 'Database Management Systems' },
+  { code: 'BACSE303', name: 'Operating Systems' },
+  { code: 'BAMGT201', name: 'Principles of Management' },
+  { code: 'BAEEE203', name: 'Basic Electrical Engineering' },
+  { code: 'BACSE401', name: 'Machine Learning' }
+];
+const CHENNAI_LOCATIONS = [
+  'Tambaram', 'Adyar', 'Velachery', 'T. Nagar', 'Anna Nagar', 'Koyambedu', 'Guindy', 'ECR', 'OMR'
+];
 
-  // Clean existing data
-  await prisma.safetyNotification.deleteMany();
-  await prisma.safeWalkSession.deleteMany();
-  await prisma.emergencyEvent.deleteMany();
-  await prisma.safetyReport.deleteMany();
-  await prisma.safetyAlert.deleteMany();
-  await prisma.emergencyContact.deleteMany();
-  await prisma.safetyLocation.deleteMany();
+function getRandomItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getRandomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateRegNo(year: string, branch: string, index: number) {
+  const isFirstBatch = Math.random() > 0.5;
+  const base = isFirstBatch ? 1000 : 5000;
+  return `${year}${branch}${base + index}`;
+}
+
+async function main() {
+  console.log('Clearing existing data...');
+  // Be careful: this deletes everything
+  await prisma.pollVote.deleteMany();
+  await prisma.poll.deleteMany();
+  await prisma.travelRequest.deleteMany();
+  await prisma.travelPost.deleteMany();
+  await prisma.hostelComplaint.deleteMany();
+  await prisma.studyBuddyMatch.deleteMany();
+  await prisma.studyBuddyProfile.deleteMany();
+  await prisma.attendanceRecord.deleteMany();
+  await prisma.timetableSlot.deleteMany();
+  await prisma.budgetEntry.deleteMany();
+  await prisma.lostFoundItem.deleteMany();
+  await prisma.appNotification.deleteMany();
+  await prisma.parentStudentLink.deleteMany();
   await prisma.user.deleteMany();
 
-  // --- Users ---
-  const studentHash = await bcrypt.hash('student123', 10);
-  const adminHash = await bcrypt.hash('admin123', 10);
+  console.log('Generating 800 mock students for VIT Chennai...');
+  const passwordHash = await bcrypt.hash('password123', 10);
+  
+  const usersToCreate = [];
+  const parentToCreate = [];
 
-  const student = await prisma.user.create({
-    data: {
-      email: 'ayush@vitgroww.edu',
-      name: 'Ayush Upadhyay',
-      studentId: 'STU-2023-0847',
+  for (let i = 0; i < 800; i++) {
+    const gender = Math.random() > 0.4 ? 'MALE' : 'FEMALE';
+    const firstName = getRandomItem(FIRST_NAMES);
+    const lastName = getRandomItem(LAST_NAMES);
+    const name = `${firstName} ${lastName}`;
+    
+    const year = getRandomItem(YEARS);
+    const branch = getRandomItem(BRANCHES);
+    const regNo = generateRegNo(year, branch, i);
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${year}${i}@vitstudent.ac.in`;
+
+    const semester = (26 - parseInt(year)) * 2 - getRandomInt(0, 1);
+    
+    let block;
+    if (year === '25') { // Freshers
+      block = 'F';
+    } else {
+      block = getRandomItem(gender === 'MALE' ? MALE_BLOCKS : FEMALE_BLOCKS);
+    }
+    const roomNumber = `${getRandomInt(1, 6)}${getRandomInt(10, 99).toString().padStart(2, '0')}`;
+
+    usersToCreate.push({
+      email,
+      passwordHash,
       role: 'STUDENT',
-      passwordHash: studentHash,
-    },
-  });
+      name,
+      studentId: regNo,
+      phone: `+919${getRandomInt(100000000, 999999999)}`,
+      department: branch,
+      year: semester, // Convert from string to integer
+      createdAt: new Date(new Date().getTime() - Math.random() * 10000000000)
+    });
 
-  const admin = await prisma.user.create({
-    data: {
-      email: 'admin@vitgroww.edu',
-      name: 'Safety Admin',
-      studentId: null,
-      role: 'ADMIN',
-      passwordHash: adminHash,
-    },
-  });
+    if (i < 50) { // Create 50 parents
+      parentToCreate.push({
+        email: `parent.of.${firstName.toLowerCase()}${i}@gmail.com`,
+        passwordHash,
+        role: 'PARENT',
+        name: `Mr/Mrs ${lastName}`,
+        phone: `+918${getRandomInt(100000000, 999999999)}`,
+      });
+    }
+  }
 
-  console.log('✅ Users created');
+  // Create Users in batches
+  console.log('Inserting students...');
+  const createdStudents = [];
+  for (let i = 0; i < usersToCreate.length; i += 100) {
+    const batch = usersToCreate.slice(i, i + 100);
+    // @ts-ignore
+    await prisma.user.createMany({ data: batch });
+    
+    // Fetch them back to get IDs
+    const emails = batch.map(u => u.email);
+    const created = await prisma.user.findMany({ where: { email: { in: emails } } });
+    console.log(`Batch ${i/100 + 1}: fetched ${created.length} users, first id: ${created[0]?.id}`);
+    createdStudents.push(...created);
+  }
 
-  // --- Emergency Contacts ---
-  await prisma.emergencyContact.createMany({
-    data: [
-      { userId: student.id, name: 'Ravi Upadhyay', phone: '+91-98765-43210', relationship: 'Father' },
-      { userId: student.id, name: 'Meena Upadhyay', phone: '+91-87654-32109', relationship: 'Mother' },
-    ],
-  });
+  console.log(`Total students created: ${createdStudents.length}`);
+  if (createdStudents.length > 0) {
+    console.log(`Sample student id: ${createdStudents[0].id}`);
+  }
 
-  console.log('✅ Emergency contacts created');
+  console.log('Inserting parents...');
+  // @ts-ignore
+  await prisma.user.createMany({ data: parentToCreate });
+  const parentEmails = parentToCreate.map(p => p.email);
+  const createdParents = await prisma.user.findMany({ where: { email: { in: parentEmails } } });
 
-  // --- Campus Safety Locations ---
-  await prisma.safetyLocation.createMany({
-    data: [
-      { name: 'Main Security Post', type: 'SECURITY_POST', latitude: 12.9698, longitude: 79.1559, description: '24/7 security desk at Main Gate', phone: '+91-416-220-2000' },
-      { name: 'VIT Medical Centre', type: 'MEDICAL', latitude: 12.9712, longitude: 79.1572, description: 'On-campus medical facility with ambulance', phone: '+91-416-220-2020' },
-      { name: 'Men\'s Hostel Block A', type: 'HOSTEL', latitude: 12.9685, longitude: 79.1548, description: 'Hostel warden available 24/7' },
-      { name: 'Women\'s Hostel Block C', type: 'HOSTEL', latitude: 12.9720, longitude: 79.1565, description: 'Women\'s hostel — warden on duty 24/7' },
-      { name: 'Tech Tower Security', type: 'SECURITY_POST', latitude: 12.9705, longitude: 79.1580, description: 'Security post near academic blocks' },
-      { name: 'Emergency Phone — Library', type: 'EMERGENCY_PHONE', latitude: 12.9710, longitude: 79.1570, description: 'Emergency direct-dial phone' },
-      { name: 'Emergency Phone — Cafeteria', type: 'EMERGENCY_PHONE', latitude: 12.9700, longitude: 79.1555, description: 'Emergency direct-dial phone near cafeteria' },
-      { name: 'Main Gate', type: 'MAIN_GATE', latitude: 12.9690, longitude: 79.1540, description: 'Main campus entrance — guards on duty', phone: '+91-416-220-2001' },
-      { name: 'Academic Block A', type: 'ACADEMIC', latitude: 12.9703, longitude: 79.1575, description: 'Computer Science & Engineering blocks' },
-      { name: 'Sports Complex', type: 'ACADEMIC', latitude: 12.9725, longitude: 79.1560, description: 'Sports facility — first aid available' },
-    ],
-  });
+  console.log('Generating Subsystem Data (Polls, Budgets, Travel, Attendance)...');
 
-  console.log('✅ Campus safety locations created');
+  // Seed data for a subset of students to avoid massive DB bloat
+  // Shuffle and take 200 unique students to avoid uniqueness constraints on one-to-one relations
+  const shuffledStudents = [...createdStudents].sort(() => 0.5 - Math.random());
+  const selectedStudents = shuffledStudents.slice(0, 200);
 
-  // --- Safety Alerts ---
-  await prisma.safetyAlert.createMany({
-    data: [
-      {
-        title: 'Heavy Rain Advisory',
-        description: 'Heavy rainfall expected tonight. Avoid low-lying areas near the north boundary. Umbrella corridors near TT square are open.',
-        severity: 'MEDIUM',
-        location: 'North Campus',
-        active: true,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdBy: admin.id,
-      },
-      {
-        title: 'Suspicious Activity Reported',
-        description: 'Unidentified person reported near Hostel Block G. Security patrolling the area. Report anything suspicious to the security post immediately.',
-        severity: 'HIGH',
-        location: 'Hostel Block G area',
-        active: true,
-        expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
-        createdBy: admin.id,
-      },
-      {
-        title: 'Campus Power Outage — Resolved',
-        description: 'Power has been restored to all academic blocks. Elevator service resuming.',
-        severity: 'LOW',
-        location: 'Academic Blocks',
-        active: false,
-        createdBy: admin.id,
-      },
-    ],
-  });
+  for (const student of selectedStudents) {
 
-  console.log('✅ Safety alerts created');
+    // 1. Timetable & Attendance
+    for (const course of COURSES) {
+      if (Math.random() > 0.5) {
+        // Add timetable slot
+        await prisma.timetableSlot.create({
+          data: {
+            userId: student.id,
+            subject: course.name,
+            code: course.code,
+            faculty: `Prof. ${getRandomItem(LAST_NAMES)}`,
+            room: `AB${getRandomInt(1,3)}-${getRandomInt(100,500)}`,
+            day: getRandomItem(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']),
+            startTime: `${getRandomInt(8, 16)}:00`,
+            endTime: `${getRandomInt(9, 17)}:00`,
+            type: 'LECTURE'
+          }
+        });
 
-  // --- Sample Safety Reports ---
-  const now = new Date();
-  await prisma.safetyReport.createMany({
-    data: [
-      {
-        reportId: 'VS-1001',
-        userId: student.id,
-        category: 'INFRASTRUCTURE_HAZARD',
-        description: 'Broken staircase railing on 2nd floor of AB Block. Poses fall risk.',
-        location: 'Academic Block A, 2nd Floor',
-        incidentAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
-        status: 'RESOLVED',
-        adminNotes: 'Maintenance team repaired on Aug 20.',
-      },
-      {
-        reportId: 'VS-1002',
-        userId: student.id,
-        category: 'SUSPICIOUS_ACTIVITY',
-        description: 'Unattended bag left near library entrance for 2+ hours.',
-        location: 'Central Library, Main Entrance',
-        incidentAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
-        status: 'UNDER_REVIEW',
-      },
-    ],
-  });
+        // Add 10-15 attendance records
+        for (let a = 0; a < getRandomInt(10, 15); a++) {
+          await prisma.attendanceRecord.create({
+            data: {
+              userId: student.id,
+              subject: course.name,
+              date: new Date(new Date().getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+              status: Math.random() > 0.2 ? 'PRESENT' : 'ABSENT',
+              notes: 'Regular Class'
+            }
+          });
+        }
+      }
+    }
 
-  console.log('✅ Sample reports created');
+    // 2. Budget
+    for (let b = 0; b < getRandomInt(3, 10); b++) {
+      const isIncome = Math.random() > 0.8;
+      await prisma.budgetEntry.create({
+        data: {
+          userId: student.id,
+          title: isIncome ? 'Allowance' : getRandomItem(['Food', 'Books', 'Travel', 'Entertainment']),
+          amount: isIncome ? getRandomInt(2000, 5000) : getRandomInt(100, 500),
+          type: isIncome ? 'INCOME' : 'EXPENSE',
+          category: isIncome ? 'OTHER' : getRandomItem(['FOOD', 'TRANSPORT', 'ACADEMIC', 'ENTERTAINMENT', 'OTHER']),
+          date: new Date(new Date().getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+        }
+      });
+    }
 
-  // --- Notifications ---
-  await prisma.safetyNotification.createMany({
-    data: [
-      { userId: student.id, title: 'Report #VS-1001 Resolved', body: 'Your incident report #VS-1001 has been reviewed and resolved by the safety team.', read: true },
-      { userId: student.id, title: 'Campus Safety Alert', body: 'Heavy rain advisory issued for north campus. Stay safe!', read: false },
-    ],
-  });
+    // 3. Hostel Complaints
+    if (Math.random() > 0.7) {
+      await prisma.hostelComplaint.create({
+        data: {
+          userId: student.id,
+          hostelBlock: student.year === '25' ? 'F' : getRandomItem(['A', 'B', 'C', 'D', 'E']), // rough guess
+          roomNumber: `${getRandomInt(1, 6)}${getRandomInt(10, 99).toString().padStart(2, '0')}`,
+          title: getRandomItem(['Fan not working', 'AC cooling issue', 'Water leakage', 'Wifi very slow']),
+          description: 'Need maintenance ASAP',
+          category: getRandomItem(['ELECTRICAL', 'PLUMBING', 'CLEANING', 'WIFI', 'OTHER']),
+          status: getRandomItem(['OPEN', 'IN_PROGRESS', 'RESOLVED']),
+          priority: getRandomItem(['LOW', 'MEDIUM', 'HIGH'])
+        }
+      });
+    }
 
-  console.log('✅ Notifications created');
-  console.log('\n🎉 Seeding complete!');
-  console.log('📧 Student login: ayush@vitgroww.edu / student123');
-  console.log('🔑 Admin login:   admin@vitgroww.edu / admin123');
+    // 4. Travel Pool
+    if (Math.random() > 0.8) {
+      await prisma.travelPost.create({
+        data: {
+          userId: student.id,
+          from: Math.random() > 0.5 ? 'VIT Chennai' : getRandomItem(CHENNAI_LOCATIONS),
+          to: Math.random() > 0.5 ? getRandomItem(CHENNAI_LOCATIONS) : 'VIT Chennai',
+          departureTime: new Date(new Date().getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
+          availableSeats: getRandomInt(1, 3),
+          mode: getRandomItem(['CAB', 'AUTO', 'BIKE']),
+          fare: getRandomInt(100, 500)
+        }
+      });
+    }
+
+    // 5. Study Buddy Profile
+    if (Math.random() > 0.6) {
+      await prisma.studyBuddyProfile.create({
+        data: {
+          userId: student.id,
+          subjects: JSON.stringify([getRandomItem(COURSES).name, getRandomItem(COURSES).name]),
+          studyStyle: getRandomItem(['POMODORO', 'GROUP', 'LATE_NIGHT', 'EARLY_BIRD']),
+          goals: 'Prepare for CAT-1',
+          bio: 'Looking for a focused study partner.'
+        }
+      });
+    }
+  }
+
+  console.log('Seeding Complete! Created ~800 students and rich subsystem data.');
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error(e);
     process.exit(1);
   })

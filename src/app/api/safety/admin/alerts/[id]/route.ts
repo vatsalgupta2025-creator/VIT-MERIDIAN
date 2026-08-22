@@ -26,7 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } catch (err) {
     if (err instanceof Response) return err;
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid input', details: err.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid input', details: err.issues }, { status: 400 });
     }
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

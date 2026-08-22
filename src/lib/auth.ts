@@ -10,7 +10,7 @@ const TOKEN_EXPIRY = '7d';
 export interface SessionPayload {
   userId: string;
   email: string;
-  role: 'STUDENT' | 'ADMIN';
+  role: 'STUDENT' | 'ADMIN' | 'FACULTY' | 'PARENT' | 'WARDEN';
   name: string;
 }
 
